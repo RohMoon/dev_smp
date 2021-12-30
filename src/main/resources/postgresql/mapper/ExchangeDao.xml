@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.amore.gps.service.exchange.ExchangeDao">
+
+	<select id="getExchangeList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 환율이력 정보 SELECT */
+		SELECT EX.*
+		FROM (
+			SELECT 
+			ROW_NUMBER() OVER(ORDER BY BASE_YEAR  DESC) N_NUM 
+			,REG_DATE
+			,KRW
+			,KRW_CUT
+			,USD
+			,USD_CUT
+			,EUR
+			,EUR_CUT
+			,JPY
+			,JPY_CUT
+			,CNY
+			,CNY_CUT
+			,HKD
+			,HKD_CUT
+			,TWD
+			,TWD_CUT
+			,SGD
+			,SGD_CUT
+			,MYR
+			,MYR_CUT
+			,THB
+			,THB_CUT
+			,VND
+			,VND_CUT
+			,IDR
+			,IDR_CUT
+			,PHP
+			,PHP_CUT
+			,BND
+			,BND_CUT
+			,INR
+			,INR_CUT
+			,NZD
+			,NZD_CUT
+			,CAD
+			,CAD_CUT
+			,GBP
+			,GBP_CUT
+			,AUD
+			,AUD_CUT
+			,AED
+			,AED_CUT
+			,KWD
+			,KWD_CUT
+			,RUB
+			,RUB_CUT
+			,BASE_YEAR
+			, base_date
+			FROM gps.FX_INFO
+		) EX	
+		WHERE 1=1
+		AND  N_NUM BETWEEN #{i_StartRownum} AND #{i_EndRownum}
+		<if test="baseYear != null and baseYear != ''">
+			AND BASE_YEAR = #{baseYear}
+		</if>
+	</select>
+	
+	<select id="getExchangeInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 환율이력 정보 SELECT */
+		SELECT 
+			REG_DATE
+			,KRW
+			,KRW_CUT
+			,USD
+			,USD_CUT
+			,EUR
+			,EUR_CUT
+			,JPY
+			,JPY_CUT
+			,CNY
+			,CNY_CUT
+			,HKD
+			,HKD_CUT
+			,TWD
+			,TWD_CUT
+			,SGD
+			,SGD_CUT
+			,MYR
+			,MYR_CUT
+			,THB
+			,THB_CUT
+			,VND
+			,VND_CUT
+			,IDR
+			,IDR_CUT
+			,PHP
+			,PHP_CUT
+			,BND
+			,BND_CUT
+			,INR
+			,INR_CUT
+			,NZD
+			,NZD_CUT
+			,CAD
+			,CAD_CUT
+			,GBP
+			,GBP_CUT
+			,AUD
+			,AUD_CUT
+			,AED
+			,AED_CUT
+			,KWD
+			,KWD_CUT
+			,RUB
+			,RUB_CUT
+			,krw_unit
+			,usd_unit
+			,eur_unit
+			,jpy_unit
+			,cny_unit
+			,hkd_unit
+			,twd_unit
+			,sgd_unit
+			,myr_unit
+			,thb_unit
+			,vnd_unit
+			,idr_unit
+			,php_unit
+			,bnd_unit
+			,inr_unit
+			,nzd_unit
+			,cad_unit
+			,gbp_unit
+			,aud_unit
+			,aed_unit
+			,kwd_unit
+			,rub_unit
+			,KRW AS KR
+			,KRW_CUT AS KR_CUT
+			,USD AS US
+			,USD_CUT AS US_CUT
+			,EUR AS FR
+			,EUR_CUT AS FR_CUT
+			,JPY AS JP
+			,JPY_CUT AS JP_CUT
+			,CNY AS CN
+			,CNY_CUT AS CN_CUT
+			,HKD AS HK
+			,HKD_CUT AS HK_CUT
+			,TWD AS TW
+			,TWD_CUT AS TW_CUT
+			,SGD AS SG
+			,SGD_CUT AS SG_CUT
+			,MYR AS MY
+			,MYR_CUT AS MY_CUT
+			,THB AS TH
+			,THB_CUT AS TH_CUT
+			,VND AS VN
+			,VND_CUT AS VN_CUT
+			,IDR AS ID
+			,IDR_CUT AS ID_CUT
+			,PHP AS PH
+			,PHP_CUT AS PH_CUT
+			,BND AS BN
+			,BND_CUT AS BN_CUT
+			,INR AS IN
+			,INR_CUT AS IN_CUT
+			,NZD AS NZ
+			,NZD_CUT AS NZ_CUT
+			,CAD AS CA
+			,CAD_CUT AS CA_CUT
+			,GBP AS GB
+			,GBP_CUT AS GB_CUT
+			,AUD AS AU
+			,AUD_CUT AS AU_CUT
+			,AED AS AE
+			,AED_CUT AS AE_CUT
+			,KWD AS KW
+			,KWD_CUT AS KW_CUT
+			,RUB AS RU
+			,RUB_CUT AS RU_CUT
+			,BASE_YEAR
+			,base_date
+		FROM gps.FX_INFO
+		WHERE 1=1
+		AND BASE_YEAR = #{baseYear}
+	</select>
+	
+	<select id="getExchangeCount" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		SELECT  COUNT(*)
+		FROM gps.FX_INFO
+		WHERE 1=1
+		<if test="baseYear != null and baseYear != ''">
+			AND BASE_YEAR = #{baseYear}
+		</if>
+	</select>	
+	
+	<insert id="insertExchange" parameterType="CmMap">
+		/* 환율정보 INSERT */
+			INSERT INTO gps.FX_INFO 
+			(
+			REG_DATE
+			, base_date
+			<if test="krw != null and !krw.equals('')">
+			, KRW
+			</if>
+			<if test="krwCut != null and !krwCut.equals('')">
+			, KRW_CUT
+			</if>
+			<if test="usd != null and !usd.equals('')">
+			, USD
+			</if>
+			<if test="usdCut != null and !usdCut.equals('')">
+			, USD_CUT
+			</if>
+			<if test="eur != null and !eur.equals('')">
+			, EUR
+			</if>
+			<if test="eurCut != null and !eurCut.equals('')">
+			, EUR_CUT
+			</if>
+			<if test="jpy != null and !jpy.equals('')">
+			, JPY
+			</if>
+			<if test="jpyCut != null and !jpyCut.equals('')">
+			, JPY_CUT
+			</if>
+			<if test="cny != null and !cny.equals('')">
+			, CNY
+			</if>
+			<if test="cnyCut != null and !cnyCut.equals('')">
+			, CNY_CUT
+			</if>
+			<if test="hkd != null and !hkd.equals('')">
+			, HKD
+			</if>
+			<if test="hkdCut != null and !hkdCut.equals('')">
+			, HKD_CUT
+			</if>
+			<if test="twd != null and !twd.equals('')">
+			, TWD
+			</if>
+			<if test="twdCut != null and !twdCut.equals('')">
+			, TWD_CUT
+			</if>
+			<if test="sgd != null and !sgd.equals('')">
+			, SGD
+			</if>
+			<if test="sgdCut != null and !sgdCut.equals('')">
+			, SGD_CUT
+			</if>
+			<if test="myr != null and !myr.equals('')">
+			, MYR
+			</if>
+			<if test="myrCut != null and !myrCut.equals('')">
+			, MYR_CUT
+			</if>
+			<if test="thb != null and !thb.equals('')">
+			, THB
+			</if>
+			<if test="thbCut != null and !thbCut.equals('')">
+			, THB_CUT
+			</if>
+			<if test="vnd != null and !vnd.equals('')">
+			, VND
+			</if>
+			<if test="vndCut != null and !vndCut.equals('')">
+			, VND_CUT
+			</if>
+			<if test="idr != null and !idr.equals('')">
+			, IDR
+			</if>
+			<if test="idrCut != null and !idrCut.equals('')">
+			, IDR_CUT
+			</if>
+			<if test="php != null and !php.equals('')">
+			, PHP
+			</if>
+			<if test="phpCut != null and !phpCut.equals('')">
+			, PHP_CUT
+			</if>
+			<if test="bnd != null and !bnd.equals('')">
+			, BND
+			</if>
+			<if test="bndCut != null and !bndCut.equals('')">
+			, BND_CUT
+			</if>
+			<if test="inr != null and !inr.equals('')">
+			, INR
+			</if>
+			<if test="inrCut  != null and !inrCut.equals('')">
+			, INR_CUT
+			</if>
+			<if test="nzd != null and !nzd.equals('')">
+			, NZD
+			</if>
+			<if test="nzdCut != null and !nzdCut.equals('')">
+			, NZD_CUT
+			</if>
+			<if test="cad != null and !cad.equals('')">
+			, CAD
+			</if>
+			<if test="cadCut != null and !cadCut.equals('')">
+			, CAD_CUT
+			</if>
+			<if test="gbp != null and !gbp.equals('')">
+			, GBP
+			</if>
+			<if test="gbpCut != null and !gbpCut.equals('')">
+			, GBP_CUT
+			</if>
+			<if test="aud != null and !aud.equals('')">
+			, AUD
+			</if>
+			<if test="audCut != null and !audCut.equals('')">
+			, AUD_CUT
+			</if>
+			<if test="aed != null and !aed.equals('')">
+			, AED
+			</if>
+			<if test="aedCut != null and !aedCut.equals('')">
+			, AED_CUT
+			</if>
+			<if test="kwd != null and !kwd.equals('')">
+			, KWD
+			</if>
+			<if test="kwdCut != null and !kwdCut.equals('')">
+			, KWD_CUT
+			</if>
+			<if test="rub != null and !rub.equals('')">
+			, RUB
+			</if>
+			<if test="rubCut != null and !rubCut.equals('')">
+			, RUB_CUT
+			</if>
+			, BASE_YEAR
+			) VALUES 
+			(
+				now()
+				, #{baseDate}
+				<if test="krw != null and !krw.equals('')">
+				,#{krw}
+				</if>
+				<if test="krwCut != null and !krwCut.equals('')">
+				,#{krwCut}
+				</if>
+				<if test="usd != null and !usd.equals('')">
+				,#{usd}
+				</if>
+				<if test="usdCut != null and !usdCut.equals('')">
+				,#{usdCut}
+				</if>
+				<if test="eur != null and !eur.equals('')">
+				,#{eur}
+				</if>
+				<if test="eurCut != null and !eurCut.equals('')">
+				,#{eurCut}
+				</if>
+				<if test="jpy != null and !jpy.equals('')">
+				,#{jpy}
+				</if>
+				<if test="jpyCut != null and !jpyCut.equals('')">
+				,#{jpyCut}
+				</if>
+				<if test="cny != null and !cny.equals('')">
+				,#{cny}
+				</if>
+				<if test="cnyCut != null and !cnyCut.equals('')">
+				,#{cnyCut}
+				</if>
+				<if test="hkd != null and !hkd.equals('')">
+				,#{hkd}
+				</if>
+				<if test="hkdCut != null and !hkdCut.equals('')">
+				,#{hkdCut}
+				</if>
+				<if test="twd != null and !twd.equals('')">
+				,#{twd}
+				</if>
+				<if test="twdCut != null and !twdCut.equals('')">
+				,#{twdCut}
+				</if>
+				<if test="sgd != null and !sgd.equals('')">
+				,#{sgd}
+				</if>
+				<if test="sgdCut != null and !sgdCut.equals('')">
+				,#{sgdCut}
+				</if>
+				<if test="myr != null and !myr.equals('')">
+				,#{myr}
+				</if>
+				<if test="myrCut != null and !myrCut.equals('')">
+				,#{myrCut}
+				</if>
+				<if test="thb != null and !thb.equals('')">
+				,#{thb}
+				</if>
+				<if test="thbCut != null and !thbCut.equals('')">
+				,#{thbCut}
+				</if>
+				<if test="vnd != null and !vnd.equals('')">
+				,#{vnd}
+				</if>
+				<if test="vndCut != null and !vndCut.equals('')">
+				,#{vndCut}
+				</if>
+				<if test="idr != null and !idr.equals('')">
+				,#{idr}
+				</if>
+				<if test="idrCut != null and !idrCut.equals('')">
+				,#{idrCut}
+				</if>
+				<if test="php != null and !php.equals('')">
+				,#{php}
+				</if>
+				<if test="phpCut != null and !phpCut.equals('')">
+				,#{phpCut}
+				</if>
+				<if test="bnd != null and !bnd.equals('')">
+				,#{bnd}
+				</if>
+				<if test="bndCut != null and !bndCut.equals('')">
+				,#{bndCut}
+				</if>
+				<if test="inr != null and !inr.equals('')">
+				,#{inr}
+				</if>
+				<if test="inrCut != null and !inrCut.equals('')">
+				,#{inrCut}
+				</if>
+				<if test="nzd != null and !nzd.equals('')">
+				,#{nzd}
+				</if>
+				<if test="nzdCut != null and !nzdCut.equals('')">
+				,#{nzdCut}
+				</if>
+				<if test="cad != null and !cad.equals('')">
+				,#{cad}
+				</if>
+				<if test="cadCut != null and !cadCut.equals('')">
+				,#{cadCut}
+				</if>
+				<if test="gbp != null and !gbp.equals('')">
+				,#{gbp}
+				</if>
+				<if test="gbpCut != null and !gbpCut.equals('')">
+				,#{gbpCut}
+				</if>
+				<if test="aud != null and !aud.equals('')">
+				,#{aud}
+				</if>
+				<if test="audCut != null and !audCut.equals('')">
+				,#{audCut}
+				</if>
+				<if test="aed != null and !aed.equals('')">
+				,#{aed}
+				</if>
+				<if test="aedCut != null and !aedCut.equals('')">
+				,#{aedCut}
+				</if>
+				<if test="kwd != null and !kwd.equals('')">
+				,#{kwd}
+				</if>
+				<if test="kwdCut != null and !kwdCut.equals('')">
+				,#{kwdCut}
+				</if>
+				<if test="rub != null and !rub.equals('')">
+				,#{rub}
+				</if>
+				<if test="rubCut != null and !rubCut.equals('')">
+				,#{rubCut}
+				</if>
+				, #{baseYear}
+			)
+    </insert>
+	
+	<update id="updateExchange" parameterType="CmMap">
+		/* 환율정보 UPDATE */
+		UPDATE gps.FX_INFO 
+		SET REG_DATE = now()
+		, base_date = #{baseDate}
+		<if test="krw != null and !krw.equals('')">
+		, KRW	=	#{krw}
+		</if>
+		<if test="krwCut != null and !krwCut.equals('')">
+		, KRW_CUT	=	#{krwCut}
+		</if>
+		<if test="usd != null and !usd.equals('')">
+		, USD	=	#{usd}
+		</if>
+		<if test="usdCut != null and !usdCut.equals('')">
+		, USD_CUT	=	#{usdCut}
+		</if>
+		<if test="eur != null and !eur.equals('')">
+		, EUR	=	#{eur}
+		</if>
+		<if test="eurCut != null and !eurCut.equals('')">
+		, EUR_CUT	=	#{eurCut}
+		</if>
+		<if test="jpy != null and !jpy.equals('')">
+		, JPY	=	#{jpy}
+		</if>
+		<if test="jpyCut != null and !jpyCut.equals('')">
+		, JPY_CUT	=	#{jpyCut}
+		</if>
+		<if test="cny != null and !cny.equals('')">
+		, CNY	=	#{cny}
+		</if>
+		<if test="cnyCut != null and !cnyCut.equals('')">
+		, CNY_CUT	=	#{cnyCut}
+		</if>
+		<if test="hkd != null and !hkd.equals('')">
+		, HKD	=	#{hkd}
+		</if>
+		<if test="hkdCut != null and !hkdCut.equals('')">
+		, HKD_CUT	=	#{hkdCut}
+		</if>
+		<if test="twd != null and !twd.equals('')">
+		, TWD	=	#{twd}
+		</if>
+		<if test="twdCut != null and !twdCut.equals('')">
+		, TWD_CUT	=	#{twdCut}
+		</if>
+		<if test="sgd != null and !sgd.equals('')">
+		, SGD	=	#{sgd}
+		</if>
+		<if test="sgdCut != null and !sgdCut.equals('')">
+		, SGD_CUT	=	#{sgdCut}
+		</if>
+		<if test="myr != null and !myr.equals('')">
+		, MYR	=	#{myr}
+		</if>
+		<if test="myrCut != null and !myrCut.equals('')">
+		, MYR_CUT	=	#{myrCut}
+		</if>
+		<if test="thb != null and !thb.equals('')">
+		, THB	=	#{thb}
+		</if>
+		<if test="thbCut != null and !thbCut.equals('')">
+		, THB_CUT	=	#{thbCut}
+		</if>
+		<if test="vnd != null and !vnd.equals('')">
+		, VND	=	#{vnd}
+		</if>
+		<if test="vndCut != null and !vndCut.equals('')">
+		, VND_CUT	=	#{vndCut}
+		</if>
+		<if test="idr != null and !idr.equals('')">
+		, IDR	=	#{idr}
+		</if>
+		<if test="idrCut != null and !idrCut.equals('')">
+		, IDR_CUT	=	#{idrCut}
+		</if>
+		<if test="php != null and !php.equals('')">
+		, PHP	=	#{php}
+		</if>
+		<if test="phpCut != null and !phpCut.equals('')">
+		, PHP_CUT	=	#{phpCut}
+		</if>
+		<if test="bnd != null and !bnd.equals('')">
+		, BND	=	#{bnd}
+		</if>
+		<if test="bndCut != null and !bndCut.equals('')">
+		, BND_CUT	=	#{bndCut}
+		</if>
+		<if test="inr != null and !inr.equals('')">
+		, INR	=	#{inr}
+		</if>
+		<if test="inrCut != null and !inrCut.equals('')">
+		, INR_CUT	=	#{inrCut}
+		</if>
+		<if test="nzd != null and !nzd.equals('')">
+		, NZD	=	#{nzd}
+		</if>
+		<if test="nzdCut != null and !nzdCut.equals('')">
+		, NZD_CUT	=	#{nzdCut}
+		</if>
+		<if test="cad != null and !cad.equals('')">
+		, CAD	=	#{cad}
+		</if>
+		<if test="cadCut != null and !cadCut.equals('')">
+		, CAD_CUT	=	#{cadCut}
+		</if>
+		<if test="gbp != null and !gbp.equals('')">
+		, GBP	=	#{gbp}
+		</if>
+		<if test="gbpCut != null and !gbpCut.equals('')">
+		, GBP_CUT	=	#{gbpCut}
+		</if>
+		<if test="aud != null and !aud.equals('')">
+		, AUD	=	#{aud}
+		</if>
+		<if test="audCut != null and !audCut.equals('')">
+		, AUD_CUT	=	#{audCut}
+		</if>
+		<if test="aed != null and !aed.equals('')">
+		, AED	=	#{aed}
+		</if>
+		<if test="aedCut != null and !aedCut.equals('')">
+		, AED_CUT	=	#{aedCut}
+		</if>
+		<if test="kwd != null and !kwd.equals('')">
+		, KWD	=	#{kwd}
+		</if>
+		<if test="kwdCut != null and !kwdCut.equals('')">
+		, KWD_CUT	=	#{kwdCut}
+		</if>
+		<if test="rub != null and !rub.equals('')">
+		, RUB	=	#{rub}
+		</if>
+		<if test="rubCut != null and !rubCut.equals('')">
+		, RUB_CUT	=	#{rubCut}
+		</if>
+		WHERE BASE_YEAR = #{baseYear}
+	</update>
+	
+	<select id="getYearCurrency" parameterType="CmMap" resultType="double" flushCache="false">
+		/* 환율 정보 가져오기 */
+		SELECT ${currency}  
+		FROM gps.fx_info
+		WHERE base_year = #{baseYear}
+	</select>
+	
+	<select id="getYearCurrencyUnit" parameterType="CmMap" resultType="String" flushCache="false">
+		/* 환율 정보 가져오기 */
+		SELECT ${currency}  
+		FROM gps.fx_info
+		WHERE base_year = #{baseYear}
+	</select>
+	
+	<select id="getBaseDate" parameterType="CmMap" resultType="String" flushCache="false">
+		/* 환율 기준일자 가져오기 */
+		SELECT base_date  
+		FROM gps.fx_info
+		WHERE base_year = #{baseYear}
+	</select>
+	
+</mapper>

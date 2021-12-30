@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.amore.gps.service.comm.CommonDao">
+
+	<insert id="insertMailLog" parameterType="CmMap">
+		/*Mail Log저장*/
+		<selectKey keyProperty="mail_id" order="BEFORE" resultType="java.lang.String" >
+	 	select	'EM'||TO_CHAR(NOW(), 'YYYYMMDD') ||
+		LPAD(cast(coalesce(cast(substring(MAX(ml.mail_id), 11) as INTEGER),0)+1 as text),3,'0') as mail_id
+	  	from	gps.mail_log ml
+    	WHERE ml.mail_id LIKE 'EM' || TO_CHAR(NOW(), 'YYYYMMDD') || '%'
+		</selectKey>
+		insert into gps.mail_log
+		(
+			mail_id
+			,from_nm
+			,from_email
+			,to_email
+			,title
+			,content
+			,err_message
+			,reg_date
+			,send_flag
+		) values (
+			 #{mail_id}
+			, #{fromNm}
+			, #{fromEmail}
+			, #{toEmail}
+			, #{title}
+			, #{content}
+			, #{errMessage}
+			, NOW()
+			, #{sendFlag}
+		)
+			
+	</insert>
+	
+	<select id="getCodeInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		select 
+			cd
+			, cd_nm
+			, cd_enm
+			, cd_type
+		from gps.code_info 
+		where 1=1 
+		and cd_type = #{cdType}
+		and is_use ='Y'
+		order by cd
+	</select>
+	
+	<select id="getChlCdInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		select 
+			ci.cd
+			, ci.cd_nm
+			, ci.cd_enm
+			, ci.cd_type
+		from gps.code_info ci
+		INNER JOIN gps.ch_info cin
+		ON ci.cd = cin.ch_gps 
+		WHERE ci.cd_type = 'chgps'
+		order by ci.cd
+	</select>
+	
+	<select id="getConfInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		select
+			conf_key
+			, conf_value
+		from gps.conf_info
+		where 1=1 
+		and conf_key = #{confKey}
+	</select>
+</mapper>

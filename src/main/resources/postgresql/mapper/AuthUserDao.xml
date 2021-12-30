@@ -1,0 +1,581 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.amore.gps.service.auth.AuthUserDao">
+
+	<select id="getUserLoginChek" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 사용자 SELECT */
+		SELECT 
+		mi.mem_id
+		, mem_pw
+		, mem_nm
+		, mem_mail
+		, mem_level
+		, status
+		, mi.pwd_lsch_dt
+		, mll.last_login_ip
+		, mll.last_login_date
+		FROM gps.member_info mi		
+	 	LEFT OUTER JOIN (SELECT mem_id, ip last_login_ip, to_char(reg_date,'YYYY-MM-DD HH24:MI:SS') AS last_login_date
+			FROM gps.member_login_log
+			WHERE UPPER(mem_id)= UPPER(#{memId}) AND login_status='Y'
+			ORDER BY reg_date DESC
+			LIMIT 1) mll ON (mi.mem_id = mll.mem_id)
+		WHERE 1=1
+		<if test="status != null and status != ''">
+			AND status = #{status}
+		</if>
+		<if test="memId != null and memId != ''">
+			AND UPPER(mi.mem_id) = UPPER(#{memId})
+		</if>
+		<if test="memPw != null and memPw != ''">
+			AND mem_pw = #{memPw}
+		</if>
+	</select>
+	
+	<select id="getAuthUserList" parameterType="CmMap" resultType="CmMap" flushCache="false"> 
+		/* 사용자권한 SELECT */
+		SELECT 
+			mi.mem_id
+			, mi.mem_nm
+			, mi.mem_mail
+			, mi.mem_level
+			, mi.mem_team
+			, mpi.cp_cd
+			, mpi.unit_cd
+			, mpi.goal_reg_auth_yn
+			, mpi.goal_expc_ddln_reg_auth_yn
+			, mpi.inq_auth_yn
+			, mpi.is_mail
+			, mpi.status
+			, si.thread
+			, si.dtl_cd 
+			, gps.FN_CODE_NM(si.cp_cd, 'cp', #{s_language}) as cd_nm
+			, gps.FN_CODE_NM(si.unit_cd, 'unit', #{s_language}) as unit_nm
+			<if test="memId != null and memId != ''">
+			, (select MAX(mif.mem_level) from gps.member_info mif where UPPER(mif.mem_id) = UPPER(#{memId})) max_role
+			</if>
+		FROM gps.member_info mi
+		LEFT OUTER JOIN gps.member_priv_info mpi ON
+			mi.mem_id = mpi.mem_id
+		LEFT OUTER JOIN gps.section_info si ON
+			mpi.cp_cd = si.cp_cd
+			AND mpi.unit_cd = si.unit_cd
+			AND si.base_year = #{baseYear}
+		WHERE
+			mi.status = 'Y'
+		<if test="memId != null and memId != ''">
+			AND UPPER(mi.mem_id) = UPPER(#{memId})
+		</if>
+		<if test="cpCd != null and cpCd != ''">
+			AND mpi.cp_cd = #{cpCd}
+		</if>
+		<if test="unitCd != null and unitCd != ''">
+			AND mpi.unit_cd = #{unitCd}
+		</if>
+		<if test="authSettingPage != null and authSettingPage != ''">
+			AND mpi.unit_cd IS NOT NULL
+			AND mpi.cp_cd IS NOT NULL
+			AND mpi.status = 'Y'
+		</if>
+		ORDER BY si.thread , mi.mem_nm ASC
+	</select>
+	
+	<update id="updatePassword" parameterType="CmMap">
+		/* 사용자 비밀번호 UPDATE */
+		UPDATE gps.member_info SET
+		mem_pw = #{memPw}
+		WHERE UPPER(mem_id) = UPPER(#{memId})
+	</update>
+	
+
+	<select id="getSectionList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 부서 전체 정보 카테고리 List */
+		SELECT ci2.cd_nm  as parent_nm
+		      , ci2.cd as parent_cd
+		      , ci2.cd_type as parent_cd_type
+		      , ex.cd as children_cd
+		      , ex.cd_nm as children_nm
+		      , ex.parent as has_parent_cd
+		      , ex.cd_type as children_type
+		      , ex.is_cp as children_is_cp
+		      , ex.thread as child_thread
+		      , ex.parentuse
+		      , ci2.cd||ex.cd as thread
+		      , '' as children_cnt
+		FROM (
+		      SELECT ci.cd
+		         , ci.cd_nm 
+		         , si.cp_cd as parent
+		         , si.unit_cd as children
+		         , ci.cd_type 
+		         , ci.is_use 
+		         , si.is_cp 
+		         , si.is_use as parentuse
+		         , si.thread 
+		      FROM gps.section_info si 
+		      INNER JOIN gps.code_info ci 
+		      ON si.unit_cd = ci.cd
+		      WHERE si.is_use ='Y'
+		      AND si.base_year = #{baseYear}
+		      AND CASE 
+		      	WHEN si.cp_cd = '1100' THEN si.unit_cd != 'SUM'
+		      	WHEN si.cp_cd = 'RU10' THEN si.unit_cd != 'SUM'
+		      	WHEN si.cp_cd = 'JP10' THEN si.unit_cd != 'SUM'
+		      	ELSE si.is_reg = 'Y'
+		      END 
+		      AND ci.cd_type != 'team'
+		      AND ci.cd_type != 'cate'
+		      ORDER BY si.thread asc, ci.cd asc, ci.cd_nm asc, ci.cd_type asc
+		) ex
+		INNER JOIN gps.code_info ci2 
+		ON ci2.cd = ex.parent AND ci2.cd_type ='cp'
+		UNION 
+		SELECT cd_nm 
+			 , cd as cd
+		     , cd_type 
+		     , ' ' AS children_cd
+		     , ' ' AS children_nm
+		     , ' ' AS has_parent_cd
+		     , ' ' AS children_type
+		     , ' ' AS children_is_cp
+		     , ' ' AS children_thead
+		     , ' ' AS childrenuse
+		     , cd||'000' as thread
+		     , (SELECT COUNT(*) FROM gps.section_info si2 WHERE ci3.cd = si2.cp_cd )::text as children_cnt
+		FROM gps.code_info ci3
+		INNER JOIN gps.section_info si3
+		ON si3.base_year = #{baseYear}
+		AND si3.is_del = 'N'
+		AND si3.is_use = 'Y'
+		AND si3.is_reg = 'Y'
+		AND si3.cp_cd = ci3.cd 
+		WHERE cd_type ='cp'
+		AND (SELECT COUNT(*) FROM gps.section_info si2 WHERE ci3.cd = si2.cp_cd ) >0
+		ORDER BY thread ASC
+	</select> 
+
+	<insert id="insertUserAuth" parameterType="CmMap">
+	/* 사용자권한 INSERT */
+	INSERT INTO gps.member_priv_info
+	(mem_id, goal_reg_auth_yn , goal_expc_ddln_reg_auth_yn , status , reg_date , is_mail , inq_auth_yn, cp_cd, unit_cd)
+	VALUES
+	(UPPER(#{memId}), #{gRegYn}, #{gExRegYn}, #{status}, now(), #{isMail}, #{inqYn}, #{cpCd}, #{unitCd})
+	</insert>
+
+	<update id="updateUserAuth" parameterType="CmMap">
+		/* 사용자권한  UPDATE  */
+		UPDATE gps.member_priv_info
+		SET
+		reg_date = now() /* 최근 권한 업데이트 시각 */
+		, status = #{status} /* 상태 */
+		<if test="gRegYn != null and gRegYn != ''">
+			, goal_reg_auth_yn = #{gRegYn}
+		</if>
+		<if test="gExRegYn != null and gExRegYn != ''">
+			, goal_expc_ddln_reg_auth_yn = #{gExRegYn}
+		</if>
+		<if test="inqYn != null and inqYn != ''">
+			, inq_auth_yn = #{inqYn}
+		</if>
+		<if test="isMail != null and isMail != ''">
+			, is_mail = #{isMail}
+		</if>
+		WHERE cp_cd = #{cpCd}
+		AND unit_cd = #{unitCd}
+		and UPPER(mem_id) = UPPER(#{memId})
+	</update>
+	
+	<select id="getSearchUserAuthCount" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		/* 사용자 변경 리스트 count */ 
+		select count(*)
+		from (
+			select  ROW_NUMBER() OVER (ORDER BY user_auth.thread ASC) as N_NUM 
+			, user_auth.*
+			from (
+				select mpi.cp_cd
+				, mpi.unit_cd
+				, (SELECT status FROM gps.member_info mi WHERE UPPER(mi.mem_id) = UPPER(mpi.mem_id) ) mem_status
+				, mpi.mem_id
+				, (SELECT mem_team FROM gps.member_info mi WHERE UPPER(mi.mem_id) = UPPER(mpi.mem_id) ) mem_team
+				, (SELECT mem_nm FROM gps.member_info mi WHERE UPPER(mi.mem_id) = UPPER(mpi.mem_id) ) mem_nm
+				, si.thread
+				FROM gps.member_priv_info mpi				
+				LEFT OUTER JOIN gps.section_info si ON (mpi.cp_cd = si.cp_cd AND mpi.unit_cd = si.unit_cd AND si.cp_cd != '0000')
+				WHERE mpi.status = 'Y' 
+				<if test="isAuthuserRegPage == null or isAuthuserRegPage == ''">
+				AND si.is_reg = 'Y'
+				</if>
+				<if test="isAuthuserRegPage != null and isAuthuserRegPage != ''">
+				AND si.is_use = 'Y' 
+				</if>
+				AND si.base_year = #{guideBase}
+			) user_auth	
+		) U
+		where 1=1
+		AND U.mem_status = 'Y'
+		<if test="searchSection != null and searchSection != ''">
+			AND UPPER(CONCAT(U.cp_cd,'-',U.unit_cd)) like UPPER('%'||#{searchSection}||'%')
+		</if>
+		<if test="searchKey != null and searchKey != ''">
+			and(UPPER(U.mem_nm) = UPPER(#{searchKey})
+			or UPPER(U.mem_id) = UPPER(#{searchKey})
+			or UPPER(U.mem_team) = UPPER(#{searchKey}) )
+		</if>
+	</select>
+
+	<select id="getAuthUserRegList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 담당자 등록n변경 리스트 SELECT */
+		SELECT U.*
+		FROM (
+			SELECT  ROW_NUMBER() OVER (ORDER BY user_auth.thread ASC) as N_NUM 
+			, user_auth.*
+			FROM (
+				SELECT
+					mpi.goal_reg_auth_yn
+					, mpi.goal_expc_ddln_reg_auth_yn
+					, mpi.inq_auth_yn
+					, mpi.status 
+					, mpi.mem_id
+					, mpi.is_mail 
+					, si.cp_cd
+					, si.cate_cd 
+					, si.thread 
+					, si.unit_cd 
+					, si.is_reg
+					, mi.status as mem_status
+					, gps.FN_CODE_NM(si.cp_cd, 'cp', #{s_language}) as cd_nm
+					, gps.FN_CODE_NM(si.unit_cd, 'unit', #{s_language}) as unit_nm
+					, mi.mem_team
+					, mi.mem_nm
+					, mpi.reg_date
+				FROM gps.member_priv_info mpi
+				INNER JOIN gps.member_info mi on (mpi.mem_id = mi.mem_id) 
+				LEFT OUTER JOIN gps.section_info si on (mpi.cp_cd = si.cp_cd AND mpi.unit_cd = si.unit_cd AND si.cp_cd != '0000' AND si.base_year = #{guideBase})
+				INNER JOIN gps.code_info ci on (si.cp_cd = ci.cd and mpi.cp_cd = si.cp_cd AND mpi.unit_cd = si.unit_cd AND ci.cd_type = 'cp')
+				WHERE mpi.status = 'Y'
+				<if test="isAuthuserRegPage == null or isAuthuserRegPage == ''">
+				AND si.is_reg = 'Y'
+				</if>
+				<if test="isAuthuserRegPage != null and isAuthuserRegPage != ''">
+				AND si.is_use = 'Y'
+				</if>
+				ORDER BY si.thread, mem_nm ASC  
+			) user_auth	
+			WHERE 1=1
+			AND user_auth.mem_status = 'Y'
+			<if test="searchSection != null and searchSection != ''">
+				AND UPPER(CONCAT(user_auth.cp_cd,'-',user_auth.unit_cd)) like UPPER('%'||#{searchSection}||'%')
+			</if>
+			<if test="searchKey != null and searchKey != ''">
+				AND( UPPER(user_auth.mem_nm) = UPPER(#{searchKey})
+				OR UPPER(user_auth.mem_id) = UPPER(#{searchKey})
+				OR UPPER(user_auth.mem_team) = UPPER(#{searchKey}))
+			</if>
+		) U
+		WHERE U.N_NUM BETWEEN #{i_StartRownum} AND #{i_EndRownum}
+	</select>
+	
+	<select id="searchUserInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 사용자 검색 */
+		SELECT EX.*
+		FROM (
+			SELECT 
+			ROW_NUMBER() OVER(ORDER BY seq DESC) N_NUM 
+			, mi.mem_id 		/*아이디*/
+			, mi.mem_nm			/*이름*/
+			, mi.mem_mail		/*email*/
+			, mi.mem_team		/*팀명*/
+			, mi.status			
+		 	FROM gps.MEMBER_INFO mi
+		 	WHERE mi.status ='Y'
+			<if test="searchType != null and searchType != ''"> /* 유저 그룹 필요*/
+				AND groupid = #{searchType}
+			</if>
+			<if test="searchKey != null and searchKey != ''">
+				AND UPPER(mi.mem_id) = UPPER(#{searchKey})
+				OR UPPER(mi.mem_nm) = UPPER(#{searchKey})
+				OR UPPER(mi.mem_team) = UPPER(#{searchKey})
+			</if>
+	 	) EX
+		WHERE 1=1
+		AND EX.status = 'Y'
+		AND N_NUM BETWEEN #{i_StartRownum} AND #{i_EndRownum}
+	</select>
+	
+	<select id="getSearchUserCount" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		SELECT  COUNT(*)
+		FROM gps.MEMBER_INFO
+		WHERE 1=1
+		and status = 'Y'
+		<if test="searchKey != null and searchKey != ''">
+			AND UPPER(mem_id) = UPPER(#{searchKey})
+			OR UPPER(mem_nm) = UPPER(#{searchKey})
+			OR UPPER(mem_team) = UPPER(#{searchKey})
+		</if>
+	</select>	
+	
+	
+	<select id="getDeptCategory" resultType="CmMap" flushCache="false">
+		/* 부서 전체 정보 카테고리 List */
+		SELECT ci2.cd_nm  as parent_nm
+		      , ci2.cd as parent_cd
+		      , ci2.cd_type as parent_cd_type
+		      , ex.cd as children_cd
+		      , ex.cd_nm as children_nm
+		      , ex.parent as has_parent_cd
+		      , ex.cd_type as children_type
+		      , ex.is_cp as children_is_cp
+		      , ex.thread as child_thread
+		      , ex.parentuse
+		      , ci2.cd||ex.cd as thread
+		      , '' as children_cnt
+		FROM (
+		      SELECT ci.cd
+		         , ci.cd_nm 
+		         , si.cp_cd as parent
+		         , si.unit_cd as children
+		         , ci.cd_type 
+		         , ci.is_use 
+		         , si.is_cp 
+		         , si.is_use as parentuse
+		         , si.thread 
+		      FROM gps.section_info si 
+		      INNER JOIN gps.code_info ci 
+		      ON si.unit_cd = ci.cd AND si.is_use ='Y' AND si.is_reg = 'Y'
+		      ORDER BY ci.cd asc, ci.cd_nm asc, ci.cd_type asc, si.thread asc
+		) ex
+		INNER JOIN gps.code_info ci2 
+		ON ci2.cd = ex.parent and ci2.cd_type ='cp'
+		UNION 
+		SELECT cd_nm 
+			 , cd as cd
+		     , cd_type 
+		     , ' ' AS children_cd
+		     , ' ' AS children_nm
+		     , ' ' AS has_parent_cd
+		     , ' ' AS children_type
+		     , ' ' AS children_is_cp
+		     , ' ' AS children_thead
+		     , ' ' AS childrenuse
+		     , cd||'000' as thread
+		     , (SELECT COUNT(*) FROM gps.section_info si2 WHERE code_info.cd = si2.cp_cd )::text as children_cnt
+		FROM gps.CODE_INFO
+		WHERE cd_type ='cp'
+		AND (SELECT COUNT(*) FROM gps.section_info si2 WHERE code_info.cd = si2.cp_cd ) >0
+		ORDER BY thread asc
+	</select>	
+	
+	
+	<select id="getMailList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 섹션 담당 메일발송 대상자 List */
+		SELECT
+			gd.guide_seq
+			, gd.seq AS guide_data_seq
+			, gd.section_id
+			, gd.status
+			, gi.guide_base
+			, si.dtl_cd
+			, si.cate_cd
+			, si.section_nm
+			, si.section_enm
+			, usr.*
+			, gps.FN_CODE_NM(usr.cp_cd, 'cp', #{s_language}) AS gp_nm
+			, gps.FN_CODE_NM(usr.unit_cd, 'unit', #{s_language}) AS unit_nm
+		FROM gps.guide_data gd
+		INNER JOIN gps.guide_info gi ON
+			gi.seq = gd.guide_seq
+		INNER JOIN gps.section_info si ON 
+			gd.section_id = si.section_id AND si.is_use = 'Y' AND si.is_reg = 'Y'
+		INNER JOIN (
+			SELECT
+				mi.mem_nm
+				, mi.mem_mail
+				, mi.mem_team
+				, mi.mem_level
+				, mpi.*
+			FROM gps.member_info mi
+			INNER JOIN gps.member_priv_info mpi ON
+				(mi.mem_id = mpi.mem_id)
+			WHERE
+				mi.status = 'Y'
+				AND mpi.status = 'Y'
+				AND mpi.is_mail = 'Y'
+		) usr ON
+			si.cp_cd = usr.cp_cd AND si.unit_cd = usr.unit_cd
+		WHERE
+			gd.guide_seq = #{guideSeq}
+		<if test="sectionArray != null and sectionArray.size != 0">
+			<foreach collection="sectionArray" item="sectionArray" open=" AND gd.section_id IN (" close=")" separator="," >
+				#{sectionArray}
+			</foreach>
+		</if>
+		<if test="statusArray != null and statusArray.size != 0">
+			<foreach collection="statusArray" item="statusArray" open=" AND gd.status IN (" close=")" separator="," >
+				#{statusArray}
+			</foreach>
+		</if>
+		<if test="w_chk != null and w_chk != ''">
+			AND	usr.goal_reg_auth_yn = #{w_chk}
+		</if>
+		ORDER BY usr.mem_id
+	</select>
+	
+	<select id="getSectionInfo" parameterType="CmMap" resultType="CmMap" flushCache="false"> 
+		/* 섹션 기본 정보 List SELECT */
+		/* 21.05.31 수정, 리포트페이지의 조회권한도 겸용할 수 있도록 수정 */
+		SELECT cp_cd
+			, unit_cd
+			, ci.cd_type
+			, gps.FN_CODE_NM(cp_cd, 'cp', #{s_language}) AS gp_nm
+			, gps.FN_CODE_NM(unit_cd, 'unit', #{s_language}) AS unit_nm
+			, is_cp
+			, thread
+		FROM gps.section_info si
+		inner join gps.code_info ci
+		on si.cp_cd = ci.cd and ci.cd_type = 'cp'
+		WHERE si.is_use ='Y'
+		<if test="isAuthuserRegPage == null or isAuthuserRegPage == ''">
+		AND si.is_reg = 'Y'
+		</if>
+		<if test="isAuthuserRegPage != null and isAuthuserRegPage != ''">
+		AND si.unit_cd != 'SUM'
+		AND si.cp_cd != '0000'
+		</if>
+		AND si.base_year = #{baseYear}
+		ORDER BY thread ASC
+	</select>
+	
+	
+	<insert id="insertUserLog" parameterType="CmMap">
+		/* Login LOG INSERT */
+		INSERT INTO gps.member_login_log
+		(mem_id , reg_date, ip, login_status )
+		VALUES
+		(UPPER(#{memId}), now(), #{ip}, #{login_status})
+	</insert>
+	
+	<update id="updateUserLoginDate" parameterType="CmMap">
+		/* 사용자 마지막 접속일자 UPDATE  */
+		UPDATE gps.member_info
+		SET
+		last_login_date = now()
+		WHERE 1=1
+		and UPPER(mem_id) = UPPER(#{memId})
+	</update>
+	
+	<!--<insert id="insertAuthLog" parameterType="CmMap">
+		/* 사용자권한 기록 작성  */
+		INSERT INTO gps.member_priv_log (
+					  auth_id 
+					, mem_id
+					, section_id
+					, priv_sales_w
+					, priv_sales_r
+					, priv_profit_w
+					, priv_profit_r
+					, status
+					, priv_profit_w_os
+					, is_mail
+					, reg_date )
+		VALUES (
+					  UPPER(#{authId})
+					, UPPER(#{memId})
+					, #{sectionId}
+					, #{privSalesW}
+					, #{privSalesR}
+					, #{privProfitW}
+					, #{privProfitR}
+					, #{status}
+					, #{privProfitWOS}
+					, #{isMail}
+					, now())
+	</insert>-->
+	<insert id="insertAuthLog" parameterType="CmMap">
+		/* 사용자권한 기록 작성  */
+		INSERT INTO gps.member_priv_log (
+					  auth_id
+					, mem_id
+					, section_id
+					, goal_reg_auth_yn
+					, goal_expc_ddln_reg_auth_yn
+					, inq_auth_yn
+					, status
+					, is_mail
+					, reg_date )
+		VALUES (
+					  UPPER(#{authId})
+					, UPPER(#{memId})
+					, #{sectionId}
+					, #{gRegYn}
+					, #{gExRegYn}
+					, #{inqYn}
+					, #{status}
+					, #{isMail}
+					, now())
+	</insert>
+	
+	<select id="getMemberList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 사용자 상태에 따른 정보 가져오기 */
+		SELECT * 
+			FROM gps.member_info
+			WHERE status = #{status}
+		ORDER BY mem_id
+	</select>
+	
+	<update id="updateUserStatus" parameterType="CmMap">
+		/* 사용자 상태 UPDATE  */
+		UPDATE gps.member_info
+		SET
+		reg_date = now()
+		, status = #{status}
+		WHERE 1=1
+		and UPPER(mem_id) = UPPER(#{memId})
+	</update>
+	
+	<select id="getCountDeleteMemberInfo" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		/* 사용자 삭재 대기 테이블 카운트 */
+		SELECT count(*)
+		FROM gps.ex_if_delete_accout
+		WHERE UPPER(pernr) = UPPER(#{memId})
+		AND result NOT IN ('S','C')
+	</select>
+	
+	<select id="getDeleteMemberList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 사용자 삭재 대기 테이블 조회 */
+		SELECT *
+		FROM gps.ex_if_delete_accout
+		WHERE UPPER(pernr) = UPPER(#{memId})
+		AND result NOT IN ('S','C')
+	</select>
+	
+	<insert id="insertDeleteMember" parameterType="CmMap">
+		/* 사용자 삭재대기 등록 */
+		INSERT INTO gps.ex_if_delete_accout (
+			  pernr
+			, requester
+			, del_res) 
+		VALUES (
+			  UPPER(#{memId})
+			, 'GPSMASTER'
+			, #{delRes})
+	</insert>
+
+	<delete id="deleteUserAuth" parameterType="CmMap">
+		/* 사용자권한  DELETE  */
+		delete from gps.member_priv_info
+		WHERE cp_cd = #{cpCd}
+		AND unit_cd = #{unitCd}
+		and UPPER(mem_id) = UPPER(#{memId})
+	</delete>
+	
+	<select id="getUserPwdChangeDate" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 사용자 최근 비밀번호 변경일자 조회 */
+		SELECT *
+		FROM gps.eai_if_user eiu
+		WHERE UPPER(eiu.pernr) = UPPER(#{memId})
+	</select>
+	
+</mapper>

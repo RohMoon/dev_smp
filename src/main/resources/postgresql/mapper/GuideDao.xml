@@ -1,0 +1,1212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.amore.gps.service.guide.GuideDao">
+
+	
+	<select id="getNewGuideId" resultType="java.lang.String" flushCache="false">
+		select	'APG'||TO_CHAR(NOW()+'1years', 'YYYY') ||'-'||
+		LPAD(cast(coalesce(cast(MAX(gi.guide_seq)as INTEGER),0)+1 as text),3,'0') as guide_id 
+	  	from	gps.guide_info gi
+	</select>
+	
+	<select id="getNewGuideMaxID" parameterType="CmMap" resultType="java.lang.String" flushCache="false">
+		select 'APG'|| #{guideBase} ||'-'||
+			LPAD(cast(coalesce(cast(MAX(guide_seq)as INTEGER),0)+1 as text),3,'0') as guide_seq
+		from gps.guide_info
+		where guide_base = #{guideBase}
+	</select>
+	
+	<select id="getGuideMaxSeq" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		SELECT 
+			MAX(seq)
+		FROM gps.guide_info
+		WHERE 1 = 1
+		<if test="guideInfoStatus != null and guideInfoStatus != ''">
+		AND status = #{guideInfoStatus}
+		</if>
+	</select>
+	
+	<select id="getGuideCnt" resultType="java.lang.Integer" flushCache="false">
+		select Count(*) from gps.guide_info
+	</select>
+	
+	<select id="getGuideCurrentSeq" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		SELECT seq
+		FROM gps.guide_info
+		WHERE 1 = 1
+		<if test="guideYear != null and guideYear != ''">
+			AND guide_base = #{guideYear}
+		</if>
+		ORDER BY seq DESC LIMIT 1
+	</select>
+	
+	<select id="getGuideHistoryCount" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		select  count(*)
+		from gps.guide_info
+		where 1=1
+		<if test="keyword != null and keyword != ''">
+		and UPPER(title) LIKE '%' || UPPER(#{keyword}) || '%'
+		</if>
+		<if test="guideBase != null and guideBase != ''">
+		and guide_base = #{guideBase}
+		</if>
+		<if test="guideInfoStatus != null and guideInfoStatus != ''">
+		and status = #{guideInfoStatus}
+		</if>
+	</select>	
+	
+	<select id="getGuideHistoryList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 가이드 SELECT */
+		SELECT GU.*
+		FROM (
+			SELECT
+				ROW_NUMBER() OVER (ORDER BY gi.seq DESC) N_NUM
+				, gi.seq
+				, 'APG'||gi.guide_base||'-'||gi.guide_seq as guide_id
+				, gi.guide_base
+				, gi.guide_seq
+				, gi.title
+				, gi.reg_id
+				, mi.mem_nm AS reg_nm
+				, gi.status
+				, gi.reg_date
+				, gi.deploy_date
+				, gi.sales_date
+				, gi.profit_date
+				, gi.month_date
+				, gi.memo
+				, gi.prev_seq
+				, gi.dist_date
+		 	FROM gps.guide_info gi
+		 	LEFT OUTER JOIN gps.member_info mi ON
+		 		gi.reg_id = mi.mem_id
+		) GU
+		WHERE 1=1
+		<if test="keyword != null and keyword != ''">
+		AND UPPER(title) LIKE '%' || UPPER(#{keyword}) || '%'
+		</if>
+		<if test="guideInfoStatus != null and guideInfoStatus != ''">
+		AND status = #{guideInfoStatus}
+		</if>
+		AND N_NUM BETWEEN #{i_StartRownum} AND #{i_EndRownum}
+	</select>
+	
+	<insert id="insertGuide" parameterType="CmMap">
+		/* 가이드 INSERT */
+		INSERT INTO gps.guide_info 
+			(
+			guide_base
+			,guide_seq
+			,title
+			,reg_id
+			,reg_date
+			,deploy_date
+			,sales_date
+			,profit_date
+			,month_date
+			<if test="memo != null and memo != ''">
+			,memo
+			</if>
+			<if test="prevSeq != null and prevSeq != ''">
+			, prev_seq
+			</if>
+			<if test="mailTarget != null and mailTarget != ''">
+			, mail_target
+			</if>
+			) VALUES 
+			(
+				#{guideBase}
+				,#{guideSeq}
+				,#{title}
+				,#{regId}
+				,#{regDate}
+				,#{deployDate}
+				,#{salesDate}
+				,#{profitDate}
+				,#{monthDate}
+				<if test="memo != null and memo != ''">
+				,#{memo}
+				</if>
+				<if test="prevSeq != null and prevSeq != ''">
+				,#{prevSeq}
+				</if>
+				<if test="mailTarget != null and mailTarget != ''">
+				, #{mailTarget}
+				</if>
+			)
+    </insert>
+    
+    <select id="getGuideDetailCount" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		SELECT COUNT(*)
+		FROM gps.guide_data
+		WHERE 1=1
+		<if test="guideSeq != null and guideSeq != ''">
+			AND guide_seq = #{guideSeq}
+		</if>
+	</select>
+    
+    <select id="getGuideDetailInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 가이드 양식 상세 SELECT  */
+		SELECT
+			gi.seq
+			, gps.FN_CODE_NM(si.cp_cd, 'cp', #{s_language}) AS gp_nm
+			, si.cp_cd
+			, si.unit_cd
+			, si.thread
+			, gps.FN_CODE_NM(si.unit_cd, 'unit', #{s_language}) AS unit_nm
+			, gi.guide_base
+			, gi.title 
+			, gd.seq as guide_data_seq
+			, gd.section_id 
+			, gd.g_unit 
+			, gd.g_sales
+			, gd.g_growth
+			, gd.g_profit
+			, gd.g_profit_r
+			, gd.g_profit_vary
+			, gd.f_unit
+			, gd.f_sales
+			, gd.f_growth
+			, gd.f_cost
+			, gd.f_sga
+			, gd.f_payroll
+			, gd.f_ad
+			, gd.f_promotion
+			, gd.f_fee
+			, gd.f_comm
+			, gd.f_rent
+			, gd.f_depre
+			, gd.f_etc
+			, gd.f_profit
+			, gd.f_profit_r
+			, gd.f_profit_vary
+			, gd.r_unit
+			, gd.r_sales
+			, gd.r_cost
+			, gd.r_sga
+			, gd.r_payroll
+			, gd.r_ad
+			, gd.r_promotion
+			, gd.r_fee
+			, gd.r_comm
+			, gd.r_rent
+			, gd.r_depre
+			, gd.r_etc
+			, gd.r_profit
+			, gd.r_profit_r
+			, gd.bzm_brnd_frcp_glst_cd
+			, si.dtl_cd
+		FROM gps.guide_info gi 
+		LEFT OUTER JOIN gps.guide_data gd ON
+			gi.seq = gd.guide_seq
+		INNER JOIN gps.section_info si ON
+			si.section_id = gd.section_id
+			AND si.is_use = 'Y'
+		<if test="isReg != null and isReg != ''">
+			AND si.is_reg = 'Y'
+		</if>
+		INNER JOIN (
+			SELECT
+				cp_cd
+				, base_year
+				, min(thread) AS min_thread
+			FROM gps.section_info si
+			GROUP BY cp_cd, base_year
+		) sm ON
+			si.cp_cd = sm.cp_cd
+			AND si.base_year = sm.base_year
+		WHERE
+			gi.seq = #{guideSeq}
+		<if test="cpCd != null and cpCd != ''">
+			AND si.cp_cd = #{cpCd}
+		</if>
+		<if test="sectionId != null and sectionId != ''">
+			AND gd.section_id = #{sectionId}
+		</if>
+		ORDER BY
+			CASE WHEN si.unit_cd = '000' THEN '000' ELSE sm.min_thread END
+			, CASE WHEN si.unit_cd = 'SUM' THEN '000' ELSE si.thread END
+	</select>
+    
+    <insert id="insertGuideData" parameterType="CmMap">
+		/* 가이드 양식 등록 INSERT */
+		INSERT INTO gps.guide_data 
+			(
+				guide_seq
+				,section_id
+				<if test="gUnit != null and gUnit != ''">
+				,g_unit
+				</if>
+				<if test="gSales != null and gSales != ''">
+				,g_sales
+				</if>
+				<if test="gGrowth != null and gGrowth != ''">
+				,g_growth
+				</if>
+				<if test="gProfit != null and gProfit != ''">
+				,g_profit
+				</if>
+				<if test="gProfitR != null and gProfitR != ''">
+				,g_profit_r
+				</if>
+				<if test="gProfitVary != null and gProfitVary != ''">
+				,g_profit_vary
+				</if>
+				<if test="gUnit != null and gUnit != ''">
+				,f_unit
+				</if>
+				<if test="fSales != null and fSales != ''">
+				,f_sales
+				</if>
+				<if test="fGrowth != null and fGrowth != ''">
+				,f_growth
+				</if>
+				<if test="fCost != null and fCost != ''">
+				,f_cost
+				</if>
+				<if test="fSga != null and fSga != ''">
+				,f_sga
+				</if>
+				<if test="fPayroll != null and fPayroll != ''">
+				,f_payroll
+				</if>
+				<if test="fAd != null and fAd != ''">
+				,f_ad
+				</if>
+				<if test="fPromotion != null and fPromotion != ''">
+				,f_promotion
+				</if>
+				<if test="fFee != null and fFee != ''">
+				,f_fee
+				</if>
+				<if test="fComm != null and fComm != ''">
+				,f_comm
+				</if>
+				<if test="fRent != null and fRent != ''">
+				,f_rent
+				</if>
+				<if test="fDepre != null and fDepre != ''">
+				,f_depre
+				</if>
+				<if test="fEtc != null and fEtc != ''">
+				,f_etc
+				</if>
+				<if test="fProfit != null and fProfit != ''">
+				,f_profit
+				</if>
+				<if test="fProfitR != null and fProfitR != ''">
+				,f_profit_r
+				</if>
+				<if test="fProfitVary != null and fProfitVary != ''">
+				,f_profit_vary
+				</if>
+				<if test="gUnit != null and gUnit != ''">
+				,r_unit
+				</if>
+				<if test="rSales != null and rSales != ''">
+				,r_sales
+				</if>
+				<if test="rCost != null and rCost != ''">
+				,r_cost
+				</if>
+				<if test="rSga != null and rSga != ''">
+				,r_sga
+				</if>
+				<if test="rPayroll != null and rPayroll != ''">
+				,r_payroll
+				</if>
+				<if test="rAd != null and rAd != ''">
+				,r_ad
+				</if>
+				<if test="rPromotion != null and rPromotion != ''">
+				,r_promotion
+				</if>
+				<if test="rFee != null and rFee != ''">
+				,r_fee
+				</if>
+				<if test="rComm != null and rComm != ''">
+				,r_comm
+				</if>
+				<if test="rRent != null and rRent != ''">
+				,r_rent
+				</if>
+				<if test="rDepre != null and rDepre != ''">
+				,r_depre
+				</if>
+				<if test="rEtc != null and rEtc != ''">
+				,r_etc
+				</if>
+				<if test="rProfit != null and rProfit != ''">
+				,r_profit
+				</if>
+				<if test="rProfitR != null and rProfitR != ''">
+				,r_profit_r
+				</if>
+				,reg_date
+				,sal_amt_reg_ddln_dttm 
+				,slpr_reg_ddln_dttm 
+				,mth_bmgt_goal_reg_ddln_dttm
+			) VALUES 
+			(
+				#{guideSeq}
+				,#{sectionId}
+				<if test="gUnit != null and gUnit != ''">
+				,#{gUnit}
+				</if>
+				<if test="gSales != null and gSales != ''">
+				,#{gSales}
+				</if>
+				<if test="gGrowth != null and gGrowth != ''">
+				,#{gGrowth}
+				</if>
+				<if test="gProfit != null and gProfit != ''">
+				,#{gProfit}
+				</if>
+				<if test="gProfitR != null and gProfitR != ''">
+				,#{gProfitR}
+				</if>
+				<if test="gProfitVary != null and gProfitVary != ''">
+				,#{gProfitVary}
+				</if>
+				<if test="gUnit != null and gUnit != ''">
+				,#{gUnit}
+				</if>
+				<if test="fSales != null and fSales != ''">
+				,#{fSales}
+				</if>
+				<if test="fGrowth != null and fGrowth != ''">
+				,#{fGrowth}
+				</if>
+				<if test="fCost != null and fCost != ''">
+				,#{fCost}
+				</if>
+				<if test="fSga != null and fSga != ''">
+				,#{fSga}
+				</if>
+				<if test="fPayroll != null and fPayroll != ''">
+				,#{fPayroll}
+				</if>
+				<if test="fAd != null and fAd != ''">
+				,#{fAd}
+				</if>
+				<if test="fPromotion != null and fPromotion != ''">
+				,#{fPromotion}
+				</if>
+				<if test="fFee != null and fFee != ''">
+				,#{fFee}
+				</if>
+				<if test="fComm != null and fComm != ''">
+				,#{fComm}
+				</if>
+				<if test="fRent != null and fRent != ''">
+				,#{fRent}
+				</if>
+				<if test="fDepre != null and fDepre != ''">
+				,#{fDepre}
+				</if>
+				<if test="fEtc != null and fEtc != ''">
+				,#{fEtc}
+				</if>
+				<if test="fProfit != null and fProfit != ''">
+				,#{fProfit}
+				</if>
+				<if test="fProfitR != null and fProfitR != ''">
+				,#{fProfitR}
+				</if>
+				<if test="fProfitVary != null and fProfitVary != ''">
+				,#{fProfitVary}
+				</if>
+				<if test="gUnit != null and gUnit != ''">
+				,#{gUnit}
+				</if>
+				<if test="rSales != null and rSales != ''">
+				,#{rSales}
+				</if>
+				<if test="rCost != null and rCost != ''">
+				,#{rCost}
+				</if>
+				<if test="rSga != null and rSga != ''">
+				,#{rSga}
+				</if>
+				<if test="rPayroll != null and rPayroll != ''">
+				,#{rPayroll}
+				</if>
+				<if test="rAd != null and rAd != ''">
+				,#{rAd}
+				</if>
+				<if test="rPromotion != null and rPromotion != ''">
+				,#{rPromotion}
+				</if>
+				<if test="rFee != null and rFee != ''">
+				,#{rFee}
+				</if>
+				<if test="rComm != null and rComm != ''">
+				,#{rComm}
+				</if>
+				<if test="rRent != null and rRent != ''">
+				,#{rRent}
+				</if>
+				<if test="rDepre != null and rDepre != ''">
+				,#{rDepre}
+				</if>
+				<if test="rEtc != null and rEtc != ''">
+				,#{rEtc}
+				</if>
+				<if test="rProfit != null and rProfit != ''">
+				,#{rProfit}
+				</if>
+				<if test="rProfitR != null and rProfitR != ''">
+				,#{rProfitR}
+				</if>
+				,now()
+				,#{salesDate}
+				,#{profitDate}
+				,#{monthDate}
+			)
+    </insert>
+    
+    <update id="updateGuideData" parameterType="CmMap">
+		/*가이드 수정*/
+		update gps.guide_data 
+		set modi_date = now()
+		<if test="gUnit != null and gUnit != ''">
+		,g_unit = #{gUnit}
+		,f_unit = #{gUnit}
+		,r_unit = #{gUnit}
+		</if>
+		<if test="gSales != null and gSales != ''">
+		,g_sales = #{gSales}
+		</if>
+		<if test="gGrowth != null and gGrowth != ''">
+		,g_growth = #{gGrowth}
+		</if>
+		<if test="gProfit != null and gProfit != ''">
+		,g_profit = #{gProfit}
+		</if>
+		<if test="gProfitR != null and gProfitR != ''">
+		,g_profit_r = #{gProfitR}
+		</if>
+		<if test="gProfitVary != null and gProfitVary != ''">
+		,g_profit_vary = #{gProfitVary}
+		</if>
+		<if test="fSales != null and fSales != ''">
+		,f_sales = #{fSales}
+		</if>
+		<if test="fGrowth != null and fGrowth != ''">
+		,f_growth = #{fGrowth}
+		</if>
+		<if test="fCost != null and fCost != ''">
+		,f_cost = #{fCost}
+		</if>
+		<if test="fSga != null and fSga != ''">
+		,f_sga = #{fSga}
+		</if>
+		<if test="fPayroll != null and fPayroll != ''">
+		,f_payroll = #{fPayroll}
+		</if>
+		<if test="fAd != null and fAd != ''">
+		,f_ad = #{fAd}
+		</if>
+		<if test="fPromotion != null and fPromotion != ''">
+		,f_promotion = #{fPromotion}
+		</if>
+		<if test="fFee != null and fFee != ''">
+		,f_fee = #{fFee}
+		</if>
+		<if test="fComm != null and fComm != ''">
+		,f_comm = #{fComm}
+		</if>
+		<if test="fRent != null and fRent != ''">
+		,f_rent = #{fRent}
+		</if>
+		<if test="fDepre != null and fDepre != ''">
+		,f_depre = #{fDepre}
+		</if>
+		<if test="fEtc != null and fEtc != ''">
+		,f_etc = #{fEtc}
+		</if>
+		<if test="fProfit != null and fProfit != ''">
+		,f_profit = #{fProfit}
+		</if>
+		<if test="fProfitR != null and fProfitR != ''">
+		,f_profit_r = #{fProfitR}
+		</if>
+		<if test="fProfitVary != null and fProfitVary != ''">
+		,f_profit_vary = #{fProfitVary}
+		</if>
+		<if test="rSales != null and rSales != ''">
+		,r_sales = #{rSales}
+		</if>
+		<if test="rCost != null and rCost != ''">
+		,r_cost = #{rCost}
+		</if>
+		<if test="rSga != null and rSga != ''">
+		,r_sga = #{rSga}
+		</if>
+		<if test="rPayroll != null and rPayroll != ''">
+		,r_payroll = #{rPayroll}
+		</if>
+		<if test="rAd != null and rAd != ''">
+		,r_ad = #{rAd}
+		</if>
+		<if test="rPromotion != null and rPromotion != ''">
+		,r_promotion = #{rPromotion}
+		</if>
+		<if test="rFee != null and rFee != ''">
+		,r_fee = #{rFee}
+		</if>
+		<if test="rComm != null and rComm != ''">
+		,r_comm = #{rComm}
+		</if>
+		<if test="rRent != null and rRent != ''">
+		,r_rent = #{rRent}
+		</if>
+		<if test="rDepre != null and rDepre != ''">
+		,r_depre = #{rDepre}
+		</if>
+		<if test="rEtc != null and rEtc != ''">
+		,r_etc = #{rEtc}
+		</if>
+		<if test="rProfit != null and rProfit != ''">
+		,r_profit = #{rProfit}
+		</if>
+		<if test="rProfitR != null and rProfitR != ''">
+		,r_profit_r = #{rProfitR}
+		</if>
+		<if test="uStatus != null and uStatus != ''">
+		,status = #{uStatus}
+		</if>
+		where guide_seq = #{currentGuideSeq}
+		and   section_id = #{sectionId}
+	</update>
+	
+	<update id="updateAllGuideDataGuideSeq" parameterType="CmMap">
+		UPDATE gps.guide_data
+		SET guide_seq = #{guideSeq}
+		WHERE
+			guide_seq = #{currentGuideSeq}
+			AND section_id IN (
+				SELECT
+					section_id
+				FROM gps.section_info
+				WHERE
+					is_use = 'Y' 
+					AND is_reg = 'Y' 
+					AND base_year = #{baseYear}
+					<foreach collection="sectionArray" item="sectionArray" open=" AND section_id NOT IN (" close=")" separator="," >
+						#{sectionArray}
+					</foreach>
+			)
+	</update>
+	
+	<select id="getGuideInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 가이드 정보 SELECT */
+		select GU.*
+		FROM(
+			SELECT
+			seq
+			, ROW_NUMBER() OVER (ORDER BY seq DESC) N_NUM
+			,'APG'||guide_base||'-'||guide_seq as guide_id
+			,guide_base
+			,guide_seq
+			,title
+			,reg_id
+			, (select mem_nm from gps.member_info where mem_id = reg_id) reg_nm
+			, (EXTRACT(Epoch from age(profit_date+1 ,now())) / 86400)::int d_day
+			, status
+			,reg_date
+			,deploy_date
+			,sales_date
+			,profit_date
+			,month_date
+			,memo
+			,prev_seq
+			, dist_date
+			, mail_target
+		 	FROM gps.guide_info
+		 ) GU	
+		WHERE 1=1
+		<if test="guideSeq != null and guideSeq != ''">
+			AND GU.seq = #{guideSeq}
+		</if>
+		<if test="status != null and status != ''">
+			AND GU.status = #{status}
+		</if>
+		<if test="onlyOne != null and onlyOne != ''">
+			AND N_NUM =1
+		</if>
+	</select>
+	
+	<update id="updateGuideDistribute" parameterType="CmMap">
+		/* 배포 UPDATE */
+		UPDATE gps.guide_info 
+		SET status = 'C'
+		, dist_date = now()
+		WHERE 1=1 
+		and seq = #{guideSeq}
+	</update>
+	
+	<select id="getGuideDeployTarget" resultType="CmMap" parameterType="CmMap" flushCache="false">
+		select m.*		
+		from(
+			select 
+				ROW_NUMBER() OVER (ORDER BY seq desc) N_NUM
+				, seq
+				, guide_base
+				, deploy_date 
+				, sales_date
+				, profit_date
+				, month_date
+			from gps.guide_info  
+			where 1=1
+			<if test="gInfoStatus != null and gInfoStatus != ''">
+			and	status = #{gInfoStatus}
+			</if>
+		) m
+		where 1=1
+		and n_num =1
+	</select>
+	
+	<select id="getSelectionList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* selecton 정보 SELECT */
+		SELECT 
+			section_id
+			, cp_cd
+			, unit_cd
+			, gps.FN_CODE_NM(cp_cd, 'cp', #{s_language}) AS gp_nm
+			, gps.FN_CODE_NM(unit_cd, 'unit', #{s_language}) AS unit_nm
+			, is_cp
+			, cate_cd
+			, is_reg
+		FROM gps.section_info
+		WHERE
+			is_use ='Y'
+			AND base_year = #{baseYear}
+		<if test="isReg != null and isReg != ''">
+			AND is_reg = #{isReg}
+		</if>
+		<if test="cateCd != null and cateCd != ''">
+			AND cate_cd = #{cateCd}
+		</if>
+		<if test="cpCd != null and cpCd != ''">
+			AND cp_cd = #{cpCd}
+		</if>
+		<if test="mailEqId != null and mailEqId != ''">
+			AND section_id = #{mailEqId}
+		</if>
+		ORDER BY cate_cd, thread ASC
+	</select>
+	
+	<select id="getCateList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* selecton Cate 정보 SELECT */
+		SELECT
+			cd
+			, gps.FN_CODE_NM(cd, 'cate', #{s_language}) AS cd_nm
+		FROM gps.code_info ci
+		WHERE cd_type = 'cate'
+		AND is_use ='Y'
+		ORDER by cd
+	</select>
+	
+	<update id="updateGuideStatusDisable" parameterType="java.lang.Integer">
+		/*배포불가*/
+		update gps.guide_info AS a 
+		set status = 'D'
+		from gps.guide_info AS b
+		where a.guide_seq = b.guide_seq
+		and b.status = 'P'
+		and b.seq  <![CDATA[<>]]> #{tblSeq}
+	</update>
+	
+	<update id="updateGuideDataStatus" parameterType="CmMap">
+		/*배포후 가이드다운로드*/
+		update gps.guide_data 
+		set status = #{gDataStatus}
+			, modi_date = now()
+		where guide_seq = #{guideSeq}
+		<if test="sectionId != null and sectionId != ''">
+		and section_id = #{sectionId}
+		</if>
+	</update>
+	
+	<select id="getGuideDataStatus" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 가이드데이터 상태 조회 */
+		SELECT status
+		FROM gps.guide_data
+		WHERE guide_seq =  #{guideSeq}
+		AND section_id  = #{sectionId}
+	</select>
+	
+	<select id="getGuideDataDeployList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 배포 시 guide_data_year를 생성할 guide_data 리스트 */
+		SELECT
+			gd.guide_seq
+			, gd.seq
+			, gd.section_id
+			, gd.status
+			, gi.guide_base
+		FROM gps.guide_data gd
+		INNER JOIN gps.guide_info gi ON
+			gi.seq = gd.guide_seq
+		INNER JOIN gps.section_info si ON
+			si.section_id = gd.section_id
+		WHERE
+			si.is_reg = 'Y'
+			AND gd.guide_seq = #{guideSeq}
+	</select>
+	
+	<select id="getGuideDetailYearCnt" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		/* 가이드 year 데이터 count */
+		SELECT count(*)
+		FROM gps.guide_data_year
+		WHERE 1=1
+		AND guide_data_seq =  #{guideDataSeq}
+		AND section_id  = #{sectionId}
+		AND cp_cd = #{cpCd}
+		AND unit_cd = #{unitCd}
+		AND nat_cd = #{natCd}
+		AND brd_cd = #{brdCd}
+		AND chl_cd = #{chlCd}
+	</select>
+	
+	<insert id="insertGuideDataYear" parameterType="CmMap">
+		/* 가이드 연목표 등록 INSERT */
+		INSERT INTO gps.guide_data_year 
+			(
+				guide_data_seq
+				,section_id
+				,cp_cd
+				,unit_cd
+				,nat_cd
+				,brd_cd
+				,chl_cd
+				,l_sales
+				,l_profit
+				,is_grp_sale
+				,f_sales
+				,f_profit
+				,is_grp_prof
+				,yyyy
+				,reg_date
+			) VALUES 
+			(
+				#{guideDataSeq}
+				,#{sectionId}
+				,#{cpCd}
+				,#{unitCd}
+				,#{natCd}
+				,#{brdCd}
+				,#{chlCd}
+				,#{lSales}
+				,#{lProfit}
+				,#{isGrpSale}
+				,#{fSales}
+				,#{fProfit}
+				,#{isGrpProf}
+				,#{guideBase}
+				,now()
+			)
+    </insert>
+    
+    <update id="updateGuideDataYear" parameterType="CmMap">
+    	update gps.guide_data_year
+    	set l_sales = #{lSales}
+			,l_profit = #{lProfit}
+			,is_grp_sale = #{isGrpSale}
+			,f_sales = #{fSales}
+			,f_profit = #{fProfit}
+			,is_grp_prof = #{isGrpProf}
+			,yyyy = #{guideBase}
+			,reg_date = now()
+    	where 1 =1
+    	and guide_data_seq = #{guideDataSeq}
+		and section_id = #{sectionId}
+		and cp_cd = #{cpCd}
+		and unit_cd = #{unitCd}
+		and nat_cd = #{natCd}
+		and brd_cd = #{brdCd}
+		and chl_cd = #{chlCd}
+    </update>
+    
+    <select id="getMainReportInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+    /* 리포트 - 경영 목표 등록 현황 */
+		SELECT 
+			gd.seq AS guide_data_seq
+			, gd.guide_seq
+			, ( SELECT guide_base FROM gps.guide_info WHERE seq = gd.guide_seq ) guide_base
+			, gd.status AS s_status
+			, gd.status AS p_status
+			, gd.g_sales
+			, gd.bzm_brnd_frcp_glst_cd as sync_status
+			, si.section_id
+			, si.thread
+			, si.cp_cd
+			, si.unit_cd
+			, si.dtl_cd
+			, si.cate_cd
+			, gps.FN_CODE_NM(si.cp_cd, 'cp', #{s_language}) AS gp_nm
+			, gps.FN_CODE_NM(si.unit_cd, 'unit', #{s_language}) AS unit_nm
+			, gd2.seq AS gdy_seq
+			, gd2.unit
+			, gd2.sm_status
+			, gd2.pm_status
+			, gd2.pm_os_status
+		FROM (
+			SELECT *
+			FROM gps.guide_data
+			WHERE guide_seq = (
+								SELECT seq 
+								FROM gps.guide_info gi 
+								WHERE seq = (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C')
+							 )
+		) gd					
+		INNER JOIN gps.section_info si ON
+			gd.section_id = si.section_id
+			AND si.is_use ='Y'
+			AND si.is_reg = 'Y'
+		LEFT OUTER JOIN gps.goal_data gd2 ON
+			gd2.section_id = gd.section_id
+			AND gd2.guide_seq = gd.guide_seq
+			AND gd2.rollback = 'N'
+		ORDER BY si.thread ASC
+	</select>
+	
+	<select id="getReportGroupGoalInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 리포트 - 그룹 목표 수립 현황 */
+		SELECT DISTINCT ON (gdy.seq) si.*
+		, gps.FN_CODE_NM(si.cp_cd , 'cp', #{s_language}) as gp_nm
+		, gps.FN_CODE_NM(si.unit_cd, 'unit', #{s_language}) as unit_nm
+		, gps.FN_CODE_NM(si.cate_cd , 'cate', #{s_language}) as unit_nm
+		, gd.status AS goal_status
+		, gd.unit as goal_unit
+		, gd.sales as goal_sales
+		, gd.p_profit as goal_profit
+		, gdy.chl_cd AS gdy_chl_cd
+		, gdy.nat_cd AS gdy_nat_cd
+		, gdy.unit AS gdy_unit
+		, gdy.g_sales
+		, gdy.g_profit
+		, ci.cp_cd
+		, ci.ch_lc
+		, ci.is_grp_sale
+		, ci.is_grp_prof
+		, ci.ch_grp
+		, ci.ch_unit 
+		, ci.ch_div
+		, ci.status
+		, ci.is_onoff
+		, ci.ch_gps 
+		, gps.FN_CODE_NM(ci.ch_lc , 'lc', #{s_language}) as lc
+		, gps.FN_CODE_NM(ci.ch_grp, 'chgr', #{s_language}) as chgr
+		FROM gps.goal_data gd
+		INNER JOIN gps.goal_data_year gdy 
+		ON gd.seq =gdy.goal_data_seq
+		INNER JOIN gps.section_info si 
+		ON si.section_id = gd.section_id
+		INNER JOIN gps.ch_info ci
+		ON gdy.chl_cd = ci.ch_gps
+		WHERE gd.guide_seq = #{guideSeq}
+		AND gd.ROLLBACK = 'N'
+		AND gd.status in ('Q', 'S','Y')
+		AND si.is_use = 'Y'
+		AND si.is_reg = 'Y'
+		AND gdy.ROLLBACK = 'N'
+		AND gdy.status IN ('S','P','Y')
+	</select>
+		
+	<select id="getReportCompareInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 리포트 - 그룹 목표 수립 현황 과거 비교데이터 */
+		SELECT DISTINCT ON (gdy.seq) si.*
+			, gps.FN_CODE_NM(si.cp_cd , 'cp', #{s_language}) as gp_nm
+			, gps.FN_CODE_NM(si.unit_cd, 'unit', #{s_language}) as unit_nm
+			, gps.FN_CODE_NM(si.cate_cd , 'cate', #{s_language}) as unit_nm
+			, 'Y' as goal_status
+			, gdy.section_id AS gdy_section_id
+			, gdy.nat_cd AS gdy_nat_cd
+			, gdy.brd_cd
+			, gdy.chl_cd AS gdy_chl_cd
+			, gdy.l_sales
+			, gdy.f_sales 
+			, gdy.l_profit 
+			, gdy.f_profit 
+			, gdy.yyyy 
+			, ci.cp_cd
+			, ci.ch_lc
+			, ci.is_grp_sale
+			, ci.is_grp_prof
+			, ci.ch_grp
+			, ci.ch_unit 
+			, ci.ch_div
+			, ci.status
+			, ci.is_onoff
+			, ci.ch_gps 
+			, gps.FN_CODE_NM(ci.ch_lc , 'lc', #{s_language}) as lc
+			, gps.FN_CODE_NM(ci.ch_grp, 'chgr', #{s_language}) as chgr
+		FROM gps.guide_data gd
+		INNER JOIN gps.guide_data_year gdy 
+		ON gd.seq =gdy.guide_data_seq
+		INNER JOIN gps.section_info si 
+		ON si.section_id = gd.section_id
+		INNER JOIN gps.ch_info ci
+		ON gdy.chl_cd = ci.ch_gps
+		WHERE gd.guide_seq = #{guideSeq}
+		AND si.is_use = 'Y'
+		AND si.is_reg = 'Y'
+		AND base_year = #{baseYear}
+	</select>
+	
+	
+	<select id="getReportGuideInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 리포트 - 그룹 목표 수립 현황 목표 가이드라인 */
+		SELECT 
+			 si.gp_nm
+			, si.cp_cd
+			, si.unit_cd
+			, si.unit_nm
+			, gd.g_unit 
+			, gd.g_sales
+			, gd.f_unit 
+			, gd.f_sales 
+			, gd.g_growth
+			, gd.g_profit
+			, gd.g_profit_r
+			, gd.g_profit_vary
+			, si.thread	
+		FROM gps.guide_info gi 
+		LEFT OUTER JOIN gps.guide_data gd 
+		ON (gi.seq = gd.guide_seq )
+		INNER JOIN (
+			SELECT 
+				section_id
+				, cp_cd
+				, unit_cd
+				,(select cd_nm from gps.code_info ci where cd =cp_cd and cd_type = 'cp' ) gp_nm
+				,(select cd_nm from gps.code_info ci where cd =unit_cd and cd_type = 'unit' ) unit_nm
+				, is_cp
+				, thread
+			FROM gps.section_info
+			WHERE is_use ='Y'
+			AND unit_cd IN ('000','050','060','SUM')
+			ORDER BY thread ASC
+		) si
+		ON(si.section_id = gd.section_id )
+		WHERE 1=1
+		AND gi.seq = #{guideSeq}
+		ORDER BY thread ASC
+	</select>
+	
+	<select id="getLatestGuideInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		SELECT
+		 	gi.*
+		FROM gps.guide_info gi
+		WHERE
+			gi.seq = (SELECT MAX(seq) FROM gps.guide_info WHERE status ='C')
+	</select>
+	
+	<select id="getLatestGuideInfoBaseYear" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		SELECT
+		 	gi.*
+		FROM gps.guide_info gi
+		WHERE
+			gi.seq = (SELECT MAX(seq) FROM gps.guide_info WHERE status ='C' AND guide_base = #{guideBase})
+	</select>
+	
+	<select id="getGuideDataYearInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		SELECT *
+		FROM gps.guide_data_year
+		WHERE guide_data_seq = #{guideDataSeq}
+		AND section_id = #{sectionId}
+	</select>
+	
+	<select id="getSyncBrandSectionList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 특정 섹션과 연동되는 섹션리스트 가져오기 */
+		SELECT
+			gbr.section_id
+			, gbr.guide_data_status
+		FROM gps.guide_data_year gdy
+		INNER JOIN (
+			SELECT
+				gd.section_id
+				, gdy.cp_cd
+				, gdy.unit_cd
+				, gdy.nat_cd
+				, gdy.brd_cd
+				, gdy.chl_cd
+				, gdy.yyyy
+				, gd.status AS guide_data_status
+			FROM gps.guide_data_year gdy
+			INNER JOIN (
+				SELECT
+				 	gd.seq
+				 	, gd.status
+				 	, gd.section_id 
+				FROM gps.guide_info gi
+				INNER JOIN gps.guide_data gd ON
+					gi.seq = gd.guide_seq
+				WHERE
+					gi.seq = (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C' AND guide_base = #{baseYear})
+			) gd ON
+				gdy.guide_data_seq = gd.seq
+			INNER JOIN gps.section_info si ON
+				gdy.section_id = si.section_id
+				AND si.is_use = 'Y'
+				AND si.is_reg = 'Y'
+			WHERE
+				si.cate_cd = #{cateCd}
+		) gbr ON
+			gdy.cp_cd = gbr.cp_cd 
+			AND gdy.nat_cd = gbr.nat_cd
+			AND gdy.brd_cd = gbr.brd_cd
+			AND gdy.chl_cd = gbr.chl_cd
+			AND gdy.yyyy = gbr.yyyy
+		WHERE
+			gdy.section_id = #{sectionId}
+			AND gdy.guide_data_seq = #{guideDataSeq}
+		GROUP BY gbr.section_id, gbr.guide_data_status
+	</select>
+	
+	<select id="getGuideDataInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		SELECT *
+		FROM gps.guide_data
+		WHERE guide_seq = #{guideSeq}
+		AND section_id = #{sectionId}
+	</select>
+	
+	<update id="updateGuideFinishDate" parameterType="CmMap">
+		UPDATE gps.guide_info
+		SET	sales_date = #{salesDate}
+			, profit_date = #{profitDate}
+			, month_date = #{monthDate}
+		WHERE 1=1
+		AND seq = #{seq}
+	</update>
+	
+	<select id="getGoalSummary" parameterType="CmMap"  resultType="CmMap" flushCache="false">
+		/* 리포트 목록 열 가져오기 */
+		SELECT 
+			 gps.FN_CODE_NM(gs.title, gs.type, #{s_language}) as title
+			, thread
+			, gs.section_id
+			, gs.cp_cd
+			, gs.unit_cd
+			, gs.brd_cd
+			, gs.ch_lc 
+			, gs.ch_grp 
+			, gs.nat_cd
+			, gs.apacyn
+			, gs.type
+		FROM gps.goal_summary gs
+		inner JOIN gps.code_info ci ON ci.cd = gs.title AND ci.cd_type = gs.type
+		WHERE status = 'Y' 
+			AND gs.base_year = #{guideYear}
+			AND report_type = #{reportType}
+			<if test="cpCd != null and cpCd != ''">
+				AND gs.cp_cd = #{cpCd}
+			</if>
+			<if test="sectionArray != null">
+			<foreach collection="sectionArray" item="sectionArray" open=" AND gs.section_id IN (" close=")" separator="," >
+				#{sectionArray}
+			</foreach>
+			</if>
+		ORDER BY unit_seq::INTEGER, thread
+	</select>
+	
+	<select id="getGuideDataSyncStatus" parameterType="CmMap"  resultType="CmMap" flushCache="false">
+		/* 가이드 데이터 연동 상태 가져오기(AP브랜드/해외법인) */
+		SELECT
+			  si.section_nm
+			, si.section_enm
+			, si.section_id
+			, si.cp_cd
+			, si.unit_cd
+			, si.cate_cd
+			, gd.seq
+			, gd.guide_seq
+			, gd.status 
+			, gd.bzm_brnd_frcp_glst_cd 
+		FROM gps.section_info si
+		INNER JOIN gps.guide_data gd
+		ON si.section_id = gd.section_id
+		AND gd.guide_seq = (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C' AND guide_base = #{baseYear})
+		WHERE si.is_use = 'Y'
+		AND si.is_del = 'N'
+		AND si.cate_cd IN ('001','005')
+		ORDER BY si.thread ASC
+	</select>
+	
+	<update id="updateGuideDataSyncStatus" parameterType="CmMap">
+		/* 가이드 데이터 연동 상태 업데이트 */
+			UPDATE gps.guide_data gd
+			SET bzm_brnd_frcp_glst_cd = #{syncStatus}
+			FROM gps.section_info si
+			WHERE gd.section_id = si.section_id
+			AND si.base_year = #{baseYearString}
+			AND gd.guide_seq = (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C' AND guide_base = #{baseYear})
+	</update>
+	
+	<select id="getDeadlineSettingList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 섹션별 마감일 변경 리스트 가져오기*/
+		SELECT
+			 gd.section_id
+			,gd.sal_amt_reg_ddln_dttm 
+			,gd.slpr_reg_ddln_dttm 
+			,gd.mth_bmgt_goal_reg_ddln_dttm
+		<choose>
+			<when test = "s_language == 'ko'">
+				,si.section_nm
+			</when>
+			<otherwise>
+				,si.section_enm as section_nm
+			</otherwise>
+		</choose>
+		FROM gps.guide_data gd
+		INNER JOIN gps.section_info si
+		on (gd.section_id = si.section_id)
+		WHERE gd.guide_seq = #{guideSeq} 
+		AND si.is_del = 'N'
+		AND si.is_reg = 'Y'
+		ORDER BY si.thread
+	</select>
+	
+	<update id="updateGuideDeadlineDate" parameterType="CmMap">
+		/* 섹션별 마감일 변경 개별 업데이트*/
+		UPDATE gps.guide_data
+		SET	sal_amt_reg_ddln_dttm  = #{salesDate}
+			, slpr_reg_ddln_dttm  = #{profitDate}
+			, mth_bmgt_goal_reg_ddln_dttm  = #{monthDate}
+		WHERE section_id = #{sectionId}
+		AND guide_seq = #{guideSeq}
+	</update>
+	
+	<update id="updateAllGuideDeadlineDate" parameterType="CmMap">
+		/* 섹션별 마감일 변경 전체 업데이트*/
+		UPDATE gps.guide_data
+		SET
+			<if test="salesDate != null">
+				sal_amt_reg_ddln_dttm  = #{salesDate}
+			</if>
+			<if test="profitDate != null">
+				,slpr_reg_ddln_dttm  = #{profitDate}
+			</if>
+			<if test="monthDate != null">
+				,mth_bmgt_goal_reg_ddln_dttm  = #{monthDate}
+			</if>
+		WHERE guide_seq = #{guideSeq}
+		AND section_id = #{sectionId};
+	</update>
+	
+	<select id="getGuideDataSyncStatusIntoBaseYear" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 섹션별 가이드 데이터 연동 상태 리스트 가져오기*/
+		SELECT gd.bzm_brnd_frcp_glst_cd AS sync_status
+			 , count(gd.bzm_brnd_frcp_glst_cd) AS cnt
+		FROM gps.guide_data gd
+		inner join gps.section_info si
+		ON gd.section_id = si.section_id
+		AND si.base_year = #{baseYearString}
+		WHERE gd.guide_seq = (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C' AND guide_base = #{baseYear})
+		GROUP BY gd.bzm_brnd_frcp_glst_cd 
+	</select>
+</mapper>

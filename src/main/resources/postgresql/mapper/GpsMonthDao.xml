@@ -1,0 +1,1922 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.amore.gps.service.gps.GpsMonthDao">
+    
+    <select id="getGpsMonthList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 월목표 등록 리스트 가져오기 */
+		SELECT
+			gi.* 
+			, gd.guide_seq
+			, gd.seq AS guide_data_seq
+			, gd.section_id 
+			, gd.status AS section_status
+			, si.cp_cd
+			, si.unit_cd
+			, gps.FN_CODE_NM(si.cp_cd, 'cp', #{s_language}) AS gp_nm
+			, gps.FN_CODE_NM(si.unit_cd, 'unit', #{s_language}) AS unit_nm
+		<choose>
+			<when test="s_language == 'en'">
+				, si.section_enm AS section_nm
+			</when>
+			<otherwise>
+				, si.section_nm
+			</otherwise>
+		</choose>
+			, gl.p_os_status
+			, gl.p_ds_status
+			, gl.sm_status
+			, gl.pm_status
+			, gl.pm_os_status
+			, gd.mth_bmgt_goal_reg_ddln_dttm AS monthly_deadline
+			, (EXTRACT(Epoch FROM age(gd.mth_bmgt_goal_reg_ddln_dttm+1 ,now())) / 86400)::int AS monthly_deadline_d_day
+		FROM (
+			SELECT 
+				seq 
+				, guide_base 
+				, profit_date
+				, (EXTRACT(Epoch FROM age(profit_date+1 ,now())) / 86400)::int AS profit_d_day
+				, sales_date
+				, (EXTRACT(Epoch FROM age(sales_date+1 ,now())) / 86400)::int AS sales_d_day
+				, month_date
+				, (EXTRACT(Epoch FROM age(month_date+1 ,now())) / 86400)::int AS month_d_day
+			FROM gps.guide_info gi
+			WHERE seq = (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C')
+		) gi
+		INNER JOIN gps.guide_data gd
+			ON (gi.seq = gd.guide_seq)
+		INNER JOIN gps.section_info si
+			ON (gd.section_id = si.section_id AND si.is_use = 'Y' AND si.is_reg = 'Y')
+		LEFT OUTER JOIN gps.goal_data gl
+			ON (gd.guide_seq = gl.guide_seq AND gd.section_id = gl.section_id AND gl.rollback = 'N')
+		WHERE 1 = 1
+-- 		AND gl.status = 'Y' (21.11.08 김혜진님 요청 연 이익 등록과 월 매출 등록을 동시에 하기 위함)
+		AND gl.status in ('Q','S','Y')
+		<foreach collection="sectionArray" item="sectionArray" open=" AND gd.section_id IN (" close=")" separator="," >
+			#{sectionArray}
+		</foreach>
+	</select>
+	
+	<select id="getGoalYearMonthList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 특정 섹션의 연월 세부목표 리스트 가져오기 */		
+		SELECT
+			goal.goal_data_year_seq
+			, gps.FN_CODE_NM(split_part(guide.section_id, '-', 1), 'cp', #{s_language}) AS gp_nm
+			, gps.FN_CODE_NM(guide.nat_cd, 'nat', #{s_language}) AS nat_nm
+			, gps.FN_CODE_NM(guide.unit_cd, 'unit', #{s_language}) AS unit_nm
+			, gps.FN_CODE_NM(guide.brd_cd, 'brand', #{s_language}) AS brd_nm
+			, gps.FN_CODE_NM(guide.chl_cd, 'chgps', #{s_language}) AS chl_nm
+			, guide.l_sales
+			, guide.l_profit
+			, guide.f_sales
+			, guide.f_profit
+			, goal.g_sales
+			, goal.g_profit
+			, goal.s_01
+			, goal.s_02
+			, goal.s_03
+			, goal.s_04
+			, goal.s_05
+			, goal.s_06
+			, goal.s_07
+			, goal.s_08
+			, goal.s_09
+			, goal.s_10
+			, goal.s_11
+			, goal.s_12
+			, goal.p_01
+			, goal.p_02
+			, goal.p_03
+			, goal.p_04
+			, goal.p_05
+			, goal.p_06
+			, goal.p_07
+			, goal.p_08
+			, goal.p_09
+			, goal.p_10
+			, goal.p_11
+			, goal.p_12
+			, guide.section_id
+			, guide.cp_cd
+			, guide.unit_cd
+			, guide.nat_cd
+			, guide.brd_cd
+			, guide.chl_cd
+			, guide.yyyy AS guide_year
+			, guide.base_year
+			, guide.is_grp_sale
+			, guide.is_grp_prof
+			, goal.s_status
+			, goal.p_status
+			, guide.r_unit
+			, guide.f_unit
+			, goal.unit AS g_unit
+			, goal.goal_data_seq
+			, guide.dtl_cd
+		FROM (
+		   SELECT 
+				gdy.seq AS guide_data_year_seq
+				, gdy.guide_data_seq
+				, gdy.section_id
+				, gdy.cp_cd
+				, gdy.unit_cd
+				, gdy.nat_cd
+				, gdy.brd_cd
+				, gdy.chl_cd
+				, gdy.l_sales
+				, gdy.f_sales
+				, gdy.yyyy
+				, CAST(CAST(gdy.yyyy AS INTEGER) - 1 AS TEXT) AS base_year
+				, gdy.status
+				, gdy.reg_date
+				, gdy.l_profit
+				, gdy.f_profit
+				, gdy.is_grp_sale
+				, gdy.is_grp_prof
+				, gd.r_unit
+				, gd.f_unit
+				, gd.g_unit
+				, si.dtl_cd
+			FROM gps.guide_data_year gdy
+			INNER JOIN gps.guide_data gd
+				ON (gdy.guide_data_seq = gd.seq)
+			INNER JOIN gps.section_info si
+				ON (gdy.section_id = si.section_id)
+			WHERE gdy.guide_data_seq = #{guideDataSeq}
+			AND gdy.section_id = #{sectionId}
+			<if test="profitKR != null and profitKR != '' ">
+				AND gdy.nat_cd = 'KR'
+			</if>
+			<if test="profitOS != null and profitOS != '' ">
+				AND gdy.nat_cd != 'KR'
+			</if>
+		) guide
+		LEFT OUTER JOIN (
+			SELECT
+				gdy.seq AS goal_data_year_seq
+				, gdy.goal_data_seq
+				, gdy.section_id
+				, gdy.cp_cd
+				, gdy.unit_cd
+				, gdy.nat_cd
+				, gdy.brd_cd
+				, gdy.chl_cd
+				, gdy.g_sales
+				, gdy.g_profit
+				, gdy.yyyy
+				, gdy.unit
+				, gdy.status
+				, gdy.is_grp_sale
+				, gdy.is_grp_prof
+				, gdm.seq AS goal_data_month_seq
+				, gdm.s_01
+				, gdm.s_02
+				, gdm.s_03
+				, gdm.s_04
+				, gdm.s_05
+				, gdm.s_06
+				, gdm.s_07
+				, gdm.s_08
+				, gdm.s_09
+				, gdm.s_10
+				, gdm.s_11
+				, gdm.s_12
+				, gdm.p_01
+				, gdm.p_02
+				, gdm.p_03
+				, gdm.p_04
+				, gdm.p_05
+				, gdm.p_06
+				, gdm.p_07
+				, gdm.p_08
+				, gdm.p_09
+				, gdm.p_10
+				, gdm.p_11
+				, gdm.p_12
+				, gdm.s_status
+				, gdm.p_status
+			FROM gps.goal_data_year gdy
+			LEFT OUTER JOIN gps.goal_data_month gdm
+				ON (gdy.seq = gdm.goal_data_year_seq)
+			WHERE gdy.goal_data_seq = #{goalDataSeq}
+			AND gdy.section_id = #{sectionId}
+		) goal
+			ON (guide.section_id = goal.section_id
+				AND guide.cp_cd = goal.cp_cd 
+				AND guide.nat_cd = goal.nat_cd
+				AND guide.unit_cd = goal.unit_cd
+				AND guide.brd_cd = goal.brd_cd
+				AND guide.chl_cd = goal.chl_cd)
+		ORDER BY (
+		    CASE guide.nat_cd
+			WHEN 'KR' THEN 0
+			WHEN 'CN' THEN 1
+			WHEN 'HK' THEN 2
+		    WHEN 'TW' THEN 3
+		    WHEN 'JP' THEN 4
+		    WHEN 'CA' THEN 5
+			ELSE 7
+			END)
+			, nat_nm
+			, brd_cd
+			, goal.goal_data_year_seq
+	</select>
+	
+	<select id="getGoalDataMonthCnt" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		/* 월목표 작성 여부 확인*/
+		SELECT
+			COUNT(*)
+		FROM gps.goal_data_month
+		WHERE goal_data_year_seq = #{goalDataYearSeq}
+	</select>
+	
+	<insert id="insertGoalDataMonth" parameterType="CmMap" >
+		/* 월목표 등록 */
+		INSERT INTO gps.goal_data_month (
+			goal_data_year_seq
+			, section_id
+			, cp_cd
+			, unit_cd
+			, nat_cd
+			, brd_cd
+			, chl_cd
+			, s_01
+			, s_02
+			, s_03
+			, s_04
+			, s_05
+			, s_06
+			, s_07
+			, s_08
+			, s_09
+			, s_10
+			, s_11
+			, s_12
+			, p_01
+			, p_02
+			, p_03
+			, p_04
+			, p_05
+			, p_06
+			, p_07
+			, p_08
+			, p_09
+			, p_10
+			, p_11
+			, p_12
+			, unit
+			<if test="smStatus != null and smStatus != '' ">
+			, s_status
+			</if>
+			<choose>
+				<when test="pmStatus != null and pmStatus != '' ">
+				, p_status 
+				</when>
+				<when test="pmOsStatus != null and pmOsStatus != '' ">
+				, p_status 
+				</when>
+			</choose>
+			,reg_date
+		)
+		VALUES (
+			#{goalDataYearSeq}
+			, #{sectionId}
+			, #{cpCd}
+			, #{unitCd}
+			, #{natCd}
+			, #{brdCd}
+			, #{chlCd}
+			, #{s01}
+			, #{s02}
+			, #{s03}
+			, #{s04}
+			, #{s05}
+			, #{s06}
+			, #{s07}
+			, #{s08}
+			, #{s09}
+			, #{s10}
+			, #{s11}
+			, #{s12}
+			, #{p01}
+			, #{p02}
+			, #{p03}
+			, #{p04}
+			, #{p05}
+			, #{p06}
+			, #{p07}
+			, #{p08}
+			, #{p09}
+			, #{p10}
+			, #{p11}
+			, #{p12}
+			, #{unit}
+			<if test="smStatus != null and smStatus != '' ">
+			, #{smStatus}
+			</if>
+			<choose>
+				<when test="pmStatus != null and pmStatus != '' ">
+				, #{pmStatus}
+				</when>
+				<when test="pmOsStatus != null and pmOsStatus != '' ">
+				, #{pmOsStatus}
+				</when>
+			</choose>
+			, now()
+		)
+	</insert>
+	
+	<update id="updateGoalDataMonth" parameterType="CmMap" >
+		/* 월목표 수정 */
+		UPDATE gps.goal_data_month 
+		SET
+			s_01 = #{s01}
+			, s_02 = #{s02}
+			, s_03 = #{s03}
+			, s_04 = #{s04}
+			, s_05 = #{s05}
+			, s_06 = #{s06}
+			, s_07 = #{s07}
+			, s_08 = #{s08}
+			, s_09 = #{s09}
+			, s_10 = #{s10}
+			, s_11 = #{s11}
+			, s_12 = #{s12}
+			, p_01 = #{p01}
+			, p_02 = #{p02}
+			, p_03 = #{p03}
+			, p_04 = #{p04}
+			, p_05 = #{p05}
+			, p_06 = #{p06}
+			, p_07 = #{p07}
+			, p_08 = #{p08}
+			, p_09 = #{p09}
+			, p_10 = #{p10}
+			, p_11 = #{p11}
+			, p_12 = #{p12}
+			<if test="smStatus != null and smStatus != '' ">
+			, s_status = #{smStatus}
+			</if>
+			<choose>
+				<when test="pmStatus != null and pmStatus != '' ">
+				, p_status = #{pmStatus}
+				</when>
+				<when test="pmOsStatus != null and pmOsStatus != '' ">
+				, p_status = #{pmOsStatus}
+				</when>
+			</choose>
+			, reg_date = now()
+		WHERE goal_data_year_seq = #{goalDataYearSeq}
+	</update>
+	
+	<update id="updateGoalDataMonthStatusCaseSync" parameterType="CmMap" >
+		/* 월목표 수정 */
+		UPDATE gps.goal_data_month 
+		SET
+			reg_date = now()
+			<if test="smStatus != null and smStatus != '' ">
+			, s_status = #{smStatus}
+			</if>
+			<choose>
+				<when test="pmStatus != null and pmStatus != '' ">
+				, p_status = #{pmStatus}
+				</when>
+				<when test="pmOsStatus != null and pmOsStatus != '' ">
+				, p_status = #{pmOsStatus}
+				</when>
+			</choose>
+		WHERE goal_data_year_seq = #{goalDataYearSeq}
+	</update>
+	
+	<select id="getMonthHistoryList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 월목표 등록이력 리스트 가져오기 */
+		select	m.*
+		from
+			(
+			select 
+				ROW_NUMBER() OVER (ORDER BY guide_base,thread asc) N_NUM
+				, gud.guide_seq
+				, gud.guide_data_seq
+				, gud.goal_data_seq
+				, gud.guide_base
+				, gud.profit_d_day
+				, gud.sales_d_day  
+				, gud.section_id
+				, gud.cp_cd
+				, gud.gp_nm
+				, gud.unit_nm
+				, gud.status
+				, gud.statusSNm nm
+				, gud.statusPNm nm2
+				, gud.p_ds_status
+				, gud.p_os_status 
+				, gud.mem_id
+				, gud.mem_nm
+				, gud.mem_team
+				, gud.goal_reg_auth_yn
+				, gud.goal_expc_ddln_reg_auth_yn
+				, gud.inq_auth_yn
+				, gud.sm_status
+				, gud.sm_status_nm
+				, gud.pm_status
+				, gud.pm_status_nm
+				, gud.pm_os_status
+				, gud.pm_os_status_nm
+				, to_char(gud.sm_date, 'YYYY-MM-DD') AS sm_date
+				, to_char(gud.pm_date, 'YYYY-MM-DD') AS pm_date
+				<include refid="getMonthListInclude"/>
+			) m
+		WHERE N_NUM BETWEEN #{i_StartRownum} AND #{i_EndRownum}
+		
+	</select>
+	
+	<select id="getMonthHistoryCount" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		/* 월목표 등록이력 건수 가져오기 */
+		select	count(*)
+		<include refid="getMonthListInclude"/>
+	</select>
+	
+	<sql id="getMonthListInclude">
+		FROM (
+			SELECT
+				gd.guide_seq
+				, gd.seq AS guide_data_seq
+				, gl.seq AS goal_data_seq
+				, gi.guide_base
+				, gi.profit_d_day
+				, gi.sales_d_day
+				, gd.section_id 
+				, gd.status
+			<choose>
+			<when test="s_language == 'en'">
+				, case gd.status 
+				  when  'N' then 'Not confirmed'
+				  when  'O' then 'Proceeding'
+				  when  'P' then 'Editing'
+				  when  'Q' then 'Completed'
+				  when  'R' then 'Completed'
+				  when  'S' then 'Completed'
+				  when  'Y' then 'Completed'
+				end statusSNm
+				, case gd.status 
+				  when  'N' then 'Waiting for registration'
+				  when  'O' then 'Waiting for registration'
+				  when  'P' then 'Waiting for registration'
+				  when  'Q' then 'Not confirmed'
+				  when  'R' then 'Proceeding'
+				  when  'S' then 'Editing'
+				  when  'Y' then 'Completed'
+				  end statusPNm
+				  , CASE gl.sm_status
+				  WHEN 'N' THEN 'Editing'
+				  WHEN 'Y' THEN 'Completed'
+				  ELSE 'Not confirmed'
+				  END sm_status_nm
+				, CASE gl.pm_status
+				  WHEN 'N' THEN 'Editing'
+				  WHEN 'Y' THEN 'Completed'
+				  ELSE 'Not confirmed'
+				  END pm_status_nm
+				, CASE gl.pm_os_status
+				  WHEN 'N' THEN 'Editing'
+				  WHEN 'Y' THEN 'Completed'
+				  ELSE 'Not confirmed'
+				  END pm_os_status_nm
+			</when>
+			<otherwise>
+				, case gd.status 
+				  when  'N' then '미확인'
+				  when  'O' then '진행중'
+				  when  'P' then '수정중'
+				  when  'Q' then '등록완료'
+				  when  'R' then '등록완료'
+				  when  'S' then '등록완료'
+				  when  'Y' then '등록완료'
+				  end statusSNm
+				  , case gd.status 
+				  when  'N' then '등록대기'
+				  when  'O' then '등록대기'
+				  when  'P' then '등록대기'
+				  when  'Q' then '미확인'
+				  when  'R' then '진행중'
+				  when  'S' then '수정중'
+				  when  'Y' then '등록완료'
+				  end statusPNm
+				  , CASE gl.sm_status
+				  WHEN 'N' THEN '수정중'
+				  WHEN 'Y' THEN '등록완료'
+				  ELSE '미확인'
+				  END sm_status_nm
+				  , CASE gl.pm_status
+				  WHEN 'N' THEN '수정중'
+				  WHEN 'Y' THEN '등록완료'
+				  ELSE '미확인'
+				  END pm_status_nm
+				  , CASE gl.pm_os_status
+				  WHEN 'N' THEN '수정중'
+				  WHEN 'Y' THEN '등록완료'
+				  ELSE '미확인'
+				  END pm_os_status_nm
+			</otherwise>
+			</choose>
+				, gps.FN_CODE_NM(split_part(gd.section_id, '-', 1), 'cp', #{s_language}) AS gp_nm
+				, gps.FN_CODE_NM(si.unit_cd, 'unit', #{s_language}) AS unit_nm
+				, si.thread
+				, si.cp_cd
+				, usr.mem_id
+				, usr.mem_nm
+				, usr.mem_team
+				, usr.goal_reg_auth_yn
+				, usr.goal_expc_ddln_reg_auth_yn
+				, usr.inq_auth_yn
+				, gl.p_ds_status
+				, gl.p_os_status
+				, gl.sm_status
+				, gl.pm_status
+				, gl.pm_os_status
+				, gl.sm_date
+				, gl.pm_date
+			FROM (
+				SELECT
+				 	seq 
+					, guide_base
+					, (EXTRACT(Epoch from age(profit_date+1 ,now())) / 86400)::int as profit_d_day
+					, (EXTRACT(Epoch from age(sales_date+1 ,now())) / 86400)::int as sales_d_day 
+				FROM gps.guide_info gi 
+				WHERE
+					seq = (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C')
+			) gi
+			INNER JOIN gps.guide_data gd ON
+				(gi.seq = gd.guide_seq)
+			INNER JOIN gps.section_info si ON 
+				(gd.section_id = si.section_id AND si.is_use = 'Y' AND si.is_reg = 'Y')
+			INNER JOIN gps.goal_data gl ON
+				(gd.guide_seq = gl.guide_seq and gd.section_id = gl.section_id)
+			INNER JOIN (
+				SELECT
+					mi.mem_id
+					, mi.mem_nm
+					, mi.mem_team
+					, mpi.goal_reg_auth_yn
+					, mpi.goal_expc_ddln_reg_auth_yn
+					, mpi.inq_auth_yn
+					, mpi.cp_cd
+					, mpi.unit_cd
+				FROM gps.member_info mi
+				INNER JOIN gps.member_priv_info mpi ON
+					(mi.mem_id = mpi.mem_id)
+				WHERE
+					mi.status = 'Y'
+					AND mpi.status = 'Y'
+					AND mi.mem_id = #{sMemId}
+			) usr ON
+				(si.cp_cd = usr.cp_cd AND si.unit_cd = usr.unit_cd)
+			WHERE
+			--(21.11.08 김혜진님 요청 연 이익 등록과 월 매출 등록을 동시에 하기 위함)
+-- 				gl.status = 'Y'
+				gl.status in ('Q','S','Y')
+				and gl.rollback = 'N'
+		) gud
+	</sql>
+	
+	<update id="updateGoalDataSmStatus" parameterType="CmMap" >
+		UPDATE gps.goal_data
+		SET
+			sm_status = #{smStatus}
+			, sm_date = now()
+		WHERE
+			seq = #{goalDataSeq}
+	</update>
+	
+	<update id="updateGoalDataPmStatus" parameterType="CmMap" >
+		UPDATE gps.goal_data
+		SET
+			pm_date = now()
+		<if test="pmStatus != null and pmStatus != ''">
+			, pm_status = #{pmStatus}
+		</if>
+		<if test="pmOsStatus != null and pmOsStatus != ''">
+			, pm_os_status = #{pmOsStatus}
+		</if>
+		WHERE
+			seq = #{goalDataSeq}
+	</update>
+	
+	<select id="getGoalDataMonthDownloadList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 월목표 일괄 다운로드 original*/
+		SELECT
+			gps.FN_CODE_NM(split_part(guide.section_id, '-', 1), 'cp', #{s_language}) AS gp_nm
+			, guide.section_id
+			, guide.cp_cd
+			, guide.unit_cd
+			, guide.nat_cd
+			, guide.brd_cd
+			, guide.chl_cd
+			, gps.FN_CODE_NM(guide.nat_cd, 'nat', #{s_language}) AS nat_nm
+			, gps.FN_CODE_NM(guide.unit_cd, 'unit', #{s_language}) AS unit_nm
+			, gps.FN_CODE_NM(guide.brd_cd, 'brand', #{s_language}) AS brd_nm
+			, gps.FN_CODE_NM(guide.chl_cd, 'chgps', #{s_language}) AS chl_nm
+			, 'KRW' AS currency
+			, guide.l_sales
+			, guide.l_profit
+			, guide.f_sales
+			, guide.f_profit
+			, goal.g_sales
+			, goal.g_profit
+			, goal.s_01
+			, goal.s_02
+			, goal.s_03
+			, goal.s_04
+			, goal.s_05
+			, goal.s_06
+			, goal.s_07
+			, goal.s_08
+			, goal.s_09
+			, goal.s_10
+			, goal.s_11
+			, goal.s_12
+			, goal.p_01
+			, goal.p_02
+			, goal.p_03
+			, goal.p_04
+			, goal.p_05
+			, goal.p_06
+			, goal.p_07
+			, goal.p_08
+			, goal.p_09
+			, goal.p_10
+			, goal.p_11
+			, goal.p_12
+			, guide.is_grp_sale
+			, guide.is_grp_prof
+			, gps.FN_CODE_NM(guide.ch_lc, 'lc', #{s_language}) AS lc_nm
+			, gps.FN_CODE_NM(guide.ch_grp, 'chgr', #{s_language}) AS chgr_nm
+			, guide.guide_seq
+			, guide.guide_data_seq
+			, guide.guide_data_year_seq
+			, goal.goal_data_seq
+			, goal.goal_data_year_seq
+			, guide.yyyy AS guide_year
+			, CAST(CAST(guide.yyyy AS INTEGER) - 1 AS TEXT) AS base_year
+			, guide.r_unit
+			, guide.f_unit
+			, goal.unit AS g_unit
+			, guide.dtl_cd
+			, guide.cate_cd
+		FROM (
+		   SELECT 
+				gdy.seq AS guide_data_year_seq
+				, gd.guide_seq
+				, gdy.guide_data_seq
+				, gdy.section_id
+				, gdy.cp_cd
+				, gdy.unit_cd
+				, gdy.nat_cd
+				, gdy.brd_cd
+				, gdy.chl_cd
+				, gdy.l_sales
+				, gdy.f_sales
+				, gdy.yyyy
+				, gdy.status
+				, gdy.reg_date
+				, gdy.l_profit
+				, gdy.f_profit
+				, gdy.is_grp_sale
+				, gdy.is_grp_prof
+				, gd.r_unit
+				, gd.f_unit
+				, gd.g_unit
+				, si.dtl_cd
+				, si.cate_cd
+				, si.thread
+				, ci.ch_lc
+				, ci.ch_grp
+			FROM gps.guide_data_year gdy
+			INNER JOIN (
+				SELECT
+				 	gd.guide_seq
+				 	, gd.seq AS guide_data_seq
+					, gi.guide_base
+					, gd.r_unit
+					, gd.f_unit
+					, gd.g_unit
+				FROM gps.guide_info gi
+				INNER JOIN gps.guide_data gd ON
+					(gi.seq = gd.guide_seq)
+				WHERE
+					gi.seq  = (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C' AND guide_base = #{guideYear})
+			) gd ON
+				(gdy.guide_data_seq = gd.guide_data_seq)
+			INNER JOIN gps.section_info si ON
+				(gdy.section_id = si.section_id AND si.is_use = 'Y' AND si.is_reg = 'Y')
+		<if test="s_maxRole != null and s_maxRole != '' and s_maxRole != '99' ">
+			INNER JOIN (
+				SELECT
+					mi.mem_id
+					, mpi.cp_cd
+					, mpi.unit_cd
+				FROM gps.member_info mi
+				INNER JOIN gps.member_priv_info mpi ON
+					(mi.mem_id = mpi.mem_id)
+				WHERE
+					mi.status = 'Y'
+					AND mpi.status = 'Y'
+					AND mi.mem_id = #{s_memId}
+			) usr ON
+				(si.cp_cd = usr.cp_cd AND si.unit_cd = usr.unit_cd)
+		</if>
+			INNER JOIN (
+			SELECT
+				  ch_lc 
+				, ch_grp
+				, ch_gps
+			FROM gps.ch_info
+			GROUP BY 
+				  ch_lc
+				, ch_grp
+				, ch_gps
+			) ci ON	(gdy.chl_cd = ci.ch_gps)
+			WHERE 1 = 1
+		<foreach collection="dtlCds" item="dtlCds" open=" AND si.dtl_cd IN (" close=")" separator="," >
+				#{dtlCds}
+		</foreach>
+		) guide
+		LEFT OUTER JOIN (
+			SELECT
+				gdy.seq AS goal_data_year_seq
+				, gd.guide_seq
+				, gdy.goal_data_seq
+				, gdy.section_id
+				, gdy.cp_cd
+				, gdy.unit_cd
+				, gdy.nat_cd
+				, gdy.brd_cd
+				, gdy.chl_cd
+				, gdy.g_sales
+				, CASE WHEN gd.status IN ('P', 'Q') THEN NULL ELSE gdy.g_profit END AS g_profit
+				, gdy.yyyy
+				, gdy.unit
+				, gdy.status
+				, gdy.is_grp_sale
+				, gdy.is_grp_prof
+				, gdm.seq AS goal_data_month_seq
+				, gdm.s_01
+				, gdm.s_02
+				, gdm.s_03
+				, gdm.s_04
+				, gdm.s_05
+				, gdm.s_06
+				, gdm.s_07
+				, gdm.s_08
+				, gdm.s_09
+				, gdm.s_10
+				, gdm.s_11
+				, gdm.s_12
+				, gdm.p_01
+				, gdm.p_02
+				, gdm.p_03
+				, gdm.p_04
+				, gdm.p_05
+				, gdm.p_06
+				, gdm.p_07
+				, gdm.p_08
+				, gdm.p_09
+				, gdm.p_10
+				, gdm.p_11
+				, gdm.p_12
+			FROM gps.goal_data_year gdy
+			INNER JOIN gps.goal_data gd ON
+				(gdy.goal_data_seq = gd.seq)
+			LEFT OUTER JOIN gps.goal_data_month gdm ON
+				(gdy.seq = gdm.goal_data_year_seq)
+			WHERE
+				gd.rollback = 'N'
+		) goal ON
+			(guide.guide_seq = goal.guide_seq
+			AND guide.section_id = goal.section_id
+			AND guide.cp_cd = goal.cp_cd 
+			AND guide.nat_cd = goal.nat_cd
+			AND guide.unit_cd = goal.unit_cd
+			AND guide.brd_cd = goal.brd_cd
+			AND guide.chl_cd = goal.chl_cd)
+		ORDER BY
+			guide.thread
+		    , CASE guide.nat_cd
+		    	WHEN 'KR' THEN 0
+				WHEN 'CN' THEN 1
+				WHEN 'HK' THEN 2
+			    WHEN 'TW' THEN 3
+			    WHEN 'JP' THEN 4
+			    WHEN 'CA' THEN 5
+				ELSE 7
+			END
+			, nat_nm
+			, brd_cd
+	</select>
+	
+	<select id="getGoalDataMonthSyncDownloadList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 월목표 일괄 다운로드 - 연동데이터*/
+		SELECT
+			gps.FN_CODE_NM(split_part(guide.section_id, '-', 1), 'cp', #{s_language}) AS gp_nm
+			, guide.section_id
+			, guide.cp_cd
+			, guide.unit_cd
+			, guide.nat_cd
+			, guide.brd_cd
+			, guide.chl_cd
+			, gps.FN_CODE_NM(guide.nat_cd, 'nat', #{s_language}) AS nat_nm
+			, gps.FN_CODE_NM(guide.unit_cd, 'unit', #{s_language}) AS unit_nm
+			, gps.FN_CODE_NM(guide.brd_cd, 'brand', #{s_language}) AS brd_nm
+			, gps.FN_CODE_NM(guide.chl_cd, 'chgps', #{s_language}) AS chl_nm
+			, 'KRW' AS currency
+			, guide.l_sales
+			, guide.l_profit
+			, guide.f_sales
+			, guide.f_profit
+			, goal.g_sales
+			, goal.g_profit
+			, goal.s_01
+			, goal.s_02
+			, goal.s_03
+			, goal.s_04
+			, goal.s_05
+			, goal.s_06
+			, goal.s_07
+			, goal.s_08
+			, goal.s_09
+			, goal.s_10
+			, goal.s_11
+			, goal.s_12
+			, goal.p_01
+			, goal.p_02
+			, goal.p_03
+			, goal.p_04
+			, goal.p_05
+			, goal.p_06
+			, goal.p_07
+			, goal.p_08
+			, goal.p_09
+			, goal.p_10
+			, goal.p_11
+			, goal.p_12
+			, guide.is_grp_sale
+			, guide.is_grp_prof
+			, gps.FN_CODE_NM(guide.ch_lc, 'lc', #{s_language}) AS lc_nm
+			, gps.FN_CODE_NM(guide.ch_grp, 'chgr', #{s_language}) AS chgr_nm
+			, guide.guide_seq
+			, guide.guide_data_seq
+			, guide.guide_data_year_seq
+			, goal.goal_data_seq
+			, goal.goal_data_year_seq
+			, guide.yyyy AS guide_year
+			, CAST(CAST(guide.yyyy AS INTEGER) - 1 AS TEXT) AS base_year
+			, guide.r_unit
+			, guide.f_unit
+			, goal.unit AS g_unit
+			, guide.dtl_cd
+			, guide.cate_cd
+		FROM (
+		   SELECT 
+				gdy.seq AS guide_data_year_seq
+				, gd.guide_seq
+				, gdy.guide_data_seq
+				, gdy.section_id
+				, gdy.cp_cd
+				, gdy.unit_cd
+				, gdy.nat_cd
+				, gdy.brd_cd
+				, gdy.chl_cd
+				, gdy.l_sales
+				, gdy.f_sales
+				, gdy.yyyy
+				, gdy.status
+				, gdy.reg_date
+				, gdy.l_profit
+				, gdy.f_profit
+				, gdy.is_grp_sale
+				, gdy.is_grp_prof
+				, gd.r_unit
+				, gd.f_unit
+				, gd.g_unit
+				, si.dtl_cd
+				, si.cate_cd
+				, si.thread
+				, ci.ch_lc
+				, ci.ch_grp
+			FROM gps.guide_data_year gdy
+			INNER JOIN (
+				SELECT
+				 	gd.guide_seq
+				 	, gd.seq AS guide_data_seq
+					, gi.guide_base
+					, gd.r_unit
+					, gd.f_unit
+					, gd.g_unit
+				FROM gps.guide_info gi
+				INNER JOIN gps.guide_data gd ON
+					(gi.seq = gd.guide_seq)
+				WHERE
+					gi.seq  = (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C' AND guide_base = #{guideYear})
+			) gd ON
+				(gdy.guide_data_seq = gd.guide_data_seq)
+			INNER JOIN gps.section_info si ON
+				(gdy.section_id = si.section_id AND si.is_use = 'Y' AND si.is_reg = 'Y')
+		<if test="s_maxRole != null and s_maxRole != '' and s_maxRole != '99' ">
+			INNER JOIN (
+				SELECT
+					mi.mem_id
+					, mpi.cp_cd
+					, mpi.unit_cd
+				FROM gps.member_info mi
+				INNER JOIN gps.member_priv_info mpi ON
+					(mi.mem_id = mpi.mem_id)
+				WHERE
+					mi.status = 'Y'
+					AND mpi.status = 'Y'
+					AND mi.mem_id = #{s_memId}
+			) usr ON
+				(si.cp_cd = usr.cp_cd AND si.unit_cd = usr.unit_cd)
+		</if>
+			INNER JOIN (
+			SELECT
+				  ch_lc 
+				, ch_grp
+				, ch_gps
+			FROM gps.ch_info
+			GROUP BY 
+				  ch_lc
+				, ch_grp
+				, ch_gps
+			) ci ON	(gdy.chl_cd = ci.ch_gps)
+			WHERE 1 = 1
+		<foreach collection="dtlCds" item="dtlCds" open=" AND si.dtl_cd IN (" close=")" separator="," >
+				#{dtlCds}
+		</foreach>
+		) guide
+		LEFT OUTER JOIN (
+			SELECT
+				gdy.seq AS goal_data_year_seq
+				, gd.guide_seq
+				, gdy.goal_data_seq
+				, gdy.section_id
+				, gdy.cp_cd
+				, gdy.unit_cd
+				, gdy.nat_cd
+				, gdy.brd_cd
+				, gdy.chl_cd
+				, gdy.g_sales
+				, CASE WHEN gd.status IN ('P', 'Q') THEN NULL ELSE gdy.g_profit END AS g_profit
+				, gdy.yyyy
+				, gdy.unit
+				, gdy.status
+				, gdy.is_grp_sale
+				, gdy.is_grp_prof
+				, gdm.seq AS goal_data_month_seq
+				, gdm.s_01
+				, gdm.s_02
+				, gdm.s_03
+				, gdm.s_04
+				, gdm.s_05
+				, gdm.s_06
+				, gdm.s_07
+				, gdm.s_08
+				, gdm.s_09
+				, gdm.s_10
+				, gdm.s_11
+				, gdm.s_12
+				, gdm.p_01
+				, gdm.p_02
+				, gdm.p_03
+				, gdm.p_04
+				, gdm.p_05
+				, gdm.p_06
+				, gdm.p_07
+				, gdm.p_08
+				, gdm.p_09
+				, gdm.p_10
+				, gdm.p_11
+				, gdm.p_12
+			FROM gps.goal_data_year gdy
+			INNER JOIN gps.goal_data gd ON
+				(gdy.goal_data_seq = gd.seq)
+			LEFT OUTER JOIN gps.goal_data_month gdm ON
+				(gdy.seq = gdm.goal_data_year_seq)
+			WHERE
+				gd.rollback = 'N'
+		) goaldy ON
+			(guide.guide_seq = goaldy.guide_seq
+			AND guide.section_id = goaldy.section_id
+			AND guide.cp_cd = goaldy.cp_cd 
+			AND guide.nat_cd = goaldy.nat_cd
+			AND guide.unit_cd = goaldy.unit_cd
+			AND guide.brd_cd = goaldy.brd_cd
+			AND guide.chl_cd = goaldy.chl_cd)
+		LEFT OUTER JOIN (
+			/* 해외법인과 연동된 월목표 */
+			SELECT
+				gdy.seq AS goal_data_year_seq
+				, gdy.goal_data_seq
+				, gdy.section_id
+				, gdy.cp_cd
+				, gdy.unit_cd
+				, gdy.nat_cd
+				, gdy.brd_cd
+				, gdy.chl_cd
+				, CASE WHEN gos.s_status IS NULL THEN gdy.g_sales
+					WHEN gos.s_status ='Y'  THEN gos.g_sales
+					ELSE NULL
+				  END AS g_sales
+				 , CASE WHEN gos.p_status IS NULL THEN gdy.g_profit
+					WHEN gos.p_status = 'Y' THEN gos.g_profit
+					ELSE NULL
+				  END AS g_profit
+				, gdy.yyyy
+				, COALESCE(gos.unit, gdy.unit) AS unit
+				, gdy.status
+				, gdy.is_grp_sale
+				, gdy.is_grp_prof
+				, gos.s_status AS os_s_status
+				, gos.p_status AS os_p_status
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_01
+					WHEN gos.s_status = 'Y' THEN gos.s_01
+					ELSE NULL
+				  END AS s_01
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_02
+					WHEN gos.s_status = 'Y' THEN gos.s_02
+					ELSE NULL
+				  END AS s_02
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_03
+					WHEN gos.s_status = 'Y' THEN gos.s_03
+					ELSE NULL
+				  END AS s_03
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_04
+					WHEN gos.s_status = 'Y' THEN gos.s_04
+					ELSE NULL
+				  END AS s_04
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_05
+					WHEN gos.s_status = 'Y' THEN gos.s_05
+					ELSE NULL
+				  END AS s_05
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_06
+					WHEN gos.s_status = 'Y' THEN gos.s_06
+					ELSE NULL
+				  END AS s_06
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_07
+					WHEN gos.s_status = 'Y' THEN gos.s_07
+					ELSE NULL
+				  END AS s_07
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_08
+					WHEN gos.s_status = 'Y' THEN gos.s_08
+					ELSE NULL
+				  END AS s_08
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_09
+					WHEN gos.s_status = 'Y' THEN gos.s_09
+					ELSE NULL
+				  END AS s_09
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_10
+					WHEN gos.s_status = 'Y' THEN gos.s_10
+					ELSE NULL
+				  END AS s_10
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_11
+					WHEN gos.s_status = 'Y' THEN gos.s_11
+					ELSE NULL
+				  END AS s_11
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_12
+					WHEN gos.s_status = 'Y' THEN gos.s_12
+					ELSE NULL
+				  END AS s_12
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_01
+					WHEN gos.p_status = 'Y' THEN gos.p_01
+					ELSE NULL
+				  END AS p_01
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_02
+					WHEN gos.p_status = 'Y' THEN gos.p_02
+					ELSE NULL
+				  END AS p_02
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_03
+					WHEN gos.p_status = 'Y' THEN gos.p_03
+					ELSE NULL
+				  END AS p_03
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_04
+					WHEN gos.p_status = 'Y' THEN gos.p_04
+					ELSE NULL
+				  END AS p_04
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_05
+					WHEN gos.p_status = 'Y' THEN gos.p_05
+					ELSE NULL
+				  END AS p_05
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_06
+					WHEN gos.p_status = 'Y' THEN gos.p_06
+					ELSE NULL
+				  END AS p_06
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_07
+					WHEN gos.p_status = 'Y' THEN gos.p_07
+					ELSE NULL
+				  END AS p_07
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_08
+					WHEN gos.p_status = 'Y' THEN gos.p_08
+					ELSE NULL
+				  END AS p_08
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_09
+					WHEN gos.p_status = 'Y' THEN gos.p_09
+					ELSE NULL
+				  END AS p_09
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_10
+					WHEN gos.p_status = 'Y' THEN gos.p_10
+					ELSE NULL
+				  END AS p_10
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_11
+					WHEN gos.p_status = 'Y' THEN gos.p_11
+					ELSE NULL
+				  END AS p_11
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_12
+					WHEN gos.p_status = 'Y' THEN gos.p_12
+					ELSE NULL
+				  END AS p_12
+				, gdm.s_status
+				, gdm.p_status
+			FROM gps.goal_data_year gdy
+			LEFT OUTER JOIN gps.goal_data_month gdm ON
+				gdy.seq = gdm.goal_data_year_seq
+			LEFT OUTER JOIN (
+				/* 해외법인 월목표 */
+				SELECT
+					goal.*
+				FROM
+				(
+					SELECT
+						gd.guide_seq
+						, gdy.section_id 
+						, gdy.cp_cd
+						, gdy.unit_cd
+						, gdy.nat_cd
+						, gdy.brd_cd
+						, gdy.chl_cd
+						, gdy.yyyy
+					FROM gps.guide_data_year gdy
+					INNER JOIN (
+						SELECT
+						 	gd.seq
+						 	, gd.status
+						 	, gd.guide_seq
+						FROM gps.guide_info gi
+						INNER JOIN gps.guide_data gd ON
+							gi.seq = gd.guide_seq
+						WHERE
+							gi.seq  = (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C' AND guide_base = #{guideYear})
+					) gd ON
+						gdy.guide_data_seq = gd.seq
+					INNER JOIN gps.section_info si ON
+						gdy.section_id = si.section_id
+					AND si.is_use = 'Y'
+					AND si.is_reg = 'Y'
+					AND si.is_del = 'N'
+					WHERE 1=1
+					AND si.dtl_cd = #{syncStatus}
+				) guide
+				LEFT OUTER JOIN (
+					SELECT
+						gd.guide_seq
+						, gdy.*
+						, gdm.s_01
+						, gdm.s_02
+						, gdm.s_03
+						, gdm.s_04
+						, gdm.s_05
+						, gdm.s_06
+						, gdm.s_07
+						, gdm.s_08
+						, gdm.s_09
+						, gdm.s_10
+						, gdm.s_11
+						, gdm.s_12
+						, gdm.p_01
+						, gdm.p_02
+						, gdm.p_03
+						, gdm.p_04
+						, gdm.p_05
+						, gdm.p_06
+						, gdm.p_07
+						, gdm.p_08
+						, gdm.p_09
+						, gdm.p_10
+						, gdm.p_11
+						, gdm.p_12
+						, COALESCE(gdm.s_status, 'U') AS s_status
+						, COALESCE(gdm.p_status, 'U') AS p_status
+					FROM gps.goal_data_year gdy
+					INNER JOIN gps.goal_data gd ON
+						gdy.goal_data_seq = gd.seq
+					LEFT OUTER JOIN gps.goal_data_month gdm ON
+						gdy.seq = gdm.goal_data_year_seq
+					WHERE
+						gd.rollback = 'N'
+				) goal ON
+					guide.guide_seq = goal.guide_seq
+					AND guide.section_id = goal.section_id
+					AND guide.cp_cd = goal.cp_cd
+					AND guide.nat_cd = goal.nat_cd
+					AND guide.unit_cd = goal.unit_cd
+					AND guide.brd_cd = goal.brd_cd
+					AND guide.chl_cd = goal.chl_cd
+			) gos ON
+				gdy.cp_cd = gos.cp_cd 
+				AND gdy.nat_cd = gos.nat_cd
+				AND gdy.brd_cd = gos.brd_cd
+				AND gdy.chl_cd = gos.chl_cd
+				AND gdy.yyyy = gos.yyyy
+		) goal ON
+			goaldy.section_id = goal.section_id
+			AND goaldy.cp_cd = goal.cp_cd 
+			AND goaldy.nat_cd = goal.nat_cd
+			AND goaldy.unit_cd = goal.unit_cd
+			AND goaldy.brd_cd = goal.brd_cd
+			AND goaldy.chl_cd = goal.chl_cd
+			AND goaldy.goal_data_year_seq = goal.goal_data_year_seq
+		ORDER BY
+			guide.thread
+		    , CASE guide.nat_cd
+		    	WHEN 'KR' THEN 0
+				WHEN 'CN' THEN 1
+				WHEN 'HK' THEN 2
+			    WHEN 'TW' THEN 3
+			    WHEN 'JP' THEN 4
+			    WHEN 'CA' THEN 5
+				ELSE 7
+			END
+			, nat_nm
+			, brd_cd
+	</select>
+	
+	<select id="getGoalYearMonthSyncList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 해외법인 연동 연월 세부목표 리스트 가져오기 */		
+		SELECT
+			goal.goal_data_year_seq
+			, gps.FN_CODE_NM(split_part(guide.section_id, '-', 1), 'cp', #{s_language}) AS gp_nm
+			, gps.FN_CODE_NM(guide.nat_cd, 'nat', #{s_language}) AS nat_nm
+			, gps.FN_CODE_NM(guide.unit_cd, 'unit', #{s_language}) AS unit_nm
+			, gps.FN_CODE_NM(guide.brd_cd, 'brand', #{s_language}) AS brd_nm
+			, gps.FN_CODE_NM(guide.chl_cd, 'chgps', #{s_language}) AS chl_nm
+			, guide.l_sales
+			, guide.l_profit
+			, guide.f_sales
+			, guide.f_profit
+			, goal.g_sales
+			, goal.g_profit
+			, goal.s_01
+			, goal.s_02
+			, goal.s_03
+			, goal.s_04
+			, goal.s_05
+			, goal.s_06
+			, goal.s_07
+			, goal.s_08
+			, goal.s_09
+			, goal.s_10
+			, goal.s_11
+			, goal.s_12
+			, goal.p_01
+			, goal.p_02
+			, goal.p_03
+			, goal.p_04
+			, goal.p_05
+			, goal.p_06
+			, goal.p_07
+			, goal.p_08
+			, goal.p_09
+			, goal.p_10
+			, goal.p_11
+			, goal.p_12
+			, guide.section_id
+			, guide.cp_cd
+			, guide.unit_cd
+			, guide.nat_cd
+			, guide.brd_cd
+			, guide.chl_cd
+			, guide.yyyy AS guide_year
+			, guide.base_year
+			, guide.is_grp_sale
+			, guide.is_grp_prof
+			, goal.s_status
+			, goal.p_status
+			, goal.os_s_status
+			, goal.os_p_status
+			, guide.r_unit
+			, guide.f_unit
+			, goal.unit AS g_unit
+			, goal.goal_data_seq
+			, guide.dtl_cd
+		FROM (
+		   SELECT 
+				gdy.guide_data_seq
+				, gdy.section_id
+				, gdy.cp_cd
+				, gdy.unit_cd
+				, gdy.nat_cd
+				, gdy.brd_cd
+				, gdy.chl_cd
+				, gdy.l_sales
+				, gdy.f_sales
+				, gdy.yyyy
+				, CAST(CAST(gdy.yyyy AS INTEGER) - 1 AS TEXT) AS base_year
+				, gdy.status
+				, gdy.reg_date
+				, gdy.l_profit
+				, gdy.f_profit
+				, gdy.is_grp_sale
+				, gdy.is_grp_prof
+				, gd.r_unit
+				, gd.f_unit
+				, gd.g_unit
+				, si.dtl_cd
+			FROM gps.guide_data_year gdy
+			INNER JOIN gps.guide_data gd ON
+				gdy.guide_data_seq = gd.seq
+			INNER JOIN gps.section_info si ON
+				gdy.section_id = si.section_id
+			WHERE
+				gdy.guide_data_seq = #{guideDataSeq}
+			<if test="profitKR != null and profitKR != '' ">
+				AND gdy.nat_cd = 'KR'
+			</if>
+			<if test="profitOS != null and profitOS != '' ">
+				AND gdy.nat_cd != 'KR'
+			</if>
+		) guide
+		LEFT OUTER JOIN (
+			/* 해외법인과 연동된 월목표 */
+			SELECT
+				gdy.seq AS goal_data_year_seq
+				, gdy.goal_data_seq
+				, gdy.section_id
+				, gdy.cp_cd
+				, gdy.unit_cd
+				, gdy.nat_cd
+				, gdy.brd_cd
+				, gdy.chl_cd
+				, CASE WHEN gos.s_status IS NULL THEN gdy.g_sales
+					WHEN gos.s_status = 'Y' THEN gos.g_sales
+					ELSE NULL
+				  END AS g_sales
+				 , CASE WHEN gos.p_status IS NULL THEN gdy.g_profit
+					WHEN gos.p_status = 'Y' THEN gos.g_profit
+					ELSE NULL
+				  END AS g_profit
+				, gdy.yyyy
+				, COALESCE(gos.unit, gdy.unit) AS unit
+				, gdy.status
+				, gdy.is_grp_sale
+				, gdy.is_grp_prof
+				, gos.s_status AS os_s_status
+				, gos.p_status AS os_p_status
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_01
+					WHEN gos.s_status = 'Y' THEN gos.s_01
+					ELSE NULL
+				  END AS s_01
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_02
+					WHEN gos.s_status = 'Y' THEN gos.s_02
+					ELSE NULL
+				  END AS s_02
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_03
+					WHEN gos.s_status = 'Y' THEN gos.s_03
+					ELSE NULL
+				  END AS s_03
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_04
+					WHEN gos.s_status = 'Y' THEN gos.s_04
+					ELSE NULL
+				  END AS s_04
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_05
+					WHEN gos.s_status = 'Y' THEN gos.s_05
+					ELSE NULL
+				  END AS s_05
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_06
+					WHEN gos.s_status = 'Y' THEN gos.s_06
+					ELSE NULL
+				  END AS s_06
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_07
+					WHEN gos.s_status = 'Y' THEN gos.s_07
+					ELSE NULL
+				  END AS s_07
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_08
+					WHEN gos.s_status = 'Y' THEN gos.s_08
+					ELSE NULL
+				  END AS s_08
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_09
+					WHEN gos.s_status = 'Y' THEN gos.s_09
+					ELSE NULL
+				  END AS s_09
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_10
+					WHEN gos.s_status = 'Y' THEN gos.s_10
+					ELSE NULL
+				  END AS s_10
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_11
+					WHEN gos.s_status = 'Y' THEN gos.s_11
+					ELSE NULL
+				  END AS s_11
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_12
+					WHEN gos.s_status = 'Y' THEN gos.s_12
+					ELSE NULL
+				  END AS s_12
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_01
+					WHEN gos.p_status = 'Y' THEN gos.p_01
+					ELSE NULL
+				  END AS p_01
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_02
+					WHEN gos.p_status = 'Y' THEN gos.p_02
+					ELSE NULL
+				  END AS p_02
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_03
+					WHEN gos.p_status = 'Y' THEN gos.p_03
+					ELSE NULL
+				  END AS p_03
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_04
+					WHEN gos.p_status = 'Y' THEN gos.p_04
+					ELSE NULL
+				  END AS p_04
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_05
+					WHEN gos.p_status = 'Y' THEN gos.p_05
+					ELSE NULL
+				  END AS p_05
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_06
+					WHEN gos.p_status = 'Y' THEN gos.p_06
+					ELSE NULL
+				  END AS p_06
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_07
+					WHEN gos.p_status = 'Y' THEN gos.p_07
+					ELSE NULL
+				  END AS p_07
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_08
+					WHEN gos.p_status = 'Y' THEN gos.p_08
+					ELSE NULL
+				  END AS p_08
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_09
+					WHEN gos.p_status = 'Y' THEN gos.p_09
+					ELSE NULL
+				  END AS p_09
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_10
+					WHEN gos.p_status = 'Y' THEN gos.p_10
+					ELSE NULL
+				  END AS p_10
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_11
+					WHEN gos.p_status = 'Y' THEN gos.p_11
+					ELSE NULL
+				  END AS p_11
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_12
+					WHEN gos.p_status = 'Y' THEN gos.p_12
+					ELSE NULL
+				  END AS p_12
+				, gdm.s_status
+				, gdm.p_status
+			FROM gps.goal_data_year gdy
+			LEFT OUTER JOIN gps.goal_data_month gdm ON
+				gdy.seq = gdm.goal_data_year_seq
+			LEFT OUTER JOIN (
+				/* 해외법인 월목표 */
+				SELECT
+					goal.*
+				FROM
+				(
+					SELECT
+						gd.guide_seq
+						, gdy.section_id 
+						, gdy.cp_cd
+						, gdy.unit_cd
+						, gdy.nat_cd
+						, gdy.brd_cd
+						, gdy.chl_cd
+						, gdy.yyyy
+					FROM gps.guide_data_year gdy
+					INNER JOIN (
+						SELECT
+						 	gd.seq
+						 	, gd.status
+						 	, gd.guide_seq
+						FROM gps.guide_info gi
+						INNER JOIN gps.guide_data gd ON
+							gi.seq = gd.guide_seq
+						WHERE
+							gi.seq  = (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C')
+					) gd ON
+						gdy.guide_data_seq = gd.seq
+					INNER JOIN gps.section_info si ON
+						gdy.section_id = si.section_id
+						AND si.is_use = 'Y'
+						AND si.is_reg = 'Y'
+					WHERE
+						si.dtl_cd = 'OS'
+					<choose>
+						<when test='isApEtcCorp == "Y"'>
+						AND gdy.unit_cd <![CDATA[<>]]> '190'
+						</when>
+						<when test='isApCorp == "Y"'>
+						AND gdy.unit_cd <![CDATA[<>]]> '998'
+						</when>
+					</choose>
+				) guide
+				LEFT OUTER JOIN (
+					SELECT
+						gd.guide_seq
+						, gdy.*
+						, gdm.s_01
+						, gdm.s_02
+						, gdm.s_03
+						, gdm.s_04
+						, gdm.s_05
+						, gdm.s_06
+						, gdm.s_07
+						, gdm.s_08
+						, gdm.s_09
+						, gdm.s_10
+						, gdm.s_11
+						, gdm.s_12
+						, gdm.p_01
+						, gdm.p_02
+						, gdm.p_03
+						, gdm.p_04
+						, gdm.p_05
+						, gdm.p_06
+						, gdm.p_07
+						, gdm.p_08
+						, gdm.p_09
+						, gdm.p_10
+						, gdm.p_11
+						, gdm.p_12
+						, COALESCE(gdm.s_status, 'U') AS s_status
+						, COALESCE(gdm.p_status, 'U') AS p_status
+					FROM gps.goal_data_year gdy
+					INNER JOIN gps.goal_data gd ON
+						gdy.goal_data_seq = gd.seq
+					LEFT OUTER JOIN gps.goal_data_month gdm ON
+						gdy.seq = gdm.goal_data_year_seq
+					WHERE
+						gd.rollback = 'N'
+				) goal ON
+					guide.guide_seq = goal.guide_seq
+					AND guide.section_id = goal.section_id
+					AND guide.cp_cd = goal.cp_cd
+					AND guide.nat_cd = goal.nat_cd
+					AND guide.unit_cd = goal.unit_cd
+					AND guide.brd_cd = goal.brd_cd
+					AND guide.chl_cd = goal.chl_cd
+			) gos ON
+				gdy.cp_cd = gos.cp_cd 
+				AND gdy.nat_cd = gos.nat_cd
+				AND gdy.brd_cd = gos.brd_cd
+				AND gdy.chl_cd = gos.chl_cd
+				AND gdy.yyyy = gos.yyyy
+			WHERE gdy.goal_data_seq = #{goalDataSeq}
+		) goal ON
+			guide.section_id = goal.section_id
+			AND guide.cp_cd = goal.cp_cd 
+			AND guide.nat_cd = goal.nat_cd
+			AND guide.unit_cd = goal.unit_cd
+			AND guide.brd_cd = goal.brd_cd
+			AND guide.chl_cd = goal.chl_cd
+		ORDER BY (
+		    CASE guide.nat_cd
+			WHEN 'KR' THEN 0
+			WHEN 'CN' THEN 1
+			WHEN 'HK' THEN 2
+		    WHEN 'TW' THEN 3
+		    WHEN 'JP' THEN 4
+		    WHEN 'CA' THEN 5
+			ELSE 7
+			END)
+			, nat_nm
+			, brd_cd
+			, goal.goal_data_year_seq
+	</select>
+	
+	<select id="getGoalYearMonthSyncBrandList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 브랜드->해외법인 연동 연월 세부목표 리스트 가져오기 */		
+		SELECT
+			goal.goal_data_year_seq
+			, gps.FN_CODE_NM(split_part(guide.section_id, '-', 1), 'cp', #{s_language}) AS gp_nm
+			, gps.FN_CODE_NM(guide.nat_cd, 'nat', #{s_language}) AS nat_nm
+			, gps.FN_CODE_NM(guide.unit_cd, 'unit', #{s_language}) AS unit_nm
+			, gps.FN_CODE_NM(guide.brd_cd, 'brand', #{s_language}) AS brd_nm
+			, gps.FN_CODE_NM(guide.chl_cd, 'chgps', #{s_language}) AS chl_nm
+			, guide.l_sales
+			, guide.l_profit
+			, guide.f_sales
+			, guide.f_profit
+			, goal.g_sales
+			, goal.g_profit
+			, goal.s_01
+			, goal.s_02
+			, goal.s_03
+			, goal.s_04
+			, goal.s_05
+			, goal.s_06
+			, goal.s_07
+			, goal.s_08
+			, goal.s_09
+			, goal.s_10
+			, goal.s_11
+			, goal.s_12
+			, goal.p_01
+			, goal.p_02
+			, goal.p_03
+			, goal.p_04
+			, goal.p_05
+			, goal.p_06
+			, goal.p_07
+			, goal.p_08
+			, goal.p_09
+			, goal.p_10
+			, goal.p_11
+			, goal.p_12
+			, guide.section_id
+			, guide.cp_cd
+			, guide.unit_cd
+			, guide.nat_cd
+			, guide.brd_cd
+			, guide.chl_cd
+			, guide.yyyy AS guide_year
+			, guide.base_year
+			, guide.is_grp_sale
+			, guide.is_grp_prof
+			, goal.s_status
+			, goal.p_status
+			, goal.os_s_status
+			, goal.os_p_status
+			, guide.r_unit
+			, guide.f_unit
+			, goal.unit AS g_unit
+			, goal.goal_data_seq
+			, guide.dtl_cd
+		FROM (
+		   SELECT 
+				gdy.guide_data_seq
+				, gdy.section_id
+				, gdy.cp_cd
+				, gdy.unit_cd
+				, gdy.nat_cd
+				, gdy.brd_cd
+				, gdy.chl_cd
+				, gdy.l_sales
+				, gdy.f_sales
+				, gdy.yyyy
+				, CAST(CAST(gdy.yyyy AS INTEGER) - 1 AS TEXT) AS base_year
+				, gdy.status
+				, gdy.reg_date
+				, gdy.l_profit
+				, gdy.f_profit
+				, gdy.is_grp_sale
+				, gdy.is_grp_prof
+				, gd.r_unit
+				, gd.f_unit
+				, gd.g_unit
+				, si.dtl_cd
+			FROM gps.guide_data_year gdy
+			INNER JOIN gps.guide_data gd ON
+				gdy.guide_data_seq = gd.seq
+			INNER JOIN gps.section_info si ON
+				gdy.section_id = si.section_id
+			WHERE
+				gdy.guide_data_seq = #{guideDataSeq}
+			<if test="profitKR != null and profitKR != '' ">
+				AND gdy.nat_cd = 'KR'
+			</if>
+			<if test="profitOS != null and profitOS != '' ">
+				AND gdy.nat_cd != 'KR'
+			</if>
+		) guide
+		LEFT OUTER JOIN (
+			/* 브랜드와 연동된 월목표 */
+			SELECT
+				gdy.seq AS goal_data_year_seq
+				, gdy.goal_data_seq
+				, gdy.section_id
+				, gdy.cp_cd
+				, gdy.unit_cd
+				, gdy.nat_cd
+				, gdy.brd_cd
+				, gdy.chl_cd
+				, CASE WHEN gos.s_status IS NULL THEN gdy.g_sales
+					WHEN gos.s_status = 'Y' THEN gos.g_sales
+					ELSE NULL
+				  END AS g_sales
+				 , CASE WHEN gos.p_status IS NULL THEN gdy.g_profit
+					WHEN gos.p_status = 'Y' THEN gos.g_profit
+					ELSE NULL
+				  END AS g_profit
+				, gdy.yyyy
+				, COALESCE(gos.unit, gdy.unit) AS unit
+				, gdy.status
+				, gdy.is_grp_sale
+				, gdy.is_grp_prof
+				, gos.s_status AS os_s_status
+				, gos.p_status AS os_p_status
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_01
+					WHEN gos.s_status = 'Y' THEN gos.s_01
+					ELSE NULL
+				  END AS s_01
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_02
+					WHEN gos.s_status = 'Y' THEN gos.s_02
+					ELSE NULL
+				  END AS s_02
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_03
+					WHEN gos.s_status = 'Y' THEN gos.s_03
+					ELSE NULL
+				  END AS s_03
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_04
+					WHEN gos.s_status = 'Y' THEN gos.s_04
+					ELSE NULL
+				  END AS s_04
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_05
+					WHEN gos.s_status = 'Y' THEN gos.s_05
+					ELSE NULL
+				  END AS s_05
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_06
+					WHEN gos.s_status = 'Y' THEN gos.s_06
+					ELSE NULL
+				  END AS s_06
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_07
+					WHEN gos.s_status = 'Y' THEN gos.s_07
+					ELSE NULL
+				  END AS s_07
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_08
+					WHEN gos.s_status = 'Y' THEN gos.s_08
+					ELSE NULL
+				  END AS s_08
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_09
+					WHEN gos.s_status = 'Y' THEN gos.s_09
+					ELSE NULL
+				  END AS s_09
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_10
+					WHEN gos.s_status = 'Y' THEN gos.s_10
+					ELSE NULL
+				  END AS s_10
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_11
+					WHEN gos.s_status = 'Y' THEN gos.s_11
+					ELSE NULL
+				  END AS s_11
+				, CASE WHEN gos.s_status IS NULL THEN gdm.s_12
+					WHEN gos.s_status = 'Y' THEN gos.s_12
+					ELSE NULL
+				  END AS s_12
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_01
+					WHEN gos.p_status = 'Y' THEN gos.p_01
+					ELSE NULL
+				  END AS p_01
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_02
+					WHEN gos.p_status = 'Y' THEN gos.p_02
+					ELSE NULL
+				  END AS p_02
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_03
+					WHEN gos.p_status = 'Y' THEN gos.p_03
+					ELSE NULL
+				  END AS p_03
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_04
+					WHEN gos.p_status = 'Y' THEN gos.p_04
+					ELSE NULL
+				  END AS p_04
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_05
+					WHEN gos.p_status = 'Y' THEN gos.p_05
+					ELSE NULL
+				  END AS p_05
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_06
+					WHEN gos.p_status = 'Y' THEN gos.p_06
+					ELSE NULL
+				  END AS p_06
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_07
+					WHEN gos.p_status = 'Y' THEN gos.p_07
+					ELSE NULL
+				  END AS p_07
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_08
+					WHEN gos.p_status = 'Y' THEN gos.p_08
+					ELSE NULL
+				  END AS p_08
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_09
+					WHEN gos.p_status = 'Y' THEN gos.p_09
+					ELSE NULL
+				  END AS p_09
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_10
+					WHEN gos.p_status = 'Y' THEN gos.p_10
+					ELSE NULL
+				  END AS p_10
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_11
+					WHEN gos.p_status = 'Y' THEN gos.p_11
+					ELSE NULL
+				  END AS p_11
+				, CASE WHEN gos.p_status IS NULL THEN gdm.p_12
+					WHEN gos.p_status = 'Y' THEN gos.p_12
+					ELSE NULL
+				  END AS p_12
+				, gdm.s_status
+				, gdm.p_status
+			FROM gps.goal_data_year gdy
+			LEFT OUTER JOIN gps.goal_data_month gdm ON
+				gdy.seq = gdm.goal_data_year_seq
+			LEFT OUTER JOIN (
+				/* 브랜드 월목표 */
+				SELECT
+					goal.*
+				FROM
+				(
+					SELECT
+						gd.guide_seq
+						, gdy.section_id 
+						, gdy.cp_cd
+						, gdy.unit_cd
+						, gdy.nat_cd
+						, gdy.brd_cd
+						, gdy.chl_cd
+						, gdy.yyyy
+					FROM gps.guide_data_year gdy
+					INNER JOIN (
+						SELECT
+						 	gd.seq
+						 	, gd.status
+						 	, gd.guide_seq
+						FROM gps.guide_info gi
+						INNER JOIN gps.guide_data gd ON
+							gi.seq = gd.guide_seq
+						WHERE
+							gi.seq  = (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C')
+					) gd ON
+						gdy.guide_data_seq = gd.seq
+					INNER JOIN gps.section_info si ON
+						gdy.section_id = si.section_id
+						AND si.is_use = 'Y'
+						AND si.is_reg = 'Y'
+					WHERE
+						si.dtl_cd = 'BR'
+				) guide
+				LEFT OUTER JOIN (
+					SELECT
+						gd.guide_seq
+						, gdy.*
+						, gdm.s_01
+						, gdm.s_02
+						, gdm.s_03
+						, gdm.s_04
+						, gdm.s_05
+						, gdm.s_06
+						, gdm.s_07
+						, gdm.s_08
+						, gdm.s_09
+						, gdm.s_10
+						, gdm.s_11
+						, gdm.s_12
+						, gdm.p_01
+						, gdm.p_02
+						, gdm.p_03
+						, gdm.p_04
+						, gdm.p_05
+						, gdm.p_06
+						, gdm.p_07
+						, gdm.p_08
+						, gdm.p_09
+						, gdm.p_10
+						, gdm.p_11
+						, gdm.p_12
+						, COALESCE(gdm.s_status, 'U') AS s_status
+						, COALESCE(gdm.p_status, 'U') AS p_status
+					FROM gps.goal_data_year gdy
+					INNER JOIN gps.goal_data gd ON
+						gdy.goal_data_seq = gd.seq
+					LEFT OUTER JOIN gps.goal_data_month gdm ON
+						gdy.seq = gdm.goal_data_year_seq
+					WHERE
+						gd.rollback = 'N'
+				) goal ON
+					guide.guide_seq = goal.guide_seq
+					AND guide.section_id = goal.section_id
+					AND guide.cp_cd = goal.cp_cd
+					AND guide.nat_cd = goal.nat_cd
+					AND guide.unit_cd = goal.unit_cd
+					AND guide.brd_cd = goal.brd_cd
+					AND guide.chl_cd = goal.chl_cd
+			) gos ON
+				gdy.cp_cd = gos.cp_cd 
+				AND gdy.nat_cd = gos.nat_cd
+				AND gdy.brd_cd = gos.brd_cd
+				AND gdy.chl_cd = gos.chl_cd
+				AND gdy.yyyy = gos.yyyy
+			WHERE gdy.goal_data_seq = #{goalDataSeq}
+		) goal ON
+			guide.section_id = goal.section_id
+			AND guide.cp_cd = goal.cp_cd 
+			AND guide.nat_cd = goal.nat_cd
+			AND guide.unit_cd = goal.unit_cd
+			AND guide.brd_cd = goal.brd_cd
+			AND guide.chl_cd = goal.chl_cd
+		ORDER BY (
+		    CASE guide.nat_cd
+			WHEN 'KR' THEN 0
+			WHEN 'CN' THEN 1
+			WHEN 'HK' THEN 2
+		    WHEN 'TW' THEN 3
+		    WHEN 'JP' THEN 4
+		    WHEN 'CA' THEN 5
+			ELSE 7
+			END)
+			, nat_nm
+			, brd_cd
+			, goal.goal_data_year_seq
+	</select>
+</mapper>

@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.amore.gps.service.sap.SapDao">
+	<insert id="putTrm001" parameterType="CmMap">
+		INSERT INTO gps.zca_if_trm_001 
+			(
+				calmonth,
+				comp_code,
+				salesorg,
+				zapgchnl,
+				zbrang,
+				currency,
+				sales,
+				sales_cost,
+				gross_margin,
+				sga,
+				payroll,
+				ad,
+				promotion,
+				fee,
+				commission,
+				rent,
+				depre_cost,
+				sga_etc,
+				profit
+			) VALUES 
+			(
+				#{calmonth}
+				,#{comp_code}
+				,#{salesorg}
+				,#{zapgchnl}
+				,#{zbrang}
+				,#{currency}
+				,#{sales}
+				,#{sales_cost}
+				,#{gross_margin}
+				,#{sga}
+				,#{payroll}
+				,#{ad}
+				,#{promotion}
+				,#{fee}
+				,#{commission}
+				,#{rent}
+				,#{depre_cost}
+				,#{sga_etc}
+				,#{profit}
+			)
+    </insert>
+	
+	<update id="initTrm001" parameterType="CmMap">
+		update gps.zca_if_trm_001 
+		set status = 'N'
+		where calmonth=#{calmonth} and 
+				comp_code=#{comp_code} and
+				salesorg=#{salesorg} and
+				zapgchnl=#{zapgchnl} and
+				zbrang=#{zbrang} and  status = 'Y'
+	</update>
+
+    <delete id="deleteTrm001">
+		delete from gps.zca_if_trm_001
+	</delete>
+
+	<insert id="putMasterText" parameterType="CmMap">
+		INSERT INTO gps.zca_master_text 
+			(
+				code_id,
+				code,
+				lang,
+				txt,
+				seq
+			) VALUES 
+			(
+				#{code_id},
+				#{code},
+				#{lang},
+				#{txt},
+				#{seq}
+			)
+    </insert>    
+    <select id="getMasterText" resultType="java.lang.Integer" flushCache="false" parameterType="CmMap">
+		select count(*) from gps.zca_master_text
+		where code_id=#{code_id} and code=#{code} and lang=#{lang} and status='Y'
+	</select>
+	<update id="updateMasterText" parameterType="CmMap">
+		UPDATE gps.zca_master_text SET
+			status='N'
+		where code_id=#{code_id} and code=#{code} and lang=#{lang}
+    </update>
+    <select id="getMas003" resultType="java.lang.Integer" flushCache="false" parameterType="CmMap">
+		select count(*) from gps.ch_info
+		where
+			chl_cd=#{zapgchnl} and
+			cp_cd=#{comp_code} and
+			status='Y'
+	</select>
+	<update id="delMas003" parameterType="CmMap">
+		UPDATE gps.zca_if_mas_003 SET
+			status='N'
+		where code_id=#{code_id} and
+		zapgchnl=#{zapgchnl} and
+		comp_code=#{comp_code} and
+		status='Y'
+    </update>
+
+	<update id="updateSectionDetailInfoIsGrp" parameterType="CmMap">
+		UPDATE gps.section_detail_info SET
+			is_grp_sale=#{zgrpamt},
+			is_grp_prof=#{zgrppro},
+			mod_date=now()
+		where
+			chl_cd=#{zapgchnl} and
+			(is_grp_sale != #{zgrpamt} or is_grp_prof != #{zgrppro})
+    </update>
+
+
+	<update id="updateGuideDataYearIsGrp" parameterType="CmMap">
+		UPDATE gps.guide_data_year SET
+			is_grp_sale=#{zgrpamt},
+			is_grp_prof=#{zgrppro},
+			mod_date=now()
+		where
+			chl_cd=#{zapgchnl} and
+			(is_grp_sale != #{zgrpamt} or is_grp_prof != #{zgrppro})
+    </update>
+
+	<update id="updateGoalDataYearIsGrp" parameterType="CmMap">
+		UPDATE gps.goal_data_year SET
+			is_grp_sale=#{zgrpamt},
+			is_grp_prof=#{zgrppro},
+			mod_date=now()
+		where
+			chl_cd=#{zapgchnl} and
+			(is_grp_sale != #{zgrpamt} or is_grp_prof != #{zgrppro})
+    </update>
+
+	<insert id="putChInfo" parameterType="CmMap">
+		WITH upsert AS (UPDATE gps.ch_info SET
+			is_grp_sale=#{zgrpamt},
+			is_grp_prof=#{zgrppro},
+			ch_grp=#{zgrpchnl},
+			ch_lc=#{zchar_10},
+			ch_unit=#{zchar_10a},
+			ch_div=#{zchar_10b},
+			is_onoff=#{zchar_2},
+			ch_gps=#{zchar_5},
+			mod_date=now()
+		where
+			chl_cd=#{zapgchnl} and
+			status='Y'
+		returning *)
+		INSERT INTO gps.ch_info (chl_cd, cp_cd, ch_grp, ch_lc, ch_unit, ch_div, is_onoff, ch_gps, is_grp_sale, is_grp_prof, status, reg_date)
+			SELECT #{zapgchnl}
+					,#{comp_code}
+					,#{zgrpchnl}
+					,#{zchar_10}
+					,#{zchar_10a}
+					,#{zchar_10b}
+					,#{zchar_2}
+					,#{zchar_5}
+					,#{zgrpamt}
+					,#{zgrppro}
+					,'Y'
+					, now()
+		WHERE NOT EXISTS (SELECT * FROM upsert)
+	</insert>
+
+	<insert id="putCodeInfo" parameterType="CmMap">
+		WITH upsert AS (UPDATE gps.code_info SET
+			cd_nm=#{txt},
+			mod_date=now()
+		where
+			cd=#{code} and
+			cd_type=#{cd_type} and
+			is_use='Y'
+		returning *)
+		INSERT INTO gps.code_info (cd, cd_nm, cd_type, is_use, reg_date)
+			SELECT #{code}
+					,#{txt}
+					,#{cd_type}
+					,'Y'
+					, now()
+		WHERE NOT EXISTS (SELECT * FROM upsert)
+	</insert>
+
+
+
+	<insert id="putCodeInfoEn" parameterType="CmMap">
+		WITH upsert AS (UPDATE gps.code_info SET
+			cd_enm=#{txt},
+			mod_date=now()
+		where
+			cd=#{code} and
+			cd_type=#{cd_type} and
+			is_use='Y'
+		returning *)
+		INSERT INTO gps.code_info (cd, cd_enm, cd_type, is_use, reg_date)
+			SELECT #{code}
+					,#{txt}
+					,#{cd_type}
+					,'Y'
+					, now()
+		WHERE NOT EXISTS (SELECT * FROM upsert)
+	</insert>
+
+
+	<delete id="delBrdInfo">
+		truncate table gps.brd_info
+    </delete>
+
+
+	<update id="putBrdInfo" parameterType="CmMap">
+		WITH upsert AS (UPDATE gps.brd_info SET
+			brd_grp=#{zshinsunl},
+			brd_cd=#{zbrang},
+			mod_date=now()
+		where
+			brd_grp=#{zshinsunl} and
+			brd_cd=#{zbrang} and
+			is_use='Y'
+		returning *)
+		INSERT INTO gps.brd_info (brd_grp, brd_cd, is_use, reg_date)
+			SELECT #{zshinsunl}
+					,#{zbrang}
+					,'Y'
+					, now()
+		WHERE NOT EXISTS (SELECT * FROM upsert)
+    </update>
+</mapper>

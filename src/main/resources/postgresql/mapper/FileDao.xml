@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.amore.gps.service.comm.FileDao">
+
+	<select id="getAttachCount" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		select COUNT(*)
+		from gps.file_info
+		where tbl = #{tbl}
+		and tbl_seq = #{tblSeq}
+	</select>	
+
+	<delete id="deleteAttach" parameterType="CmMap">
+		/* 기존 파일 DELETE */
+		UPDATE gps.file_info
+		SET flag_del	= 'Y'
+		WHERE tbl = #{tbl}
+		AND tbl_seq = #{tblSeq}
+		<if test="saveName != null and saveName != ''">
+		AND save_name = #{saveName}
+		</if>
+	</delete>
+	
+	<insert id="insertAttach" parameterType="CmMap">
+		/*파일 DB저장*/
+		
+		insert into gps.file_info
+		(
+			tbl
+			,tbl_seq
+			,save_name
+			,save_path
+			,origin_name
+			,file_type
+			,reg_date
+			,flag_del
+			,file_size
+			,file_ext
+		) values (
+			 #{tbl}
+			,#{tblSeq}
+			,#{saveName}
+			,#{savePath}
+			,#{originName}
+			,#{fileType}
+			,now()
+			,#{flagDel}
+			,#{fileSize}
+			,#{fileExt}
+		)
+			
+	</insert>
+	
+	<select id="getAttachInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		SELECT  *
+		  FROM  gps.file_info
+		 WHERE  save_name = #{fileId}
+	</select>
+	
+	<update id="updateAttachDownCnt" parameterType="CmMap">
+		UPDATE  gps.file_info SET
+				download_cnt = coalesce(download_cnt, 0) + 1
+		 WHERE  save_name = #{fileId}		 
+	</update>
+	
+	<select id="getAttachFileList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 첨부파일 SELECT */
+		SELECT
+		seq
+		,save_name
+		, origin_name
+	 	FROM gps.file_info  
+		WHERE 1=1
+		AND tbl = #{tbl}
+		AND tbl_seq = #{tblSeq} 
+		AND file_type = #{fileType}
+		AND flag_del = 'N'
+	</select>
+	
+	<update id="updateTblSeq" parameterType="CmMap">
+		UPDATE  gps.file_info SET
+				tbl_seq = #{nowTblSeq}
+		 WHERE  tbl = #{tbl}
+		 AND 	tbl_seq = #{tblSeq}
+		 
+	</update>
+	
+</mapper>

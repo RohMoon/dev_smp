@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.amore.gps.service.report.ReportDao">
+	<select id="getGuideBaseBelongDist" resultType="CmMap" flushCache="false">
+		SELECT
+			guide_base
+		 	, MAX(seq)
+		FROM gps.guide_info
+		WHERE
+			status = 'C'
+		GROUP BY guide_base
+		ORDER BY guide_base
+	</select>
+	
+	<select id="getGuideBaseBelongReport" resultType="CmMap" flushCache="false">
+		SELECT distinct rs.base_year
+		FROM gps.report_summary rs
+		ORDER BY rs.base_year;
+	</select>
+	
+	<select id="getReportGrpSummaryList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+	/* 경영성과, 경영목표 요약 미계산 데이터*/
+		SELECT 
+			  title 
+			, section_id
+			, unit_cd
+			, thread
+			, cp_thread
+			, view
+			, is_subtotal
+			, is_sum
+			, is_mainview
+			, cate_cd
+			, g_sales
+			, g_profit
+			, s01, s02, s03, s04, s05, s06, s07, s08, s09, s10, s11, s12
+			, p01, p02, p03, p04, p05, p06, p07, p08, p09, p10, p11, p12
+			, ests01, ests02, ests03, ests04, ests05, ests06, ests07, ests08, ests09, ests10, ests11, ests12
+			, estp01, estp02, estp03, estp04, estp05, estp06, estp07, estp08, estp09, estp10, estp11, estp12
+			, rsts01, rsts02, rsts03, rsts04, rsts05, rsts06, rsts07, rsts08, rsts09, rsts10, rsts11, rsts12
+			, rstp01, rstp02, rstp03, rstp04, rstp05, rstp06, rstp07, rstp08, rstp09, rstp10, rstp11, rstp12
+			, curs01, curs02, curs03, curs04, curs05, curs06, curs07, curs08, curs09, curs10, curs11, curs12
+			, curp01, curp02, curp03, curp04, curp05, curp06, curp07, curp08, curp09, curp10, curp11, curp12
+		FROM gps.report_summary
+		WHERE base_year = #{guideYear}
+		<if test="apGrp != null and apGrp != ''">
+			AND (section_id LIKE #{apGrp} || '%' OR section_id LIKE '0000' ||'%')
+		</if>
+		<if test="sectionArray != null and sectionArray.size != 0 ">
+			<foreach collection="sectionArray" item="sectionArray" open=" AND section_id IN (" close=")" separator="," >
+					#{sectionArray}
+			</foreach>
+		</if>
+		ORDER BY cp_thread , thread
+	</select>
+	
+	<select id="getDigitalSummaryList" parameterType="CmMap"  resultType="CmMap" flushCache="false">
+	/* 디지털퀀텀 성과 요약 실적, 목표 데이터 (단위 : 억 원)*/
+		SELECT base2.is_ap,GROUPING(base2.cp_thread),base2.thread,base2.seq,COUNT(*)OVER(PARTITION BY base2.cp_thread, a.base_year) AS cnt, a.base_year, base2.cp_thread
+		,base2.cp_thread
+		,CASE
+		WHEN base2.unit_cd = '130,131' THEN '에스트라'
+		ELSE (SELECT cd_nm FROM gps.code_info ci WHERE cd_type='unit' AND ci.cd = base2.unit_cd)
+		END AS unit_title
+		,CASE
+		WHEN base2.is_etc = 'Y' THEN base2.title
+		ELSE (SELECT cd_nm FROM gps.code_info ci WHERE cd_type='brand' AND ci.cd = base2.brd_cd)
+		END AS brd_title
+			 , sum(ec+gec) AS korea
+			 , sum(ec) AS ec
+			 , sum(ece) AS ece
+			 , sum(ecd) AS ecd
+			 , sum(gec) AS gec
+			 , sum(global) AS global
+			 , sum(cn) AS cn
+			 , sum(hk) AS hk
+			 , sum(tw) AS tw
+			 , sum(sg+my+th+vn+id+ind+au+ph+au) AS apac
+			 , sum(sg) AS sg
+			 , sum(my) AS my
+			 , sum(th) AS th
+			 , sum(vn) AS vn
+			 , sum(id) AS id
+			 , sum(ind) AS ind
+			 , sum(au) AS au
+			 , sum(ph) AS ph
+			 , sum(ae) AS ae
+			 , sum(jp) AS jp
+			 , sum(fr) AS fr
+			 , sum(us) AS us
+			 , sum(ca) AS ca
+			 , sum(ru) AS ru
+			 , sum(ec+gec+global) AS total
+			 , sum(korea_spec) AS korea_spec
+			 , sum(global_spec) AS global_spec
+			 , sum(korea_spec+global_spec) AS total_spec
+			 , sum(goal_ec+goal_gec) AS goal_korea
+			 , sum(goal_ec) AS goal_ec
+-- 			 , sum(goal_ece) AS goal_ece
+-- 			 , sum(goal_ecd) AS goal_ecd
+			 , sum(goal_gec) AS goal_gec
+			 , sum(goal_global) AS goal_global
+			 , sum(goal_cn) AS goal_cn
+			 , sum(goal_hk) AS goal_hk
+			 , sum(goal_tw) AS goal_tw
+			 , sum(goal_sg+goal_my+goal_th+goal_vn+goal_id+goal_ind+goal_au+goal_ph+goal_au) AS goal_apac
+			 , sum(goal_sg) AS goal_sg
+			 , sum(goal_my) AS goal_my
+			 , sum(goal_th) AS goal_th
+			 , sum(goal_vn) AS goal_vn
+			 , sum(goal_id) AS goal_id
+			 , sum(goal_ind) AS goal_ind
+			 , sum(goal_au) AS goal_au
+			 , sum(goal_ph) AS goal_ph
+			 , sum(goal_ae) AS goal_ae
+			 , sum(goal_jp) AS goal_jp
+			 , sum(goal_fr) AS goal_fr
+			 , sum(goal_us) AS goal_us
+			 , sum(goal_ca) AS goal_ca
+			 , sum(goal_ru) AS goal_ru
+			 , sum(goal_ec+goal_gec+goal_global) AS goal_total
+			 , sum(goal_korea_spec) AS goal_korea_spec
+			 , sum(goal_global_spec) AS goal_global_spec
+			 , sum(goal_korea_spec+goal_global_spec) AS goal_total_spec
+		FROM (
+			SELECT * FROM gps.report_digital_summay WHERE base_year IN (#{lastGuideYear},#{guideYear}) AND selectMonth = #{selectMonth} AND report_type = #{reportType}
+		) a
+		RIGHT JOIN gps.report_digital_quantum_base base2 ON CASE WHEN a.base_year = #{lastGuideYear} THEN a.base_seq = base2.seq ELSE a.base_seq = base2.seq END
+		GROUP BY ROLLUP(a.base_year, base2.is_ap, cp_thread,(brd_title, thread, base2.seq, base2.unit_cd, base2.is_etc))
+		HAVING a.base_year IS NOT NULL
+		ORDER BY a.base_year, is_ap IS NULL, is_ap DESC, cp_thread, thread
+	</select>
+	
+	<select id="getOneChinaSummaryList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+	/* 원차이나 성과 요약 미계산 데이터 (단위 : 억 원)*/
+		SELECT base2.is_ap,GROUPING(base2.cp_thread),base2.thread,base2.seq,COUNT(*)OVER(PARTITION BY base2.cp_thread, a.base_year) AS cnt, a.base_year, base2.cp_thread
+			,base2.cp_thread
+			,CASE
+				WHEN base2.unit_cd = '130,131' THEN '에스트라'
+				ELSE (SELECT cd_nm FROM gps.code_info ci WHERE cd_type='unit' AND ci.cd = base2.unit_cd)
+			END AS unit_title
+			,CASE
+				WHEN base2.is_etc = 'Y' THEN base2.title
+				ELSE (SELECT cd_nm FROM gps.code_info ci WHERE cd_type='brand' AND ci.cd = base2.brd_cd)
+			END AS brd_title
+			, sum(ec+offline) AS cn_apc
+			, sum(ec) AS ec
+			, sum(offline) AS offline
+			, sum(gec) AS gec
+			, sum(ntr+gtr) AS tr
+			, sum(ntr) AS ntr
+			, sum(gtr) AS gtr
+			, sum(ec+offline+gec+ntr+gtr) AS total
+			, sum(goal_ec+goal_offline) AS goal_cn_apc
+			, sum(goal_ec) AS goal_ec
+			, sum(goal_offline) AS goal_offline
+			, sum(goal_gec) AS goal_gec
+			, sum(goal_ntr+goal_gtr) AS goal_tr
+			, sum(goal_ntr) AS goal_ntr
+			, sum(goal_gtr) AS goal_gtr
+			, sum(goal_ec+goal_offline+goal_gec+goal_ntr+goal_gtr) AS total
+		FROM (
+			SELECT * FROM gps.report_onechina_summary WHERE base_year IN (#{lastGuideYear},#{guideYear}) AND selectMonth = #{selectMonth}
+		) a
+		RIGHT JOIN gps.report_digital_quantum_base base2 ON CASE WHEN a.base_year = #{lastGuideYear} THEN a.base_seq = base2.seq ELSE a.base_seq = base2.seq END
+		GROUP BY ROLLUP(a.base_year, base2.is_ap, cp_thread,(brd_title, thread, base2.seq, base2.unit_cd, base2.is_etc))
+		HAVING a.base_year IS NOT NULL
+		ORDER BY a.base_year, is_ap IS NULL, is_ap DESC, cp_thread, thread
+	</select>
+	
+	<select id="getGroupBrandSummaryList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+	/* 그룹브랜드x국내채널 성과 요약 미계산 데이터 (단위 : 억 원)*/
+		SELECT base2.is_ap,base2.is_view,GROUPING(base2.cp_thread),base2.thread,base2.seq,COUNT(*)OVER(PARTITION BY base2.cp_thread, a.base_year) AS cnt, a.base_year, base2.cp_thread
+			, base2.cp_thread
+			, base2.title
+			, sum(ec_korea_sales+ec_global_sales+tc_sales+mbs_sales+roadshop_sales+mart_sales+dtd_sales+department_sales+retail_sales+ntr_sales+gtr_sales+global_sales) AS brand_total_sales
+			, sum(ec_korea_profit+ec_global_profit+tc_profit+mbs_profit+roadshop_profit+mart_profit+dtd_profit+department_profit+retail_profit+ntr_profit+gtr_profit+global_profit) AS brand_total_profit
+			, sum(ec_korea_sales+ec_global_sales+tc_sales+mbs_sales+roadshop_sales+mart_sales+dtd_sales+department_sales+retail_sales) AS korea_total_sales
+			, sum(ec_korea_profit+ec_global_profit+tc_profit+mbs_profit+roadshop_profit+mart_profit+dtd_profit+department_profit+retail_profit) AS korea_total_profit
+			, sum(ec_korea_sales+ec_global_sales) AS ec_total_sales
+			, sum(ec_korea_profit+ec_global_profit) AS ec_total_profit
+			, sum(ec_korea_sales) AS ec_korea_sales
+			, sum(ec_korea_profit) AS ec_korea_profit
+			, sum(ec_global_sales) AS ec_global_sales
+			, sum(ec_global_profit) AS ec_global_profit
+			, sum(tc_sales) AS tc_sales
+			, sum(tc_profit) AS tc_profit
+			, sum(mbs_sales) AS mbs_sales
+			, sum(mbs_profit) AS mbs_profit
+			, sum(roadshop_sales) AS roadshop_sales
+			, sum(roadshop_profit) AS roadshop_profit
+			, sum(mart_sales) AS mart_sales
+			, sum(mart_profit) AS mart_profit
+			, sum(dtd_sales) AS dtd_sales
+			, sum(dtd_profit) AS dtd_profit
+			, sum(department_sales) AS department_sales
+			, sum(department_profit) AS department_profit
+			, sum(retail_sales) AS retail_sales
+			, sum(retail_profit) AS retail_profit
+			, sum(ntr_sales+gtr_sales) AS tr_total_sales
+			, sum(ntr_profit+gtr_profit) AS tr_total_profit
+			, sum(ntr_sales) AS ntr_sales
+			, sum(ntr_profit) AS ntr_profit
+			, sum(gtr_sales) AS gtr_sales
+			, sum(gtr_profit) AS gtr_profit
+			, sum(global_sales) AS global_sales
+			, sum(global_profit) AS global_profit
+			, sum(goal_ec_korea_sales+goal_ec_global_sales+goal_tc_sales+goal_mbs_sales+goal_roadshop_sales+goal_mart_sales+goal_dtd_sales+goal_department_sales+goal_retail_sales+goal_ntr_sales+goal_gtr_sales+goal_global_sales) AS goal_brand_total_sales
+			, sum(goal_ec_korea_profit+goal_ec_global_profit+goal_tc_profit+goal_mbs_profit+goal_roadshop_profit+goal_mart_profit+goal_dtd_profit+goal_department_profit+goal_retail_profit+goal_ntr_profit+goal_gtr_profit+goal_global_profit) AS goal_brand_total_profit
+			, sum(goal_ec_korea_sales+goal_ec_global_sales+goal_tc_sales+goal_mbs_sales+goal_roadshop_sales+goal_mart_sales+goal_dtd_sales+goal_department_sales+goal_retail_sales) AS goal_korea_total_sales
+			, sum(goal_ec_korea_profit+goal_ec_global_profit+goal_tc_profit+goal_mbs_profit+goal_roadshop_profit+goal_mart_profit+goal_dtd_profit+goal_department_profit+goal_retail_profit) AS goal_korea_total_profit
+			, sum(goal_ec_korea_sales+goal_ec_global_sales) AS goal_ec_total_sales
+			, sum(goal_ec_korea_profit+goal_ec_global_profit) AS goal_ec_total_profit
+			, sum(goal_ec_korea_sales) AS goal_ec_korea_sales
+			, sum(goal_ec_korea_profit) AS goal_ec_korea_profit
+			, sum(goal_ec_global_sales) AS goal_ec_global_sales
+			, sum(goal_ec_global_profit) AS goal_ec_global_profit
+			, sum(goal_tc_sales) AS goal_tc_sales
+			, sum(goal_tc_profit) AS goal_tc_profit
+			, sum(goal_mbs_sales) AS goal_mbs_sales
+			, sum(goal_mbs_profit) AS goal_mbs_profit
+			, sum(goal_roadshop_sales) AS goal_roadshop_sales
+			, sum(goal_roadshop_profit) AS goal_roadshop_profit
+			, sum(goal_mart_sales) AS goal_mart_sales
+			, sum(goal_mart_profit) AS goal_mart_profit
+			, sum(goal_dtd_sales) AS goal_dtd_sales
+			, sum(goal_dtd_profit) AS goal_dtd_profit
+			, sum(goal_department_sales) AS goal_department_sales
+			, sum(goal_department_profit) AS goal_department_profit
+			, sum(goal_retail_sales) AS goal_retail_sales
+			, sum(goal_retail_profit) AS goal_retail_profit
+			, sum(goal_ntr_sales+goal_gtr_sales) AS goal_tr_total_sales
+			, sum(goal_ntr_profit+goal_gtr_profit) AS goal_tr_total_profit
+			, sum(goal_ntr_sales) AS goal_ntr_sales
+			, sum(goal_ntr_profit) AS goal_ntr_profit
+			, sum(goal_gtr_sales) AS goal_gtr_sales
+			, sum(goal_gtr_profit) AS goal_gtr_profit
+			, sum(goal_global_sales) AS goal_global_sales
+			, sum(goal_global_profit) AS goal_global_profit
+		FROM (
+			SELECT * FROM gps.report_group_brand_summary WHERE base_year IN (#{guideYear}, #{fGuideYear}, #{lGuideYear})
+			<foreach collection="selectMonthAry" item="selectMonthAry" open=" AND selectMonth IN (" close=")" separator="," >
+					#{selectMonthAry}
+			</foreach>
+		) a
+		RIGHT JOIN gps.report_group_brand_base base2 ON CASE WHEN a.base_year = '2021' THEN a.base_seq = base2.seq ELSE a.base_seq = base2.seq END
+		GROUP BY ROLLUP(a.base_year, base2.is_ap, base2.is_view, cp_thread,(title, thread, base2.seq, base2.unit_cd, base2.is_etc))
+		HAVING a.base_year IS NOT NULL
+		ORDER BY a.base_year, cp_thread, thread
+	</select>
+	
+	<select id="getCalenderResultTypeSetting" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 월별 마감상태 데이터  */
+		SELECT * 
+		FROM gps.BZGPSM_DDLN_YRMN  
+		WHERE DDLN_YEAR = #{baseYear}
+		ORDER BY DDLN_MTH
+	</select>
+	
+	<update id="updateCalenderResultType" parameterType="CmMap">
+		/* 월별 마감상태 UPDATE */
+		UPDATE gps.BZGPSM_DDLN_YRMN
+		SET
+			 DDLN_YN = #{resultStatus}
+		WHERE DDLN_YEAR = #{baseYear}
+		AND   DDLN_MTH = #{month}
+	</update>
+	
+	<select id="getCalenderResultTypeSettingList" resultType="CmMap" flushCache="false">
+		/* 월별 마감상태 전체 리스트  */
+		SELECT * 
+		FROM gps.BZGPSM_DDLN_YRMN  
+		ORDER BY DDLN_YEAR, DDLN_MTH
+	</select>
+</mapper>

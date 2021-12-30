@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.amore.gps.service.board.BoardDao">
+
+	<select id="getBoardMaxSeq" resultType="java.lang.Integer" flushCache="false">
+		select 
+			MAX(seq)
+		from gps.board_info
+	</select>
+
+	<select id="getBoardListCount" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		select  count(*)
+		from gps.board_info
+		where 1=1
+		<foreach collection="typeArray" item="typeArray" open=" AND type IN (" close=")" separator="," >
+		#{typeArray}
+		</foreach>
+		and status = 'N'
+		<if test="keyword != null and keyword != ''">
+		and UPPER(title) LIKE '%' || UPPER(#{keyword}) || '%'
+		</if>
+	</select>	
+	
+	<select id="getBoardList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 가이드 SELECT */
+		select BI.*
+		, ((n_count2+1+p_count)-N_NUM) n_count
+	from (
+		SELECT BB.*
+		, (select count(*) FROM gps.board_info WHERE 1=1and status = 'N' and type ='P' ) p_count
+		, (select count(*) FROM gps.board_info WHERE 1=1and status = 'N' and type ='N' ) n_count2
+		, ROW_NUMBER() OVER (ORDER BY type desc, seq DESC) N_NUM
+		FROM (
+			SELECT
+			seq
+			,title
+			,e_title
+			,contents
+			,e_contents
+			,type
+			,status
+			,reg_id
+			, (select mem_nm from gps.member_info where mem_id = reg_id) reg_nm
+			,reg_date
+			,read_cnt
+		 	FROM gps.board_info
+		 	WHERE 1=1
+		 	and status = 'N'
+		 	and type ='P'
+		 	union 
+		 	SELECT
+			seq
+			,title
+			,e_title
+			,contents
+			,e_contents
+			,type
+			,status
+			,reg_id
+			, (select mem_nm from gps.member_info where mem_id = reg_id) reg_nm
+			,reg_date
+			,read_cnt
+		 	FROM gps.board_info
+		 	WHERE 1=1
+		 	and status = 'N'
+		 	and type ='N'
+		) BB
+		WHERE 1=1
+		<if test="keyword != null and keyword != ''">
+		and UPPER(title) LIKE '%' || UPPER(#{keyword}) || '%'
+		</if>
+		<if test="type != null and type != ''">
+		and type = #{type}
+		</if>
+	) BI
+	WHERE 1=1
+	AND N_NUM BETWEEN #{i_StartRownum} AND #{i_EndRownum}	
+	</select>
+	
+	<insert id="insertBoard" parameterType="CmMap">
+		/* 게시판 INSERT */
+		INSERT INTO gps.board_info 
+			(
+				title
+				,contents
+				,type
+				,reg_id
+				,reg_date
+				,read_cnt
+				,upt_id
+				,upt_date
+				<if test="eTitle != null and eTitle != ''">
+				,e_title
+				</if>
+				<if test="eContents != null and eContents != ''">
+				,e_contents
+				</if>
+			) VALUES 
+			(
+				#{title}
+				,#{contents}
+				,#{type}
+				,#{regId}
+				, now()
+				, 0
+				,#{uptId}
+				, now()
+				<if test="eTitle != null and eTitle != ''">
+				,#{eTitle}
+				</if>
+				<if test="eContents != null and eContents != ''">
+				,#{eContents}
+				</if>
+			)
+	</insert>	
+	
+	<update id="updateReadCnt" parameterType="CmMap">
+		/* 게시판 readCnt++ */
+		UPDATE gps.board_info 
+		SET read_cnt = #{readCnt}
+		WHERE 1=1
+		AND seq = #{boardSeq}
+	</update>
+	
+	
+	<update id="updateBoard" parameterType="CmMap">
+		/* 게시판 update */
+		UPDATE gps.board_info 
+		SET title = #{title}
+			, contents = #{contents}
+			<if test="eTitle != null and eTitle != ''">
+			, e_title = #{eTitle}
+			</if>
+			<if test="eContents != null and eContents != ''">
+			, e_contents = #{eContents}
+			</if>
+			, type = #{type}
+			, upt_id = #{uptId}
+			, upt_date = now()
+		WHERE seq = #{boardSeq}
+	</update>
+	
+	<delete id="deleteBoard" parameterType="CmMap">
+		/* 게시판 Delete */
+		UPDATE gps.board_info 
+		SET status = 'D'
+			, upt_id = #{uptId}
+			, upt_date = now()
+		WHERE seq = #{boardSeq}
+<!-- 		AND type = #{type} -->
+	</delete>	
+	
+	<select id="getBoardInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 가이드 정보 SELECT */
+		SELECT
+			seq
+			,title
+			,contents
+			,e_title
+			,e_contents
+			,type
+			,status
+			,reg_id
+			, (select mem_nm from gps.member_info where mem_id = reg_id) reg_nm
+			,reg_date
+			,read_cnt
+			,upt_id
+			, (select mem_nm from gps.member_info where mem_id = upt_id) upt_nm
+			,upt_date
+	 	FROM gps.board_info
+		WHERE 1=1
+		<if test="boardSeq != null and boardSeq != ''">
+		AND seq = #{boardSeq}
+		</if>
+	</select>
+	
+	<select id="getFaqList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* Faq Select */
+		SELECT B.*
+		FROM (
+		SELECT ROW_NUMBER() OVER (ORDER BY seq DESC) N_NUM
+			, bi.seq
+			, bi.title
+			, bi.e_title
+			, bi.contents
+			, bi.e_contents
+			, bi.type
+		FROM gps.board_info bi 
+		WHERE bi.status = 'N'
+		AND bi.type = 'F'
+		<if test="keyword != null and keyword != ''">
+		AND UPPER(title) LIKE '%' || UPPER(#{keyword}) || '%'
+		</if>
+		) B
+		WHERE 1=1
+		AND N_NUM BETWEEN #{i_StartRownum} AND #{i_EndRownum}
+		ORDER BY B.seq DESC
+	</select>
+	
+</mapper>

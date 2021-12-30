@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.amore.gps.service.section.SectionDao">
+
+	<select id="getSectionList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		SELECT
+			si.*
+			, COALESCE(sdi.total_cnt, 0) AS sdi_cnt
+			, COALESCE(sdi.cp_cnt, 0) AS cp_cnt
+			, COALESCE(sdi.brd_cnt, 0) AS brd_cnt
+			, COALESCE(sdi.chl_cnt, 0) AS chl_cnt
+		FROM gps.section_info si
+		LEFT OUTER JOIN (
+			SELECT
+				sdi.section_id
+				, COUNT(*) AS total_cnt
+				, COUNT(DISTINCT sdi.cp_cd) AS cp_cnt
+				, COUNT(DISTINCT sdi.brd_cd) AS brd_cnt
+				, COUNT(DISTINCT sdi.chl_cd) AS chl_cnt
+			FROM gps.section_detail_info sdi
+			WHERE
+				sdi.base_year = #{baseYear}
+			GROUP BY sdi.section_id
+		) sdi ON
+			si.section_id = sdi.section_id
+		WHERE
+			si.is_del = 'N'
+			AND si.is_reg = 'Y'
+			AND si.base_year = #{baseYear}
+		ORDER BY si.thread
+	</select>
+	
+	<select id="getRegSectionList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		SELECT
+			si.*
+		FROM gps.section_info si
+		WHERE
+			si.is_use = 'Y'
+			AND si.is_reg = 'Y'
+			AND si.base_year = #{baseYear}
+		ORDER BY si.thread
+	</select>
+	
+	<select id="getSectionInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		SELECT
+			si.*
+		FROM gps.section_info si
+		WHERE
+			si.is_del = 'N'
+			AND si.section_id = #{sectionId}
+	</select>
+	
+	<select id="getSectionBaseYearList" resultType="string" flushCache="false">
+		SELECT
+			DISTINCT guide_base
+		FROM gps.guide_info
+		ORDER BY guide_base
+	</select>
+	
+	<update id="updateSectionOrder" parameterType="CmMap">
+		UPDATE gps.section_info
+		SET
+			thread = #{thread}
+		WHERE
+			section_id = #{sectionId}
+	</update>
+	
+	<insert id="insertSection" parameterType="CmMap">
+		INSERT INTO gps.section_info (
+			section_id
+			, cp_cd
+			, unit_cd
+			, dtl_cd
+			, is_use
+			, thread
+			, cate_cd
+			, is_reg
+			, section_nm
+			, section_enm
+			, base_year
+		) VALUES (
+			#{sectionId}
+			, #{cpCd}
+			, #{unitCd}
+			, #{dtlCd}
+			, #{isUse}
+			, #{thread}
+			, #{cateCd}
+			, #{isReg}
+			, #{sectionNm}
+			, #{sectionEnm}
+			, #{baseYear}
+		)
+	</insert>
+	
+	<update id="updateSection" parameterType="CmMap">
+		UPDATE gps.section_info
+		SET
+			section_nm = #{sectionNm}
+			, section_enm = #{sectionEnm}
+			, dtl_cd = #{dtlCd}
+			, cate_cd = #{cateCd}
+			, is_use = #{isUse}
+			, mod_date = now()
+		WHERE
+			section_id = #{sectionId}
+	</update>
+	
+	<update id="deleteSection" parameterType="CmMap">
+		UPDATE gps.section_info
+		SET
+			is_del = 'Y'
+			, is_use = 'N'
+			, mod_date = now()
+		WHERE
+			section_id = #{sectionId}
+	</update>
+	
+	<select id="getDuplicateSectionCount" resultType="int" flushCache="false">
+		SELECT
+			COUNT(*)
+		FROM gps.section_info si
+		WHERE
+			si.is_del = 'N'
+			AND si.is_reg = 'Y'
+			AND si.base_year = #{baseYear}
+			AND (si.section_nm = #{sectionNm} OR si.section_enm = #{sectionEnm})
+		<if test="sectionId != null and sectionId != ''">
+			AND si.section_id != #{sectionId}
+		</if>
+	</select>
+	
+	<select id="getSectionExcelList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		SELECT
+			si.*
+			, gps.FN_CODE_NM(si.cp_cd, 'cp', #{s_language}) AS cp_nm
+			, gps.FN_CODE_NM(si.dtl_cd, 'dtl', #{s_language}) AS dtl_nm
+			, gps.FN_CODE_NM(si.cate_cd, 'cate', #{s_language}) AS cate_nm
+		FROM gps.section_info si
+		WHERE
+			si.is_del = 'N'
+			AND si.is_reg = 'Y'
+			AND si.base_year = #{baseYear}
+		ORDER BY si.thread
+	</select>
+	
+	<select id="getTrmMonthExcelList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		SELECT
+			tm.cp_cd
+			, gps.FN_CODE_NM(tm.cp_cd, 'cp', #{s_language}) AS cp_nm
+			, tm.brd_cd
+			, gps.FN_CODE_NM(tm.brd_cd, 'brand', #{s_language}) AS brd_nm
+			, ci.ch_gps
+			, gps.FN_CODE_NM(ci.ch_gps, 'chgps', #{s_language}) AS chg_nm
+			, CASE WHEN tm.cp_cd ~ '^([0-9]+[.]?[0-9]*|[.][0-9]+)$' THEN 'KR' ELSE substring(tm.cp_cd, 0, 3) END AS nat_cd
+			, 'KRW' AS currency
+			, SUM(COALESCE(tm1.l_sales, 0)) AS l_sales
+			, SUM(COALESCE(tm1.l_profit, 0)) AS l_profit
+			, SUM(COALESCE(tm2.f_sales, 0)) AS f_sales
+			, SUM(COALESCE(tm2.f_profit, 0)) AS f_profit
+			, ci.is_grp_sale
+			, ci.is_grp_prof
+			, ci.ch_lc
+			, gps.FN_CODE_NM(ci.ch_lc, 'lc', #{s_language}) AS lc_nm
+			, ci.ch_grp
+			, gps.FN_CODE_NM(ci.ch_grp, 'chgr', #{s_language}) AS chgr_nm
+		FROM gps.tb_trm_month_krw tm
+		INNER JOIN gps.ch_info ci ON
+			tm.chl_cd = ci.chl_cd
+		LEFT OUTER JOIN (
+			SELECT
+				tm.cp_cd
+				, tm.brd_cd
+				, tm.chl_cd
+				, tm.sales AS l_sales
+				, tm.profit AS l_profit
+			FROM gps.tb_trm_month_krw tm
+			WHERE
+				tm.yyyy = #{lYear}
+				AND tm.sales != 0
+				AND tm.profit != 0
+		) tm1 ON
+			tm.cp_cd = tm1.cp_cd
+			AND tm.brd_cd = tm1.brd_cd
+			AND tm.chl_cd = tm1.chl_cd
+		LEFT OUTER JOIN (
+			SELECT
+				tm.yyyy
+				, tm.cp_cd
+				, tm.brd_cd
+				, tm.chl_cd
+				, tm.sales AS f_sales
+				, tm.profit AS f_profit
+			FROM gps.tb_trm_month_krw tm
+			WHERE
+				tm.yyyy = #{fYear}
+				AND tm.sales != 0
+				AND tm.profit != 0
+		) tm2 ON
+			tm.cp_cd = tm2.cp_cd
+			AND tm.brd_cd = tm2.brd_cd
+			AND tm.chl_cd = tm2.chl_cd
+		WHERE
+			tm.yyyy = #{baseYear}
+			AND tm.sales != 0
+			AND tm.profit != 0
+		GROUP BY
+			tm.cp_cd
+			, tm.brd_cd
+			, ci.ch_gps
+			, ci.is_grp_sale
+			, ci.is_grp_prof
+			, ci.ch_lc
+			, ci.ch_grp
+		ORDER BY
+			tm.cp_cd
+			, tm.brd_cd
+	</select>
+	
+	<select id="getSectionDetailExcelList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		SELECT
+			sdi.cp_cd
+			, gps.FN_CODE_NM(sdi.cp_cd, 'cp', #{s_language}) AS cp_nm
+			, sdi.brd_cd
+			, gps.FN_CODE_NM(sdi.brd_cd, 'brand', #{s_language}) AS brd_nm
+			, ci.ch_gps
+			, gps.FN_CODE_NM(ci.ch_gps, 'chgps', #{s_language}) AS chg_nm
+			, CASE WHEN sdi.cp_cd ~ '^([0-9]+[.]?[0-9]*|[.][0-9]+)$' THEN 'KR' ELSE substring(sdi.cp_cd, 0, 3) END AS nat_cd
+			, 'KRW' AS currency
+			, SUM(COALESCE(tm1.l_sales, 0)) AS l_sales
+			, SUM(COALESCE(tm1.l_profit, 0)) AS l_profit
+			, SUM(COALESCE(tm2.f_sales, 0)) AS f_sales
+			, SUM(COALESCE(tm2.f_profit, 0)) AS f_profit
+			, ci.is_grp_sale
+			, ci.is_grp_prof
+			, ci.ch_lc
+			, gps.FN_CODE_NM(ci.ch_lc, 'lc', #{s_language}) AS lc_nm
+			, ci.ch_grp
+			, gps.FN_CODE_NM(ci.ch_grp, 'chgr', #{s_language}) AS chgr_nm
+		FROM gps.section_detail_info sdi
+		INNER JOIN gps.ch_info ci ON
+			sdi.chl_cd = ci.ch_gps
+		LEFT OUTER JOIN (
+			SELECT
+				tm.cp_cd
+				, tm.brd_cd
+				, tm.chl_cd
+				, tm.sales AS l_sales
+				, tm.profit AS l_profit
+			FROM gps.tb_trm_month_krw tm
+			WHERE
+				tm.yyyy = #{lYear}
+				AND tm.sales != 0
+				AND tm.profit != 0
+		) tm1 ON
+			sdi.cp_cd = tm1.cp_cd
+			AND sdi.brd_cd = tm1.brd_cd
+			AND ci.chl_cd = tm1.chl_cd
+		LEFT OUTER JOIN (
+			SELECT
+				tm.cp_cd
+				, tm.brd_cd
+				, tm.chl_cd
+				, tm.sales AS f_sales
+				, tm.profit AS f_profit
+			FROM gps.tb_trm_month_krw tm
+			WHERE
+				tm.yyyy = #{fYear}
+				AND tm.sales != 0
+				AND tm.profit != 0
+		) tm2 ON
+			sdi.cp_cd = tm2.cp_cd
+			AND sdi.brd_cd = tm2.brd_cd
+			AND ci.chl_cd = tm2.chl_cd
+		WHERE
+			sdi.section_id = #{sectionId}
+		GROUP BY
+			sdi.cp_cd
+			, sdi.brd_cd
+			, ci.ch_gps
+			, ci.is_grp_sale
+			, ci.is_grp_prof
+			, ci.ch_lc
+			, ci.ch_grp
+		ORDER BY
+			sdi.cp_cd
+			, sdi.brd_cd
+	</select>
+	
+	<delete id="clearSection" parameterType="CmMap">
+		DELETE
+		FROM gps.section_info
+		WHERE
+			base_year = #{baseYear}
+			AND is_reg = 'Y'
+	</delete>
+	
+	<insert id="copySection" parameterType="CmMap">
+		INSERT INTO gps.section_info
+		(
+			section_id
+			, cp_cd
+			, unit_cd
+			, dtl_cd
+			, is_cp
+			, is_use
+			, thread
+			, cate_cd
+			, is_reg
+			, section_nm
+			, section_enm
+			, is_del
+			, base_year
+		)
+		SELECT
+			substring(section_id, 0, 10) || #{baseYear}
+			, cp_cd
+			, unit_cd
+			, dtl_cd
+			, is_cp
+			, is_use
+			, thread
+			, cate_cd
+			, is_reg
+			, section_nm
+			, section_enm
+			, is_del
+			, #{baseYear}
+		FROM gps.section_info
+		WHERE
+			base_year = #{copyYear}
+	</insert>
+	
+	<insert id="insertSectionLog" parameterType="CmMap">
+		INSERT INTO gps.section_log 
+			(
+				tbl
+				, section_id
+				, cp_cd
+				, brd_cd
+				, chl_cd
+				, action_type
+				, reg_id
+			) VALUES 
+			(
+				#{tbl}
+				, #{sectionId}
+				, #{cpCd}
+				, #{brdCd}
+				, #{chlCd}
+				, #{actionType}
+				, #{regId}
+			)	
+	</insert>
+	
+</mapper>

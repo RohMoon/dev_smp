@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.amore.gps.service.section.SectionDetailDao">
+	<select id="getSectionDetailList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		SELECT
+       		si.section_id
+       		, si.section_nm
+			, gps.FN_CODE_NM(si.dtl_cd, 'dtl', #{s_language}) AS dtl_nm
+			, sdi.cp_cd
+			, sdi.unit_cd
+			, sdi.brd_cd
+			, gps.FN_CODE_NM(sdi.brd_cd, 'brand', #{s_language}) AS brd_nm
+			, sdi.chl_cd
+			, gps.FN_CODE_NM(ci.ch_gps, 'chgps', #{s_language}) AS chg_nm
+			, sdi.nat_cd
+			, 'KRW' AS currency
+			, 'KRW' AS fx_cd
+			, SUM(COALESCE(tm1.l_sales, 0)) AS l_sales
+			, SUM(COALESCE(tm1.l_profit, 0)) AS l_profit
+			, SUM(COALESCE(tm2.f_sales, 0)) AS f_sales
+			, SUM(COALESCE(tm2.f_profit, 0)) AS f_profit
+			, ci.is_grp_sale
+			, ci.is_grp_prof
+		FROM gps.section_detail_info sdi
+		INNER JOIN gps.section_info si
+			ON sdi.section_id = si.section_id
+		INNER JOIN gps.ch_info ci 
+			ON sdi.chl_cd = ci.ch_gps
+		LEFT OUTER JOIN (
+			SELECT
+				tm.cp_cd
+				, tm.brd_cd
+				, tm.chl_cd
+				, tm.sales AS l_sales
+				, tm.profit AS l_profit
+			FROM gps.tb_trm_month_krw tm
+			WHERE
+				tm.yyyy = #{lYear}
+		) tm1 ON
+			sdi.cp_cd = tm1.cp_cd
+			AND sdi.brd_cd = tm1.brd_cd
+			AND ci.chl_cd = tm1.chl_cd
+		LEFT OUTER JOIN (
+			SELECT
+				tm.cp_cd
+				, tm.brd_cd
+				, tm.chl_cd
+				, tm.sales AS f_sales
+				, tm.profit AS f_profit
+			FROM gps.tb_trm_month_krw tm
+			WHERE
+				tm.yyyy = #{fYear}
+		) tm2 ON
+			sdi.cp_cd = tm2.cp_cd
+			AND sdi.brd_cd = tm2.brd_cd
+			AND ci.chl_cd = tm2.chl_cd
+		WHERE 
+			1=1
+			<if test="sectionId != null and sectionId != ''">
+				AND sdi.section_id = #{sectionId} 
+			</if>
+		GROUP BY
+			si.section_id 
+       		, si.section_nm
+       		, si.dtl_cd
+			, sdi.cp_cd
+			, sdi.unit_cd
+			, sdi.brd_cd
+			, sdi.chl_cd
+			, sdi.nat_cd
+			, ci.ch_gps
+			, ci.is_grp_sale
+			, ci.is_grp_prof
+			, ci.ch_lc
+			, ci.ch_grp
+		ORDER BY
+			sdi.cp_cd
+			, sdi.brd_cd
+	</select>
+	
+	<select id="getSectionDetailInfoCount" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		/* 섹션 세부항목 중복 조회 */
+		SELECT count(*)
+		FROM 
+			gps.section_detail_info sdi
+		WHERE 
+			  sdi.section_id  = #{sectionId}
+			AND sdi.cp_cd     = #{cpCd}
+			AND sdi.unit_cd   = #{unitCd}
+			AND sdi.base_year = #{baseYear}
+			AND sdi.brd_cd    = #{brdCd}
+			AND sdi.chl_cd    = #{chlCd}
+			AND sdi.nat_cd    = #{natCd}
+	</select>
+	
+	<update id="updateSectionDetailInfo" parameterType="CmMap" >
+		/* 섹션 세부항목 수정 - 업데이트 */
+		UPDATE gps.section_detail_info
+		SET
+			section_id = #{toSectionId}
+			, unit_cd  = #{toUnitCd}
+			, dtl_cd   = #{toDtlCd}
+			, mod_date = now()
+		WHERE section_id = #{sectionId}
+		AND   cp_cd      = #{cpCd}
+		AND   unit_cd    = #{unitCd}
+		AND   nat_cd     = #{natCd}
+		AND   brd_cd     = #{brdCd}
+		AND   chl_cd     = #{chlCd}
+	</update>
+	
+	<delete id="deleteSectionDetailInfo" parameterType="CmMap" >
+		/* 섹션 세부항목 수정 - 삭제 */
+		DELETE 
+		FROM gps.section_detail_info
+		WHERE 
+			  base_year  = #{baseYear}
+		AND   section_id = #{sectionId}
+		AND   cp_cd      = #{cpCd}
+		AND   unit_cd    = #{unitCd}
+		AND   nat_cd     = #{natCd}
+		AND   brd_cd     = #{brdCd}
+		AND   chl_cd     = #{chlCd}
+	</delete>
+	
+	<insert id="insertSectionDetail" parameterType="CmMap">
+		INSERT INTO gps.section_detail_info (
+			section_id
+			, dtl_cd
+			, cp_cd
+			, unit_cd
+			, nat_cd
+			, brd_cd
+			, chl_cd
+			, fx_cd
+			, base_year
+		) VALUES (
+			  #{sectionId}
+			, #{dtlCd}
+			, #{cpCd}
+			, #{unitCd}
+			, #{natCd}
+			, #{brdCd}
+			, #{chlCd}
+			, #{fxCd}
+			, #{baseYear}
+		)
+	</insert>
+	
+	<delete id="clearAllSectionDetail" parameterType="CmMap">
+		DELETE
+		FROM gps.section_detail_info
+		WHERE
+			base_year = #{baseYear}
+	</delete>
+	
+	<delete id="clearSectionDetail" parameterType="CmMap">
+		DELETE
+		FROM gps.section_detail_info
+		WHERE base_year = #{baseYear}
+		AND section_id = #{sectionId}
+	</delete>
+	
+	<insert id="insertGuideDataYearRefChInfo" parameterType="CmMap">
+		/* 섹션 세부항목 등록> 가이드 데이터 연쇄등록 */
+		INSERT INTO gps.guide_data_year 
+		(
+			guide_data_seq
+			,section_id
+			,cp_cd
+			,unit_cd
+			,nat_cd
+			,brd_cd
+			,chl_cd
+			,l_sales
+			,l_profit
+			,is_grp_sale
+			,f_sales
+			,f_profit
+			,is_grp_prof
+			,yyyy
+		)
+		SELECT
+			#{guideDataSeq} AS guide_data_seq
+			, sdi.section_id 
+			, sdi.cp_cd 
+			, sdi.unit_cd 
+			, sdi.nat_cd 
+			, sdi.brd_cd 
+			, sdi.chl_cd 
+			, COALESCE(tm1.l_sales, 0)
+			, COALESCE(tm1.l_profit, 0)
+			, ci.is_grp_sale 
+			, COALESCE(tm2.f_sales, 0)
+			, COALESCE(tm2.f_profit, 0) 
+			, ci.is_grp_prof 
+			, sdi.base_year
+		FROM gps.section_detail_info sdi
+		INNER JOIN gps.ch_info ci 
+			ON sdi.chl_cd = ci.ch_gps
+		LEFT OUTER JOIN (
+			SELECT
+				tm.cp_cd
+				, tm.brd_cd
+				, tm.chl_cd
+				, tm.sales AS l_sales
+				, tm.profit AS l_profit
+			FROM gps.tb_trm_month_krw tm
+			WHERE
+				tm.yyyy = #{lYear}
+				AND tm.sales != 0
+				AND tm.profit != 0
+		) tm1 ON
+			sdi.cp_cd = tm1.cp_cd
+			AND sdi.brd_cd = tm1.brd_cd
+			AND ci.chl_cd = tm1.chl_cd
+		LEFT OUTER JOIN (
+			SELECT
+				tm.cp_cd
+				, tm.brd_cd
+				, tm.chl_cd
+				, tm.sales AS f_sales
+				, tm.profit AS f_profit
+			FROM gps.tb_trm_month_krw tm
+			WHERE
+				tm.yyyy = #{fYear}
+				AND tm.sales != 0
+				AND tm.profit != 0
+		) tm2 ON
+			sdi.cp_cd = tm2.cp_cd
+			AND sdi.brd_cd = tm2.brd_cd
+			AND ci.chl_cd = tm2.chl_cd
+		WHERE sdi.base_year = #{baseYear}
+		AND sdi.section_id = #{sectionId}
+		AND sdi.cp_cd  = #{cpCd}
+		AND sdi.unit_cd = #{unitCd}
+		AND sdi.nat_cd = #{natCd}
+		AND sdi.dtl_cd = #{dtlCd}
+		AND sdi.brd_cd = #{brdCd}
+		AND sdi.chl_cd = #{chlCd}
+	</insert>
+	
+	<delete id="deleteGuideDataYear" parameterType="CmMap">
+		/* 섹션 세부항목 삭제> 가이드 데이터 연쇄삭제 */
+		DELETE 
+		FROM 
+			gps.guide_data_year gdy
+		WHERE
+				gdy.guide_data_seq = #{guideDataSeq}
+			AND gdy.section_id = #{sectionId}
+			AND gdy.cp_cd = #{cpCd}
+			AND gdy.unit_cd = #{unitCd}
+			AND gdy.nat_cd = #{natCd}
+			AND gdy.brd_cd = #{brdCd}
+			AND gdy.chl_cd = #{chlCd}
+			AND gdy.yyyy = #{baseYear}
+	</delete>
+	
+	<update id="updateGuideDataYear" parameterType="CmMap" >
+		/* 섹션 세부항목 수정> 가이드 데이터 연쇄업데이트 */
+		UPDATE gps.guide_data_year gdy
+		SET
+			section_id       = #{toSectionId}
+			, unit_cd        = #{toUnitCd}
+			, guide_data_seq = #{toGuideDataSeq}
+			, mod_date       = now()
+		WHERE yyyy           = #{baseYear}
+		AND   section_id     = #{sectionId}
+		AND   cp_cd          = #{cpCd}
+		AND   unit_cd        = #{unitCd}
+		AND   nat_cd         = #{natCd}
+		AND   brd_cd         = #{brdCd}
+		AND   chl_cd         = #{chlCd}
+		AND   guide_data_seq = #{guideDataSeq}
+	</update>
+	
+	<select id="getSectionInfoSectionId" parameterType="CmMap" resultType="java.lang.String" flushCache="false">
+		SELECT 
+			 si.section_id
+		FROM gps.section_info si
+		WHERE section_id = #{sectionInfoSectionId}
+		AND si.is_reg = 'Y'
+		AND si.is_del = 'N'
+	</select>
+	
+	<select id="getSectionDetailStatusList" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 섹션분류현황 리스트 가져오기 */
+		SELECT
+			  COALESCE(sdi.section_id, '-') AS section_id
+			, COALESCE(si.section_nm, '-') AS section_nm
+			, tm.cp_cd
+			, tm.brd_cd
+			, gps.FN_CODE_NM(tm.brd_cd, 'brand', #{s_language}) AS brd_nm
+			, ci.ch_gps
+			, gps.FN_CODE_NM(ci.ch_gps, 'chgps', #{s_language}) AS chg_nm
+			, COALESCE(sdi.dtl_cd, '-') as dtl_cd
+			, CASE WHEN sdi.dtl_cd IS NULL THEN '-' ELSE gps.FN_CODE_NM(sdi.dtl_cd, 'dtl', #{s_language}) END AS dtl_nm
+			, CASE WHEN tm.cp_cd ~ '^([0-9]+[.]?[0-9]*|[.][0-9]+)$' THEN 'KR' ELSE substring(tm.cp_cd, 0, 3) END AS nat_cd
+			, CASE WHEN tm.cp_cd IS NULL THEN '-' WHEN tm.cp_cd ~ '^([0-9]+[.]?[0-9]*|[.][0-9]+)$' THEN gps.FN_CODE_NM('KR', 'nat', #{s_language}) ELSE gps.FN_CODE_NM(substring(tm.cp_cd, 0, 3), 'nat', #{s_language}) END AS nat_nm
+			, 'KRW' AS currency
+			, ci.is_grp_sale 
+			, ci.is_grp_prof
+			, ROUND(COALESCE(l_sales, 0)::numeric,2) AS l_sales
+			, ROUND(COALESCE(l_profit, 0)::numeric,2) AS l_profit
+			, ROUND(COALESCE(f_sales, 0)::numeric,2) AS f_sales
+			, ROUND(COALESCE(f_profit, 0)::numeric,2) AS f_profit
+			, ROUND(COALESCE(g_sales, 0)::numeric,2) AS g_sales
+			, ROUND(COALESCE(g_profit, 0)::numeric,2) AS g_profit
+			, CASE WHEN sdi.section_id IS NULL THEN 'N' ELSE 'Y' END AS is_categorize
+		FROM gps.tb_trm_month_krw tm
+		INNER JOIN gps.ch_info ci ON
+			tm.chl_cd = ci.chl_cd
+		LEFT OUTER JOIN gps.section_detail_info sdi ON
+			tm.cp_cd = sdi.cp_cd
+			AND tm.brd_cd  = sdi.brd_cd
+			AND sdi.chl_cd = ci.ch_gps
+			AND sdi.base_year = #{baseYear}
+		LEFT OUTER JOIN gps.section_info si ON
+			sdi.section_id = si.section_id
+			AND sdi.base_year = si.base_year
+		LEFT OUTER JOIN (
+			SELECT
+				tm.cp_cd
+				, tm.brd_cd
+				, tm.chl_cd
+				, tm.sales AS l_sales
+				, tm.profit AS l_profit
+			FROM gps.tb_trm_month_krw tm
+			WHERE
+				tm.yyyy = #{lYear}
+				AND tm.sales != 0
+				AND tm.profit != 0
+		) tm1 ON
+			sdi.cp_cd = tm1.cp_cd
+			AND sdi.brd_cd = tm1.brd_cd
+			AND ci.chl_cd = tm1.chl_cd
+		LEFT OUTER JOIN (
+			SELECT
+				tm.cp_cd
+				, tm.brd_cd
+				, tm.chl_cd
+				, tm.sales AS f_sales
+				, tm.profit AS f_profit
+			FROM gps.tb_trm_month_krw tm
+			WHERE
+				tm.yyyy = #{fYear}
+				AND tm.sales != 0
+				AND tm.profit != 0
+		) tm2 ON
+			sdi.cp_cd = tm2.cp_cd
+			AND sdi.brd_cd = tm2.brd_cd
+			AND ci.chl_cd = tm2.chl_cd
+		LEFT OUTER JOIN (
+			SELECT
+				tm.cp_cd
+				, tm.brd_cd
+				, tm.chl_cd
+				, tm.sales AS g_sales
+				, tm.profit AS g_profit
+			FROM gps.tb_trm_month_krw tm
+			WHERE
+				tm.yyyy = #{gYear}
+				AND tm.sales != 0
+				AND tm.profit != 0
+		) tm3 ON
+			sdi.cp_cd = tm3.cp_cd
+			AND sdi.brd_cd = tm3.brd_cd
+			AND ci.chl_cd = tm3.chl_cd
+		WHERE
+			tm.yyyy = #{trmYear}
+			AND tm.sales != 0
+			AND tm.profit != 0
+		ORDER BY
+			  tm.cp_cd
+			, tm.brd_cd
+	</select>
+	
+	<select id="getTrmDetailExistCnt" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		/* 섹션 세부항목 중복 조회 */
+		SELECT count(*)
+		FROM gps.tb_trm_month_krw tm
+		INNER JOIN gps.ch_info ci 
+		ON tm.chl_cd = ci.chl_cd
+		WHERE tm.yyyy = #{trmYear}
+		AND tm.cp_cd = #{cpCd}
+		AND tm.brd_cd = #{brdCd}
+		AND ci.ch_gps = #{chlCd}
+	</select>
+	
+	<select id="getGoalDataYearInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 연 세부 목표 작성 조회 */
+		SELECT * 
+		FROM gps.goal_data_year
+		WHERE
+			goal_data_seq = #{goalDataSeq}
+		AND section_id = #{sectionId}
+		AND cp_cd = #{cpCd}
+		AND unit_cd = #{unitCd}
+		AND nat_cd = #{natCd}
+		AND brd_cd = #{brdCd}
+		AND chl_cd = #{chlCd}
+		AND yyyy = #{baseYear}
+	</select>
+	
+	<update id="updateGoalDataYear" parameterType="CmMap" >
+		/* 연 세부 목표 정보 업데이트 */
+		UPDATE gps.goal_data_year
+		SET
+			section_id = #{toSectionId}
+			, unit_cd  = #{toUnitCd}
+			, goal_data_seq = #{toGoalDataSeq}
+			, mod_date = now()
+		WHERE goal_data_seq = #{goalDataSeq}
+		AND   section_id = #{sectionId}
+		AND   cp_cd      = #{cpCd}
+		AND   unit_cd    = #{unitCd}
+		AND   nat_cd     = #{natCd}
+		AND   brd_cd     = #{brdCd}
+		AND   chl_cd     = #{chlCd}
+	</update>
+	
+	<select id="getGoalDataMonthInfo" parameterType="CmMap" resultType="CmMap" flushCache="false">
+		/* 월 세부 목표 작성 조회 */
+		SELECT * 
+		FROM gps.goal_data_month
+		WHERE
+			goal_data_year_seq = #{goalDataYearSeq}
+		AND section_id = #{sectionId}
+		AND cp_cd = #{cpCd}
+		AND unit_cd = #{unitCd}
+		AND nat_cd = #{natCd}
+		AND brd_cd = #{brdCd}
+		AND chl_cd = #{chlCd}
+	</select>
+	
+	<update id="updateGoalDataMonth" parameterType="CmMap" >
+		/* 연 세부 목표 정보 업데이트 */
+		UPDATE gps.goal_data_month
+		SET
+			section_id = #{toSectionId}
+			, unit_cd  = #{toUnitCd}
+		WHERE goal_data_year_seq = #{goalDataYearSeq}
+		AND   section_id = #{sectionId}
+		AND   cp_cd      = #{cpCd}
+		AND   unit_cd    = #{unitCd}
+		AND   nat_cd     = #{natCd}
+		AND   brd_cd     = #{brdCd}
+		AND   chl_cd     = #{chlCd}
+	</update>
+</mapper>

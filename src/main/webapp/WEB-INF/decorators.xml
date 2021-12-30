@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<decorators>
+    <excludes>
+        <pattern>*_ajax.do*</pattern>
+        <pattern>*ajax.do*</pattern>
+        <pattern>*json.do*</pattern>
+        <pattern>*save.do*</pattern>
+        <pattern>*/login/*</pattern>
+        <pattern>*/include/*</pattern>
+        <pattern>*/health/*</pattern>
+        <pattern>*user_reg_popup*</pattern>
+        <pattern>*.html*</pattern>
+    </excludes>
+
+    <decorator name="webLayout" page="/WEB-INF/view/include/cm_layout.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+    <decorator name="popupLayout" page="/WEB-INF/view/include/cm_popup_layout.jsp">
+        <pattern>/*_popup*</pattern>
+    </decorator>
+</decorators>

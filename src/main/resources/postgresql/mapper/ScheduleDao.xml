@@ -1,0 +1,2941 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.amore.gps.service.comm.ScheduleDao">
+
+    <delete id="deleteTrmMonth">
+        TRUNCATE TABLE gps.tb_trm_month_krw
+    </delete>
+
+    <insert id="insertTrmMonth">
+        INSERT INTO gps.tb_trm_month_krw
+            (yyyy,
+            cp_cd ,
+            brd_cd,
+            chl_cd,
+            currency,
+            s_01,
+            s_02,
+            s_03,
+            s_04,
+            s_05,
+            s_06,
+            s_07,
+            s_08,
+            s_09,
+            s_10,
+            s_11,
+            s_12,
+            p_01,
+            p_02,
+            p_03,
+            p_04,
+            p_05,
+            p_06,
+            p_07,
+            p_08,
+            p_09,
+            p_10,
+            p_11,
+            p_12)
+        SELECT substring((a.calmonth)::text, 1, 4) AS yyyy,
+            a.comp_code,
+                CASE
+                    WHEN ((a.zbrang)= '') THEN '#'::character varying
+                    ELSE a.zbrang
+                END AS zbrang,
+            a.zapgchnl,
+            a.currency,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '01'::text) THEN (a.sales)::double PRECISION
+                    ELSE (0)::double precision
+                END) AS s01,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '02'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s02,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '03'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s03,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '04'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s04,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '05'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s05,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '06'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s06,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '07'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s07,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '08'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s08,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '09'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s09,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '10'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s10,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '11'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s11,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '12'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s12,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '01'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p01,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '02'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p02,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '03'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p03,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '04'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p04,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '05'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p05,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '06'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p06,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '07'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p07,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '08'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p08,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '09'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p09,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '10'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p10,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '11'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p11,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '12'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p12
+           FROM gps.zca_if_trm_001 a
+          WHERE a.status = 'Y'
+          GROUP BY ("substring"((a.calmonth)::text, 1, 4)), a.comp_code, a.zbrang, a.zapgchnl, a.currency
+    </insert>
+
+    <insert id="insertTrmMonth2019">
+        INSERT INTO gps.tb_trm_month_krw
+            (yyyy,
+            cp_cd ,
+            brd_cd,
+            chl_cd,
+            currency,
+            s_01,
+            s_02,
+            s_03,
+            s_04,
+            s_05,
+            s_06,
+            s_07,
+            s_08,
+            s_09,
+            s_10,
+            s_11,
+            s_12,
+            p_01,
+            p_02,
+            p_03,
+            p_04,
+            p_05,
+            p_06,
+            p_07,
+            p_08,
+            p_09,
+            p_10,
+            p_11,
+            p_12)
+        SELECT substring((a.calmonth)::text, 1, 4) AS yyyy,
+            a.comp_code,
+                CASE
+                    WHEN ((a.zbrang)= '') THEN '#'::character varying
+                    ELSE a.zbrang
+                END AS zbrang,
+            a.zapgchnl,
+            a.currency,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '01'::text) THEN (a.sales)::double PRECISION
+                    ELSE (0)::double precision
+                END) AS s01,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '02'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s02,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '03'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s03,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '04'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s04,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '05'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s05,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '06'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s06,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '07'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s07,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '08'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s08,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '09'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s09,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '10'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s10,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '11'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s11,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '12'::text) THEN (a.sales)::double precision
+                    ELSE (0)::double precision
+                END) AS s12,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '01'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p01,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '02'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p02,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '03'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p03,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '04'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p04,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '05'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p05,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '06'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p06,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '07'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p07,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '08'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p08,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '09'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p09,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '10'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p10,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '11'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p11,
+            sum(
+                CASE
+                    WHEN ("substring"((a.calmonth)::text, 5, 7) = '12'::text) THEN (a.profit)::double precision
+                    ELSE (0)::double precision
+                END) AS p12
+           FROM gps.zca_if_trm_001_2019 a
+          WHERE a.status = 'Y' and a.calmonth like '2019%'
+          GROUP BY ("substring"((a.calmonth)::text, 1, 4)), a.comp_code, a.zbrang, a.zapgchnl, a.currency
+    </insert>
+
+    <update id="updateTrmMomth" parameterType="String">
+        UPDATE gps.tb_trm_month_krw a
+            SET
+                yyyy_fx=#{fxYear},
+                currency='KRW',
+                s_01=(case WHEN b.currency!='KRW' THEN b.s_01 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.s_01/1000000	END),
+                s_02=(case WHEN b.currency!='KRW' THEN b.s_02 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.s_02/1000000	END),
+                s_03=(case WHEN b.currency!='KRW' THEN b.s_03 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.s_03/1000000	END),
+                s_04=(case WHEN b.currency!='KRW' THEN b.s_04 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.s_04/1000000	END),
+                s_05=(case WHEN b.currency!='KRW' THEN b.s_05 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.s_05/1000000	END),
+                s_06=(case WHEN b.currency!='KRW' THEN b.s_06 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.s_06/1000000	END),
+                s_07=(case WHEN b.currency!='KRW' THEN b.s_07 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.s_07/1000000	END),
+                s_08=(case WHEN b.currency!='KRW' THEN b.s_08 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.s_08/1000000	END),
+                s_09=(case WHEN b.currency!='KRW' THEN b.s_09 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.s_09/1000000	END),
+                s_10=(case WHEN b.currency!='KRW' THEN b.s_10 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.s_10/1000000	END),
+                s_11=(case WHEN b.currency!='KRW' THEN b.s_11 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.s_11/1000000	END),
+                s_12=(case WHEN b.currency!='KRW' THEN b.s_12 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.s_12/1000000	END),
+                p_01=(case WHEN b.currency!='KRW' THEN b.p_01 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.p_01/1000000	END),
+                p_02=(case WHEN b.currency!='KRW' THEN b.p_02 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.p_02/1000000	END),
+                p_03=(case WHEN b.currency!='KRW' THEN b.p_03 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.p_03/1000000	END),
+                p_04=(case WHEN b.currency!='KRW' THEN b.p_04 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.p_04/1000000	END),
+                p_05=(case WHEN b.currency!='KRW' THEN b.p_05 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.p_05/1000000	END),
+                p_06=(case WHEN b.currency!='KRW' THEN b.p_06 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.p_06/1000000	END),
+                p_07=(case WHEN b.currency!='KRW' THEN b.p_07 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.p_07/1000000	END),
+                p_08=(case WHEN b.currency!='KRW' THEN b.p_08 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.p_08/1000000	END),
+                p_09=(case WHEN b.currency!='KRW' THEN b.p_09 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.p_09/1000000	END),
+                p_10=(case WHEN b.currency!='KRW' THEN b.p_10 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.p_10/1000000	END),
+                p_11=(case WHEN b.currency!='KRW' THEN b.p_11 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.p_11/1000000	END),
+                p_12=(case WHEN b.currency!='KRW' THEN b.p_12 * gps.fn_nat_unit_fx_krw(b.currency,#{fxYear}) ELSE b.p_12/1000000	END)
+        FROM
+        (SELECT * FROM gps.tb_trm_month_krw WHERE yyyy_fx IS NULL) b
+        WHERE a.seq=b.seq
+    </update>
+
+    <update id="updateSumTrmMomth" parameterType="String">
+        UPDATE gps.tb_trm_month_krw a
+        SET
+        sales=(s_01+s_02+s_03+s_04+s_05+s_06+s_07+s_08+s_09+s_10+s_11+s_12),
+        profit=(p_01+p_02+p_03+p_04+p_05+p_06+p_07+p_08+p_09+p_10+p_11+p_12)
+    </update>
+
+    <delete id="deleteGoalDataMonth" parameterType="String">
+        delete from gps.tb_goal_data_month_krw where base_year=#{goalBaseYear}
+    </delete>
+
+    <insert id="insertGoalDataMonth" parameterType="String">
+       INSERT INTO  gps.tb_goal_data_month_krw (
+            month_seq,
+            year_seq,
+            base_year,
+            section_id,
+            view,
+            cp_cd ,
+            cp_nm ,
+            unit_cd ,
+            unit_nm,
+            nat_cd,
+            nat_nm,
+            brd_cd,
+            brd_nm,
+            chl_cd,
+            chl_nm,
+            unit,
+            g_sales,
+            g_profit,
+            g_sales_total,
+            g_profit_total,
+            sm_status,
+            pm_status,
+            is_grp_sale,
+            is_grp_prof,
+            s_01,s_02,s_03,s_04,s_05,s_06,s_07,s_08,s_09,s_10,s_11,s_12,
+            p_01,p_02,p_03,p_04,p_05,p_06,p_07,p_08,p_09,p_10,p_11,p_12)
+        SELECT
+            a.month_seq, a.year_seq, a.base_year,
+            a.section_id, b.dtl_cd AS views,
+            a.cp_cd, a.cp_nm, a.unit_cd, a.unit_nm,
+            a.nat_cd, a.nat_nm,
+            a.brd_cd, a.brd_nm,
+            a.chl_cd, a.chl_nm,
+            'KRW' AS unit,
+            a.g_sales, a.g_profit,
+            a.g_sales_total, a.g_profit_total,
+            a.sm_status, a.pm_status,
+            a.is_grp_sale, a.is_grp_prof,
+            a.s_01,a.s_02,a.s_03,a.s_04,a.s_05,a.s_06,a.s_07,a.s_08,a.s_09,a.s_10,a.s_11,s_12,
+            a.p_01,a.p_02,a.p_03,a.p_04,a.p_05,a.p_06,a.p_07,a.p_08,a.p_09,a.p_10,a.p_11,p_12
+        FROM (
+            SELECT
+            a.month_seq, a.year_seq, a.base_year,
+            a.cp_cd, a.cp_nm, a.unit_cd, a.unit_nm,
+            a.nat_cd, a.nat_nm,
+            a.brd_cd, a.brd_nm,
+            a.chl_cd, a.chl_nm,
+            'KRW' AS unit,
+            a.section_id,
+            gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	a.g_sales,'' , a.unit) AS g_sales,
+            gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	a.g_profit,'' , a.unit) AS g_profit,
+            gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	a.g_sales_total,'' , a.unit) AS g_sales_total,
+            gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	a.g_profit_total,'' , a.unit) AS g_profit_total,
+            a.sm_status, a.pm_status,
+            a.is_grp_sale, a.is_grp_prof,
+            a.s_01,a.s_02,a.s_03,a.s_04,a.s_05,a.s_06,a.s_07,a.s_08,a.s_09,a.s_10,a.s_11,a.s_12,
+            a.p_01,a.p_02,a.p_03,a.p_04,a.p_05,a.p_06,a.p_07,a.p_08,a.p_09,a.p_10,a.p_11,a.p_12
+            FROM (
+                SELECT m.seq AS month_seq, a.seq AS year_seq, a.yyyy AS base_year,
+                    a.cp_cd, b.cd_nm AS cp_nm, a.unit_cd, c.cd_nm AS unit_nm,
+                    a.nat_cd, d.cd_nm AS nat_nm,
+                    a.brd_cd, e.cd_nm AS brd_nm,
+                    a.chl_cd, f.cd_nm AS chl_nm,
+                    case
+                        WHEN g.ch_unit='19' THEN a.unit
+                        ELSE aa.unit
+                    END unit,
+                    a.section_id,
+                    case when g.is_grp_sale='Y' then g_sales ELSE '0' end AS g_sales,
+                    case when g.is_grp_prof IN ('N','Y') then g_profit ELSE '0' end AS g_profit,
+                    g_sales AS g_sales_total,
+                    g_profit AS g_profit_total,
+                    aa.sm_status,
+                    CASE
+                        WHEN a.cp_cd='1100' AND a.nat_cd='KR' THEN aa.pm_status
+                        WHEN a.cp_cd='1100' AND a.nat_cd!='KR' THEN aa.pm_os_status
+                        ELSE aa.pm_status
+                    END AS pm_status,
+                    g.is_grp_sale, g.is_grp_prof,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.s_01, g.ch_unit , aa.unit) AS s_01,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.s_02, g.ch_unit , aa.unit) AS s_02,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.s_03, g.ch_unit , aa.unit) AS s_03,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.s_04, g.ch_unit , aa.unit) AS s_04,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.s_05, g.ch_unit , aa.unit) AS s_05,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.s_06, g.ch_unit , aa.unit) AS s_06,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.s_07, g.ch_unit , aa.unit) AS s_07,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.s_08, g.ch_unit , aa.unit) AS s_08,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.s_09, g.ch_unit , aa.unit) AS s_09,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.s_10, g.ch_unit , aa.unit) AS s_10,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.s_11, g.ch_unit , aa.unit) AS s_11,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.s_12, g.ch_unit , aa.unit) AS s_12,
+
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.p_01, g.ch_unit , aa.unit) AS p_01,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.p_02, g.ch_unit , aa.unit) AS p_02,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.p_03, g.ch_unit , aa.unit) AS p_03,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.p_04, g.ch_unit , aa.unit) AS p_04,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.p_05, g.ch_unit , aa.unit) AS p_05,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.p_06, g.ch_unit , aa.unit) AS p_06,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.p_07, g.ch_unit , aa.unit) AS p_07,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.p_08, g.ch_unit , aa.unit) AS p_08,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.p_09, g.ch_unit , aa.unit) AS p_09,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.p_10, g.ch_unit , aa.unit) AS p_10,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.p_11, g.ch_unit , aa.unit) AS p_11,
+                    gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	m.p_12, g.ch_unit , aa.unit) AS p_12
+                FROM gps.goal_data_year a
+                LEFT OUTER JOIN gps.goal_data aa ON a.goal_data_seq=aa.seq AND aa.ROLLBACK='N'
+                LEFT OUTER JOIN gps.code_info b ON a.cp_cd=b.cd AND b.cd_type='cp'
+                LEFT OUTER JOIN gps.code_info c ON a.unit_cd=c.cd AND c.cd_type='unit'
+                LEFT OUTER JOIN gps.code_info d ON a.nat_cd=d.cd AND d.cd_type='nat'
+                LEFT OUTER JOIN gps.code_info e ON a.brd_cd=e.cd AND e.cd_type='brand'
+                LEFT OUTER JOIN gps.code_info f ON a.chl_cd=f.cd AND f.cd_type='ch'
+                LEFT OUTER JOIN gps.goal_data_month m ON a.seq=m.goal_data_year_seq AND m."rollback"='N'
+                LEFT OUTER JOIN (select ch_gps, max(ch_unit) ch_unit, MAX(is_grp_sale) is_grp_sale, MAX(is_grp_prof) is_grp_prof FROM gps.ch_info GROUP BY ch_gps) g ON a.chl_cd=g.ch_gps
+                WHERE goal_data_seq IN (
+                    SELECT seq AS goal_seq
+                    FROM gps.goal_data
+                    WHERE guide_seq = (
+                        SELECT MAX(seq) AS guide_seq
+                        FROM gps.guide_info
+                        WHERE STATUS='C' AND guide_base::text=#{goalBaseYear}
+                    )
+                    AND ROLLBACK='N'
+                )
+                AND yyyy=#{goalBaseYear}
+                AND a.ROLLBACK='N'
+            ) a
+        ) a
+        LEFT JOIN gps.section_info b ON a.section_id=b.section_id
+        WHERE  b.is_use='Y' AND b.cate_cd!='005'
+    </insert>
+
+    <delete id="deleteReportSummary" parameterType="CmMap">
+        DELETE FROM gps.report_summary WHERE base_year=#{goalBaseYear}
+    </delete>
+
+    <insert id="insertReportSummary" parameterType="CmMap" >
+        INSERT INTO gps.report_summary (
+            base_year,
+            title,
+            unit_cd,
+            thread,
+            cp_thread,
+            "view",
+            is_subtotal,
+            is_sum,
+			is_mainview,
+            section_id,
+            seq,
+            cate_cd,
+            ests01,	ests02,	ests03,	ests04,	ests05,	ests06,	ests07,	ests08,	ests09,	ests10,	ests11,	ests12,	estp01,	estp02,	estp03,	estp04,	estp05,	estp06,	estp07,	estp08,	estp09,	estp10,	estp11,	estp12)
+	    SELECT
+              #{goalBaseYear}  AS base_year
+			, b.title
+			, b.unit_cd
+			, b.thread
+			, b.cp_thread
+			, b.view
+			, b.is_subtotal
+			, b.is_sum
+			, b.is_mainview
+			, b.section_id
+			, a.*
+			FROM
+			(
+				SELECT
+				  a.seq, a.cate_cd
+				, COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_01 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms01
+				, COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_02 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms02
+				, COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_03 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms03
+				, COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_04 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms04
+				, COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_05 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms05
+				, COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_06 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms06
+				, COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_07 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms07
+				, COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_08 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms08
+				, COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_09 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms09
+				, COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_10 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms10
+				, COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_11 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms11
+				, COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_12 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms12
+				, COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_01 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp01
+				, COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_02 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp02
+				, COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_03 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp03
+				, COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_04 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp04
+				, COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_05 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp05
+				, COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_06 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp06
+				, COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_07 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp07
+				, COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_08 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp08
+				, COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_09 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp09
+				, COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_10 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp10
+				, COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_11 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp11
+				, COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_12 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp12
+				FROM
+				(
+					SELECT a.seq, a.cp_cd, a.brd_cd, b.chl_cd, a.nat_cd, a.cate_cd, a.unit_cd, a.view, a.is_sum,a.brd_grp_arr, a.brd_grp, a.thread, a.ch_un
+					FROM
+					(
+						SELECT seq, gs.cp_cd, brd_cd, chl_cd, nat_cd, gs.unit_cd, string_to_array(ch_grp,',') ch_grp_arr, gs.brd_grp,
+							string_to_array(REPLACE(brd_grp,'!',''),',') brd_grp_arr, gs.cate_cd, gs.view, gs.is_sum, gs.thread, gs.ch_un, gs.ch_lc
+						FROM gps.report_base1 gs
+						WHERE gs.base_year = #{goalBaseYear} AND gs.status = 'Y' AND report_type = 'common'
+					) a
+					LEFT JOIN gps.ch_info b ON CASE
+					when a.chl_cd!='' then a.chl_cd=b.chl_cd
+					WHEN a.ch_un!='' THEN a.ch_un=b.ch_unit
+					when a.ch_lc!='' then a.ch_lc=b.ch_lc
+					ELSE b.ch_grp = ANY(a.ch_grp_arr) END
+				) a
+				LEFT OUTER JOIN gps.tb_trm_month_krw vtm
+				ON
+					vtm.yyyy= #{lastBaseYear} and vtm.yyyy_fx= #{fxYear}
+				AND CASE
+					WHEN a.unit_cd='191' AND a.brd_grp='AP99' AND LENGTH(a.thread)=1 THEN vtm.cp_cd IN ('1100','US10')
+					WHEN a.cp_cd!='' THEN a.cp_cd=vtm.cp_cd
+					WHEN a.nat_cd!='' THEN a.nat_cd=substr(vtm.cp_cd,1,2)
+					ELSE 1=1
+				END
+				AND  case
+					WHEN a.brd_cd='76300' AND LENGTH(a.thread)=1 THEN vtm.brd_cd IN ('76300','76500')  -- for 아모스 단위합계
+					WHEN LENGTH(a.brd_cd)>5 THEN vtm.brd_cd=ANY(STRING_TO_ARRAY(a.brd_cd,','))
+					WHEN a.brd_cd!=''  AND a.brd_grp='' THEN a.brd_cd=vtm.brd_cd
+					WHEN a.unit_cd='191' AND a.brd_grp='AP99' AND a.cp_cd='1100' AND LENGTH(a.thread)=1 THEN vtm.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr)) OR vtm.brd_cd  IN ('00000','#')
+					WHEN a.unit_cd='191' AND a.brd_grp='AP99' AND a.cp_cd='1100' AND LENGTH(a.thread)<![CDATA[ > ]]>1 THEN vtm.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr) AND brd_cd!='11010') OR vtm.brd_cd  IN ('00000','#')
+
+					WHEN a.view!='CH' AND a.brd_grp!='' AND a.brd_grp!='AP99,AP04' THEN
+						CASE
+							WHEN a.brd_grp !~ '^!' THEN vtm.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr))
+							ELSE vtm.brd_cd NOT IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr))
+						END
+					WHEN a.view!='CH' AND a.brd_grp='AP99,AP04' THEN vtm.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr) AND brd_cd!='11010') OR vtm.brd_cd  IN ('00000','#')
+				ELSE 1=1
+				END
+				AND CASE WHEN a.chl_cd!='' AND a.chl_cd is not null then a.chl_cd  = vtm.chl_cd ELSE 1=1 END
+				LEFT JOIN gps.ch_info ci ON vtm.chl_cd=ci.chl_cd
+
+				GROUP BY a.seq, a.cate_cd
+			) a
+			LEFT JOIN gps.report_base1 b ON a.seq = b.seq
+			ORDER BY b.cp_thread, b.thread asc
+    </insert>
+
+
+
+    <update id="updateReportSummary1" parameterType="CmMap" >
+        UPDATE gps.report_summary a
+		SET
+			g_sales       = b.g_sales,
+			g_profit      = b.g_profit,
+			g_sales_total = b.g_sales_total,
+			g_profit_total= b.g_profit_total,
+			s01=b.s01,
+			s02=b.s02,
+			s03=b.s03,
+			s04=b.s04,
+			s05=b.s05,
+			s06=b.s06,
+			s07=b.s07,
+			s08=b.s08,
+			s09=b.s09,
+			s10=b.s10,
+			s11=b.s11,
+			s12=b.s12,
+			p01=b.p01,
+			p02=b.p02,
+			p03=b.p03,
+			p04=b.p04,
+			p05=b.p05,
+			p06=b.p06,
+			p07=b.p07,
+			p08=b.p08,
+			p09=b.p09,
+			p10=b.p10,
+			p11=b.p11,
+			p12=b.p12
+		FROM (
+			SELECT
+				  b.base_year
+				, b.title
+				, b.unit_cd
+				, b.thread
+				, b.cp_thread
+				, b.view
+				, b.is_subtotal
+				, b.is_sum
+				, b.is_mainview
+				, b.section_id
+				, a.*
+			FROM
+			(
+				SELECT
+					a.seq, a.cate_cd
+					, SUM(CASE WHEN b.is_grp_sale='Y' THEN b.g_sales ::DOUBLE PRECISION WHEN a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.g_sales_total ::DOUBLE PRECISION END) AS g_sales
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.g_profit ::DOUBLE PRECISION ELSE 0 END) AS g_profit
+					, SUM(b.g_sales_total ::DOUBLE PRECISION) AS g_sales_total
+					, SUM(b.g_profit_total ::DOUBLE PRECISION) AS g_profit_total
+					, SUM(CASE WHEN b.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.s_01::DOUBLE PRECISION ELSE 0 END) AS s01
+					, SUM(CASE WHEN b.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.s_02::DOUBLE PRECISION ELSE 0 END) AS s02
+					, SUM(CASE WHEN b.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.s_03::DOUBLE PRECISION ELSE 0 END) AS s03
+					, SUM(CASE WHEN b.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.s_04::DOUBLE PRECISION ELSE 0 END) AS s04
+					, SUM(CASE WHEN b.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.s_05::DOUBLE PRECISION ELSE 0 END) AS s05
+					, SUM(CASE WHEN b.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.s_06::DOUBLE PRECISION ELSE 0 END) AS s06
+					, SUM(CASE WHEN b.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.s_07::DOUBLE PRECISION ELSE 0 END) AS s07
+					, SUM(CASE WHEN b.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.s_08::DOUBLE PRECISION ELSE 0 END) AS s08
+					, SUM(CASE WHEN b.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.s_09::DOUBLE PRECISION ELSE 0 END) AS s09
+					, SUM(CASE WHEN b.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.s_10::DOUBLE PRECISION ELSE 0 END) AS s10
+					, SUM(CASE WHEN b.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.s_11::DOUBLE PRECISION ELSE 0 END) AS s11
+					, SUM(CASE WHEN b.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN b.s_12::DOUBLE PRECISION ELSE 0 END) AS s12
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.p_01 ::DOUBLE PRECISION ELSE 0 END) AS p01
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.p_02 ::DOUBLE PRECISION ELSE 0 END) AS p02
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.p_03 ::DOUBLE PRECISION ELSE 0 END) AS p03
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.p_04 ::DOUBLE PRECISION ELSE 0 END) AS p04
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.p_05 ::DOUBLE PRECISION ELSE 0 END) AS p05
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.p_06 ::DOUBLE PRECISION ELSE 0 END) AS p06
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.p_07 ::DOUBLE PRECISION ELSE 0 END) AS p07
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.p_08 ::DOUBLE PRECISION ELSE 0 END) AS p08
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.p_09 ::DOUBLE PRECISION ELSE 0 END) AS p09
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.p_10 ::DOUBLE PRECISION ELSE 0 END) AS p10
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.p_11 ::DOUBLE PRECISION ELSE 0 END) AS p11
+					, SUM(CASE WHEN b.is_grp_prof='Y' THEN b.p_12 ::DOUBLE PRECISION ELSE 0 END) AS p12
+				FROM
+				(
+					SELECT DISTINCT ON (a.seq, a.cp_cd, a.brd_cd, b.ch_gps, a.nat_cd, a.cate_cd, a.unit_cd, a.view, a.is_sum,a.brd_grp_arr, a.brd_grp, a.thread, a.ch_un)
+					a.seq, a.cp_cd, a.brd_cd, CASE WHEN b.ch_gps!='' THEN b.ch_gps ELSE b.chl_cd END AS chl_cd, a.nat_cd, a.cate_cd, a.unit_cd, a.view, a.is_sum,a.brd_grp_arr, a.brd_grp, a.thread, a.ch_un
+					FROM
+					(
+						SELECT seq, gs.cp_cd, brd_cd, chl_cd, nat_cd, gs.unit_cd, string_to_array(ch_grp,',') ch_grp_arr, gs.brd_grp,
+							string_to_array(REPLACE(brd_grp,'!',''),',') brd_grp_arr, gs.cate_cd, gs.view, gs.is_sum, gs.thread, gs.ch_un, gs.ch_lc
+						FROM gps.report_base1 gs
+						WHERE gs.base_year = #{goalBaseYear} AND gs.status = 'Y' AND report_type = 'common'
+					) a
+					LEFT JOIN gps.ch_info b ON CASE
+					when a.chl_cd!='' then a.chl_cd=b.chl_cd
+					WHEN a.ch_un!='' THEN a.ch_un=b.ch_unit
+					when a.ch_lc!='' then a.ch_lc=b.ch_lc
+					ELSE b.ch_grp = ANY(a.ch_grp_arr) END
+				) a
+				LEFT JOIN gps.tb_goal_data_month_krw b ON
+				CASE
+					WHEN a.unit_cd='191' AND a.brd_grp='AP99' AND LENGTH(a.thread)=1 THEN b.cp_cd IN ('1100','US10')
+					WHEN a.cp_cd!='' THEN a.cp_cd=b.cp_cd
+					WHEN a.nat_cd!='' THEN a.nat_cd = b.nat_cd
+					ELSE 1=1
+				END
+				AND	CASE
+					WHEN a.brd_cd='76300' AND LENGTH(a.thread)=1 THEN b.brd_cd IN ('76300','76500')  -- for 아모스 단위합계
+					WHEN LENGTH(a.brd_cd)>5 THEN b.brd_cd=ANY(STRING_TO_ARRAY(a.brd_cd,','))
+					WHEN a.brd_cd!=''  AND a.brd_grp='' THEN a.brd_cd=b.brd_cd
+					WHEN a.unit_cd='191' AND a.brd_grp='AP99' AND a.cp_cd='1100' AND LENGTH(a.thread)=1 THEN b.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr)) OR b.brd_cd  IN ('00000','#')
+					WHEN a.unit_cd='191' AND a.brd_grp='AP99' AND a.cp_cd='1100' AND LENGTH(a.thread)<![CDATA[ > ]]>1 THEN b.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr) AND brd_cd!='11010') OR b.brd_cd  IN ('00000','#')
+					WHEN a.view!='CH' AND a.brd_grp!='' AND a.brd_grp!='AP99,AP04' THEN
+						CASE
+							WHEN a.brd_grp !~ '^!' THEN b.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr))
+							ELSE b.brd_cd NOT IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr))
+						END
+					WHEN a.view!='CH' AND a.brd_grp='AP99,AP04' THEN b.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr) AND brd_cd!='11010') OR b.brd_cd  IN ('00000','#')
+					ELSE 1=1
+				END
+				AND CASE
+					WHEN a.chl_cd IS NOT NULL AND a.chl_cd != '' THEN a.chl_cd = b.chl_cd
+					ELSE 1=1
+				END
+				AND CASE
+					WHEN a.view!= 'CH' THEN a.view=b.view
+					ELSE 1=1
+				END
+				AND b.base_year = #{goalBaseYear}
+				GROUP BY a.seq, a.cate_cd
+			) a
+			LEFT JOIN gps.report_base1 b ON a.seq = b.seq
+			ORDER BY b.cp_thread, b.thread asc
+		) b
+		WHERE a.seq=b.seq
+    </update>
+
+    <update id="updateReportSummary" parameterType="CmMap" >
+        UPDATE gps.report_summary a
+        SET
+            rsts01=b.vtms01,
+            rsts02=b.vtms02,
+            rsts03=b.vtms03,
+            rsts04=b.vtms04,
+            rsts05=b.vtms05,
+            rsts06=b.vtms06,
+            rsts07=b.vtms07,
+            rsts08=b.vtms08,
+            rsts09=b.vtms09,
+            rsts10=b.vtms10,
+            rsts11=b.vtms11,
+            rsts12=b.vtms12,
+            rstp01=b.vtmp01,
+            rstp02=b.vtmp02,
+            rstp03=b.vtmp03,
+            rstp04=b.vtmp04,
+            rstp05=b.vtmp05,
+            rstp06=b.vtmp06,
+            rstp07=b.vtmp07,
+            rstp08=b.vtmp08,
+            rstp09=b.vtmp09,
+            rstp10=b.vtmp10,
+            rstp11=b.vtmp11,
+            rstp12=b.vtmp12
+        FROM (
+        SELECT
+                 a.*
+                FROM
+                (
+                    SELECT
+                      a.seq, a.cate_cd
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_01 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms01
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_02 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms02
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_03 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms03
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_04 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms04
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_05 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms05
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_06 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms06
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_07 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms07
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_08 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms08
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_09 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms09
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_10 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms10
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_11 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms11
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_12 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms12
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_01 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp01
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_02 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp02
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_03 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp03
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_04 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp04
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_05 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp05
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_06 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp06
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_07 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp07
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_08 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp08
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_09 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp09
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_10 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp10
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_11 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp11
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_12 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp12
+                    FROM
+                    (
+                        SELECT a.seq, a.cp_cd, a.brd_cd, b.chl_cd, a.nat_cd, a.cate_cd, a.unit_cd, a.view, a.is_sum,a.brd_grp_arr, a.brd_grp, a.thread, a.ch_un
+                        FROM
+                        (
+                            SELECT seq, gs.cp_cd, brd_cd, chl_cd, nat_cd, gs.unit_cd, string_to_array(ch_grp,',') ch_grp_arr, gs.brd_grp,
+                                string_to_array(REPLACE(brd_grp,'!',''),',') brd_grp_arr, gs.cate_cd, gs.view, gs.is_sum, gs.thread, gs.ch_un, gs.ch_lc
+                            FROM gps.report_base1 gs
+                                    WHERE gs.base_year = #{goalBaseYear} AND gs.status = 'Y' AND report_type = 'common'
+                        ) a
+                        LEFT JOIN gps.ch_info b ON CASE
+                        when a.chl_cd!='' then a.chl_cd=b.chl_cd
+                        WHEN a.ch_un!='' THEN a.ch_un=b.ch_unit
+					    when a.ch_lc!='' then a.ch_lc=b.ch_lc
+                        ELSE b.ch_grp = ANY(a.ch_grp_arr) END
+                    ) a
+                        LEFT OUTER JOIN gps.tb_trm_month_krw vtm
+                        ON
+                            vtm.yyyy= #{lastBaseYear} and vtm.yyyy_fx=#{fxYear}
+                        AND CASE
+                            WHEN a.unit_cd='191' AND a.brd_grp='AP99' AND LENGTH(a.thread)=1 THEN vtm.cp_cd IN ('1100','US10')
+                            WHEN a.cp_cd!='' THEN a.cp_cd=vtm.cp_cd
+                            WHEN a.nat_cd!='' THEN a.nat_cd=substr(vtm.cp_cd,1,2)
+                            ELSE 1=1
+                        END
+                        AND case
+                            WHEN a.brd_cd='76300' AND LENGTH(a.thread)=1 THEN vtm.brd_cd IN ('76300','76500')  -- for 아모스 단위합계
+                            WHEN LENGTH(a.brd_cd)>5 THEN vtm.brd_cd=ANY(STRING_TO_ARRAY(a.brd_cd,','))
+                            WHEN a.brd_cd!=''  AND a.brd_grp='' THEN a.brd_cd=vtm.brd_cd
+                            WHEN a.unit_cd='191' AND a.brd_grp='AP99' AND a.cp_cd='1100' AND LENGTH(a.thread)=1 THEN vtm.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr)) OR vtm.brd_cd  IN ('00000','#')
+                            WHEN a.unit_cd='191' AND a.brd_grp='AP99' AND a.cp_cd='1100' AND LENGTH(a.thread)<![CDATA[ > ]]>1 THEN vtm.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr) AND brd_cd!='11010') OR vtm.brd_cd  IN ('00000','#')
+                            WHEN a.view!='CH' AND a.brd_grp!='' AND a.brd_grp!='AP99,AP04' THEN
+                                CASE
+                                    WHEN a.brd_grp !~ '^!' THEN vtm.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr))
+                                    ELSE vtm.brd_cd NOT IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr))
+                                END
+                            WHEN a.view!='CH' AND a.brd_grp='AP99,AP04' THEN vtm.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr) AND brd_cd!='11010') OR vtm.brd_cd  IN ('00000','#')
+                        ELSE 1=1
+                        END
+                        AND CASE WHEN a.chl_cd!='' OR a.chl_cd is not null then a.chl_cd  = vtm.chl_cd ELSE 1=1 END
+                        LEFT JOIN gps.ch_info ci ON vtm.chl_cd=ci.chl_cd
+                    GROUP BY a.seq, a.cate_cd
+                ) a
+                LEFT JOIN gps.report_base1 b ON a.seq = b.seq
+                ORDER BY b.cp_thread, b.thread asc
+        ) b
+        WHERE a.seq=b.seq
+    </update>
+
+    <update id="updateReportSummary2" parameterType="CmMap" >
+        UPDATE gps.report_summary a
+        SET
+            curs01=b.vtms01,
+            curs02=b.vtms02,
+            curs03=b.vtms03,
+            curs04=b.vtms04,
+            curs05=b.vtms05,
+            curs06=b.vtms06,
+            curs07=b.vtms07,
+            curs08=b.vtms08,
+            curs09=b.vtms09,
+            curs10=b.vtms10,
+            curs11=b.vtms11,
+            curs12=b.vtms12,
+            curp01=b.vtmp01,
+            curp02=b.vtmp02,
+            curp03=b.vtmp03,
+            curp04=b.vtmp04,
+            curp05=b.vtmp05,
+            curp06=b.vtmp06,
+            curp07=b.vtmp07,
+            curp08=b.vtmp08,
+            curp09=b.vtmp09,
+            curp10=b.vtmp10,
+            curp11=b.vtmp11,
+            curp12=b.vtmp12
+        FROM (
+        SELECT
+                 a.*
+                FROM
+                (
+                    SELECT
+                      a.seq, a.cate_cd
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_01 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms01
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_02 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms02
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_03 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms03
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_04 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms04
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_05 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms05
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_06 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms06
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_07 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms07
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_08 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms08
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_09 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms09
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_10 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms10
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_11 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms11
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_sale='Y' OR a.is_sum='N' or (a.view='CH' AND a.is_sum='Y') THEN vtm.s_12 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtms12
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_01 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp01
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_02 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp02
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_03 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp03
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_04 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp04
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_05 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp05
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_06 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp06
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_07 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp07
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_08 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp08
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_09 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp09
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_10 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp10
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_11 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp11
+                    , COALESCE(SUM(CASE WHEN ci.is_grp_prof='Y' THEN vtm.p_12 ::DOUBLE PRECISION ELSE 0 END), 0) AS vtmp12
+                    FROM
+                    (
+                        SELECT a.seq, a.cp_cd, a.brd_cd, b.chl_cd, a.nat_cd, a.cate_cd, a.unit_cd, a.view, a.is_sum,a.brd_grp_arr, a.brd_grp, a.thread, a.ch_un
+                        FROM
+                        (
+                            SELECT seq, gs.cp_cd, brd_cd, chl_cd, nat_cd, gs.unit_cd, string_to_array(ch_grp,',') ch_grp_arr, gs.brd_grp,
+                                string_to_array(REPLACE(brd_grp,'!',''),',') brd_grp_arr, gs.cate_cd, gs.view, gs.is_sum, gs.thread, gs.ch_un, gs.ch_lc
+                            FROM gps.report_base1 gs
+                            WHERE gs.base_year = #{goalBaseYear} AND gs.status = 'Y' AND report_type = 'common'
+                        ) a
+                        LEFT JOIN gps.ch_info b ON CASE
+                        when a.chl_cd!='' then a.chl_cd=b.chl_cd
+                        WHEN a.ch_un!='' THEN a.ch_un=b.ch_unit
+					    when a.ch_lc!='' then a.ch_lc=b.ch_lc
+                        ELSE b.ch_grp = ANY(a.ch_grp_arr) END
+                    ) a
+                        LEFT OUTER JOIN gps.tb_trm_month_krw vtm
+                        ON
+                                vtm.yyyy= #{lastBaseYear} and vtm.yyyy_fx=#{fxYear}
+                        AND CASE
+                            WHEN a.unit_cd='191' AND a.brd_grp='AP99' AND LENGTH(a.thread)=1 THEN vtm.cp_cd IN ('1100','US10')
+                            WHEN a.cp_cd!='' THEN a.cp_cd=vtm.cp_cd
+                            WHEN a.nat_cd!='' THEN a.nat_cd=substr(vtm.cp_cd,1,2)
+                            ELSE 1=1
+                        END
+                        AND case
+                            WHEN a.brd_cd='76300' AND LENGTH(a.thread)=1 THEN vtm.brd_cd IN ('76300','76500')  -- for 아모스 단위합계
+                            WHEN LENGTH(a.brd_cd)>5 THEN vtm.brd_cd=ANY(STRING_TO_ARRAY(a.brd_cd,','))
+                            WHEN a.brd_cd!=''  AND a.brd_grp='' THEN a.brd_cd=vtm.brd_cd
+                            WHEN a.unit_cd='191' AND a.brd_grp='AP99' AND a.cp_cd='1100' AND LENGTH(a.thread)=1 THEN vtm.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr)) OR vtm.brd_cd  IN ('00000','#')
+                            WHEN a.unit_cd='191' AND a.brd_grp='AP99' AND a.cp_cd='1100' AND LENGTH(a.thread)<![CDATA[ > ]]>2 THEN vtm.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr) AND brd_cd!='11010') OR vtm.brd_cd  IN ('00000','#')
+                            WHEN a.view!='CH' AND a.brd_grp!='' AND a.brd_grp!='AP99,AP04' THEN
+                                CASE
+                                    WHEN a.brd_grp !~ '^!' THEN vtm.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr))
+                                    ELSE vtm.brd_cd NOT IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr))
+                                END
+                            WHEN a.view!='CH' AND a.brd_grp='AP99,AP04' THEN vtm.brd_cd IN (SELECT brd_cd FROM gps.brd_info WHERE brd_grp=ANY(a.brd_grp_arr) AND brd_cd!='11010') OR vtm.brd_cd  IN ('00000','#')
+                        ELSE 1=1
+                        END
+                        AND CASE WHEN a.chl_cd!='' OR a.chl_cd is not null then a.chl_cd  = vtm.chl_cd ELSE 1=1 END
+                        LEFT JOIN gps.ch_info ci ON vtm.chl_cd=ci.chl_cd
+                    GROUP BY a.seq, a.cate_cd
+                ) a
+                LEFT JOIN gps.report_base1 b ON a.seq = b.seq
+                ORDER BY b.cp_thread, b.thread asc
+        ) b
+        WHERE a.seq=b.seq
+    </update>
+
+    <delete id="deleteReportSummaryGroup">
+        DELETE FROM gps.report_summary WHERE cp_thread=1
+    </delete>
+
+    <insert id="insertReportSummaryGroupEst" parameterType="CmMap" >
+        INSERT INTO gps.report_summary  (
+            base_year,
+            title,
+            thread,
+            cp_thread,
+            is_subtotal,
+            is_sum,
+			is_mainview,
+            section_id,
+            seq,
+            ests01,	ests02,	ests03,	ests04,	ests05,	ests06,	ests07,	ests08,	ests09,	ests10,	ests11,	ests12,	estp01,	estp02,	estp03,	estp04,	estp05,	estp06,	estp07,	estp08,	estp09,	estp10,	estp11,	estp12 )
+        SELECT
+                #{goalBaseYear} AS base_year
+                , b.title
+                , b.thread
+                , b.cp_thread
+                , b.is_subtotal
+                , b.is_sum
+				, b.is_mainview
+                , b.section_id
+                , a.*
+                FROM
+                (
+                    SELECT
+                        a.seq
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN est.s_01::DOUBLE PRECISION ELSE 0 END),0) AS ests01
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN est.s_02::DOUBLE PRECISION ELSE 0 END),0) AS ests02
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN est.s_03::DOUBLE PRECISION ELSE 0 END),0) AS ests03
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN est.s_04::DOUBLE PRECISION ELSE 0 END),0) AS ests04
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN est.s_05::DOUBLE PRECISION ELSE 0 END),0) AS ests05
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN est.s_06::DOUBLE PRECISION ELSE 0 END),0) AS ests06
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN est.s_07::DOUBLE PRECISION ELSE 0 END),0) AS ests07
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN est.s_08::DOUBLE PRECISION ELSE 0 END),0) AS ests08
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN est.s_09::DOUBLE PRECISION ELSE 0 END),0) AS ests09
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN est.s_10::DOUBLE PRECISION ELSE 0 END),0) AS ests10
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN est.s_11::DOUBLE PRECISION ELSE 0 END),0) AS ests11
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN est.s_12::DOUBLE PRECISION ELSE 0 END),0) AS ests12
+
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN est.p_01 ::DOUBLE PRECISION ELSE 0 END),0) AS estp01
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN est.p_02 ::DOUBLE PRECISION ELSE 0 END),0) AS estp02
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN est.p_03 ::DOUBLE PRECISION ELSE 0 END),0) AS estp03
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN est.p_04 ::DOUBLE PRECISION ELSE 0 END),0) AS estp04
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN est.p_05 ::DOUBLE PRECISION ELSE 0 END),0) AS estp05
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN est.p_06 ::DOUBLE PRECISION ELSE 0 END),0) AS estp06
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN est.p_07 ::DOUBLE PRECISION ELSE 0 END),0) AS estp07
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN est.p_08 ::DOUBLE PRECISION ELSE 0 END),0) AS estp08
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN est.p_09 ::DOUBLE PRECISION ELSE 0 END),0) AS estp09
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN est.p_10 ::DOUBLE PRECISION ELSE 0 END),0) AS estp10
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN est.p_11 ::DOUBLE PRECISION ELSE 0 END),0) AS estp11
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN est.p_12 ::DOUBLE PRECISION ELSE 0 END),0) AS estp12
+                    FROM
+                    (
+		                SELECT a.seq, a.is_sum, b.chl_cd, a.nat_cd, b.is_grp_sale, b.is_grp_prof
+                        FROM
+                        (
+                            SELECT seq, string_to_array(chl_cd,',') chl_cd_arr, ch_onoff, gs.is_sum, string_to_array(ch_grp,',') ch_grp_arr, chl_cd, ch_un, ch_grp, nat_cd, ch_lc,
+					            string_to_array(ch_onoff,',') ch_onoff_arr, is_sale
+                            FROM gps.report_base1 gs
+                            WHERE gs.base_year = #{goalBaseYear} AND gs.status = 'Y' AND report_type = 'common'
+                            AND cp_thread = 1
+                        ) a
+                        LEFT JOIN gps.ch_info b ON
+                        CASE
+                                when a.chl_cd!='' then a.chl_cd=b.chl_cd
+                                WHEN a.ch_grp!='' THEN a.ch_grp=b.ch_grp
+                                WHEN a.ch_lc!='' THEN a.ch_lc=b.ch_lc
+                                ELSE 1=1
+                            END
+                        AND
+                            CASE
+                                WHEN array_length(a.ch_onoff_arr,1)>0 THEN b.is_onoff=ANY(a.ch_onoff_arr)
+                                ELSE 1=1
+                            END
+                    ) a
+                    LEFT OUTER JOIN gps.tb_trm_month_krw est ON
+                    est.yyyy= #{estBaseYear} and est.yyyy_fx=#{fxYear} and
+                    CASE
+                        WHEN a.nat_cd!='' and a.nat_cd!='-' THEN substr(est.cp_cd,1,2) ~ '^[0-9]'
+                        WHEN a.nat_cd='-' THEN substr(est.cp_cd,1,2) ~ '^[A-Z]'
+                        ELSE 1=1
+                    END
+                    AND
+                    CASE
+                        when a.chl_cd!='' then a.chl_cd=est.chl_cd
+                        ELSE 1!=1
+                    END
+                    GROUP BY a.seq, a.is_sum
+                ) a
+                LEFT JOIN gps.report_base1 b ON a.seq=b.seq
+                ORDER BY b.cp_thread, b.thread
+    </insert>
+
+    <update id="updateReportSummaryGroupRst" parameterType="CmMap" >
+        UPDATE gps.report_summary a
+        SET
+            rsts01=b.rsts01,
+            rsts02=b.rsts02,
+            rsts03=b.rsts03,
+            rsts04=b.rsts04,
+            rsts05=b.rsts05,
+            rsts06=b.rsts06,
+            rsts07=b.rsts07,
+            rsts08=b.rsts08,
+            rsts09=b.rsts09,
+            rsts10=b.rsts10,
+            rsts11=b.rsts11,
+            rsts12=b.rsts12,
+            rstp01=b.rstp01,
+            rstp02=b.rstp02,
+            rstp03=b.rstp03,
+            rstp04=b.rstp04,
+            rstp05=b.rstp05,
+            rstp06=b.rstp06,
+            rstp07=b.rstp07,
+            rstp08=b.rstp08,
+            rstp09=b.rstp09,
+            rstp10=b.rstp10,
+            rstp11=b.rstp11,
+            rstp12=b.rstp12
+        FROM (
+            SELECT
+                #{goalBaseYear} AS base_year
+                , b.title
+                , b.thread
+                , b.cp_thread
+                , b.is_subtotal
+                , b.is_sum
+				, b.is_mainview
+                , b.section_id
+                , a.*
+                FROM
+                (
+                     SELECT
+                        a.seq
+
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN rst.s_01::DOUBLE PRECISION ELSE 0 END),0) AS rsts01
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN rst.s_02::DOUBLE PRECISION ELSE 0 END),0) AS rsts02
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN rst.s_03::DOUBLE PRECISION ELSE 0 END),0) AS rsts03
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN rst.s_04::DOUBLE PRECISION ELSE 0 END),0) AS rsts04
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN rst.s_05::DOUBLE PRECISION ELSE 0 END),0) AS rsts05
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN rst.s_06::DOUBLE PRECISION ELSE 0 END),0) AS rsts06
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN rst.s_07::DOUBLE PRECISION ELSE 0 END),0) AS rsts07
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN rst.s_08::DOUBLE PRECISION ELSE 0 END),0) AS rsts08
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN rst.s_09::DOUBLE PRECISION ELSE 0 END),0) AS rsts09
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN rst.s_10::DOUBLE PRECISION ELSE 0 END),0) AS rsts10
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN rst.s_11::DOUBLE PRECISION ELSE 0 END),0) AS rsts11
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN rst.s_12::DOUBLE PRECISION ELSE 0 END),0) AS rsts12
+
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN rst.p_01 ::DOUBLE PRECISION ELSE 0 END),0) AS rstp01
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN rst.p_02 ::DOUBLE PRECISION ELSE 0 END),0) AS rstp02
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN rst.p_03 ::DOUBLE PRECISION ELSE 0 END),0) AS rstp03
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN rst.p_04 ::DOUBLE PRECISION ELSE 0 END),0) AS rstp04
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN rst.p_05 ::DOUBLE PRECISION ELSE 0 END),0) AS rstp05
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN rst.p_06 ::DOUBLE PRECISION ELSE 0 END),0) AS rstp06
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN rst.p_07 ::DOUBLE PRECISION ELSE 0 END),0) AS rstp07
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN rst.p_08 ::DOUBLE PRECISION ELSE 0 END),0) AS rstp08
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN rst.p_09 ::DOUBLE PRECISION ELSE 0 END),0) AS rstp09
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN rst.p_10 ::DOUBLE PRECISION ELSE 0 END),0) AS rstp10
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN rst.p_11 ::DOUBLE PRECISION ELSE 0 END),0) AS rstp11
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN rst.p_12 ::DOUBLE PRECISION ELSE 0 END),0) AS rstp12
+                    FROM
+                    (
+                        SELECT a.seq, a.is_sum, b.chl_cd, a.nat_cd, b.is_grp_sale, b.is_grp_prof
+                        FROM
+                        (
+                            SELECT seq, string_to_array(chl_cd,',') chl_cd_arr, ch_onoff, gs.is_sum, string_to_array(ch_grp,',') ch_grp_arr, chl_cd, ch_un, ch_grp, nat_cd, ch_lc,
+                            string_to_array(ch_onoff,',') ch_onoff_arr, is_sale
+                            FROM gps.report_base1 gs
+                            WHERE gs.base_year = #{goalBaseYear} AND gs.status = 'Y' AND report_type = 'common'
+                            AND cp_thread = 1
+                        ) a
+                        LEFT JOIN gps.ch_info b ON
+                        CASE
+                            --WHEN array_length(a.chl_cd_arr,1)>0 THEN b.chl_cd=ANY(a.chl_cd_arr)
+                                when a.chl_cd!='' then a.chl_cd=b.chl_cd
+                                WHEN a.ch_grp!='' THEN a.ch_grp=b.ch_grp
+                                WHEN a.ch_lc!='' THEN a.ch_lc=b.ch_lc
+                                ELSE 1=1
+                            END
+                        AND
+                            CASE
+						        WHEN array_length(a.ch_onoff_arr,1)>0 THEN b.is_onoff=ANY(a.ch_onoff_arr)
+                                ELSE 1=1
+                            END
+                    ) a
+                    LEFT OUTER JOIN gps.tb_trm_month_krw rst ON
+                        rst.yyyy= #{rstBaseYear} and rst.yyyy_fx=#{fxYear} and
+                        CASE
+                            WHEN a.nat_cd!='' and a.nat_cd!='-' THEN substr(rst.cp_cd,1,2) ~ '^[0-9]'
+                            WHEN a.nat_cd='-' THEN substr(rst.cp_cd,1,2) ~ '^[A-Z]'
+                            ELSE 1=1
+                        END
+                        AND
+                        CASE
+                            when a.chl_cd!='' then a.chl_cd=rst.chl_cd
+                            ELSE 1!=1
+                        END
+                    GROUP BY a.seq, a.is_sum
+                ) a
+                LEFT JOIN gps.report_base1 b ON a.seq=b.seq
+                ORDER BY b.cp_thread, b.thread
+        ) b
+        WHERE a.seq=b.seq
+    </update>
+
+
+    <update id="updateReportSummaryGroupCur" parameterType="CmMap" >
+        UPDATE gps.report_summary a
+        SET
+            curs01=b.curs01,
+            curs02=b.curs02,
+            curs03=b.curs03,
+            curs04=b.curs04,
+            curs05=b.curs05,
+            curs06=b.curs06,
+            curs07=b.curs07,
+            curs08=b.curs08,
+            curs09=b.curs09,
+            curs10=b.curs10,
+            curs11=b.curs11,
+            curs12=b.curs12,
+            curp01=b.curp01,
+            curp02=b.curp02,
+            curp03=b.curp03,
+            curp04=b.curp04,
+            curp05=b.curp05,
+            curp06=b.curp06,
+            curp07=b.curp07,
+            curp08=b.curp08,
+            curp09=b.curp09,
+            curp10=b.curp10,
+            curp11=b.curp11,
+            curp12=b.curp12
+        FROM (
+            SELECT
+                #{goalBaseYear} AS base_year
+                , b.title
+                , b.thread
+                , b.cp_thread
+                , b.is_subtotal
+                , b.is_sum
+				, b.is_mainview
+                , b.section_id
+                , a.*
+                FROM
+                (
+                     SELECT
+                        a.seq
+
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN cur.s_01::DOUBLE PRECISION ELSE 0 END),0) AS curs01
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN cur.s_02::DOUBLE PRECISION ELSE 0 END),0) AS curs02
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN cur.s_03::DOUBLE PRECISION ELSE 0 END),0) AS curs03
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN cur.s_04::DOUBLE PRECISION ELSE 0 END),0) AS curs04
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN cur.s_05::DOUBLE PRECISION ELSE 0 END),0) AS curs05
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN cur.s_06::DOUBLE PRECISION ELSE 0 END),0) AS curs06
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN cur.s_07::DOUBLE PRECISION ELSE 0 END),0) AS curs07
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN cur.s_08::DOUBLE PRECISION ELSE 0 END),0) AS curs08
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN cur.s_09::DOUBLE PRECISION ELSE 0 END),0) AS curs09
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN cur.s_10::DOUBLE PRECISION ELSE 0 END),0) AS curs10
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN cur.s_11::DOUBLE PRECISION ELSE 0 END),0) AS curs11
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN cur.s_12::DOUBLE PRECISION ELSE 0 END),0) AS curs12
+
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN cur.p_01 ::DOUBLE PRECISION ELSE 0 END),0) AS curp01
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN cur.p_02 ::DOUBLE PRECISION ELSE 0 END),0) AS curp02
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN cur.p_03 ::DOUBLE PRECISION ELSE 0 END),0) AS curp03
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN cur.p_04 ::DOUBLE PRECISION ELSE 0 END),0) AS curp04
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN cur.p_05 ::DOUBLE PRECISION ELSE 0 END),0) AS curp05
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN cur.p_06 ::DOUBLE PRECISION ELSE 0 END),0) AS curp06
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN cur.p_07 ::DOUBLE PRECISION ELSE 0 END),0) AS curp07
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN cur.p_08 ::DOUBLE PRECISION ELSE 0 END),0) AS curp08
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN cur.p_09 ::DOUBLE PRECISION ELSE 0 END),0) AS curp09
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN cur.p_10 ::DOUBLE PRECISION ELSE 0 END),0) AS curp10
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN cur.p_11 ::DOUBLE PRECISION ELSE 0 END),0) AS curp11
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN cur.p_12 ::DOUBLE PRECISION ELSE 0 END),0) AS curp12
+                    FROM
+                    (
+                        SELECT a.seq, a.is_sum, b.chl_cd, a.nat_cd, b.is_grp_sale, b.is_grp_prof
+                        FROM
+                        (
+                            SELECT seq, string_to_array(chl_cd,',') chl_cd_arr, ch_onoff, gs.is_sum, string_to_array(ch_grp,',') ch_grp_arr, chl_cd, ch_un, ch_grp, nat_cd, ch_lc,
+                            string_to_array(ch_onoff,',') ch_onoff_arr, is_sale
+                            FROM gps.report_base1 gs
+                            WHERE gs.base_year = #{goalBaseYear} AND gs.status = 'Y' AND report_type = 'common'
+                            AND cp_thread = 1
+                        ) a
+                        LEFT JOIN gps.ch_info b ON
+                        CASE
+                            --WHEN array_length(a.chl_cd_arr,1)>0 THEN b.chl_cd=ANY(a.chl_cd_arr)
+                                when a.chl_cd!='' then a.chl_cd=b.chl_cd
+                                WHEN a.ch_grp!='' THEN a.ch_grp=b.ch_grp
+                                WHEN a.ch_lc!='' THEN a.ch_lc=b.ch_lc
+                                ELSE 1=1
+                            END
+                        AND
+                            CASE
+						        WHEN array_length(a.ch_onoff_arr,1)>0 THEN b.is_onoff=ANY(a.ch_onoff_arr)
+                                ELSE 1=1
+                            END
+                    ) a
+                    LEFT OUTER JOIN gps.tb_trm_month_krw cur ON
+                        cur.yyyy= #{curBaseYear} and cur.yyyy_fx=#{fxYear} and
+                        CASE
+                            WHEN a.nat_cd!='' and a.nat_cd!='-' THEN substr(cur.cp_cd,1,2) ~ '^[0-9]'
+                            WHEN a.nat_cd='-' THEN substr(cur.cp_cd,1,2) ~ '^[A-Z]'
+                            ELSE 1=1
+                        END
+                        AND
+                        CASE
+                            when a.chl_cd!='' then a.chl_cd=cur.chl_cd
+                            ELSE 1!=1
+                        END
+                    GROUP BY a.seq, a.is_sum
+                ) a
+                LEFT JOIN gps.report_base1 b ON a.seq=b.seq
+                ORDER BY b.cp_thread, b.thread
+        ) b
+        WHERE a.seq=b.seq
+    </update>
+
+
+    <update id="updateReportSummaryGroupGoal" parameterType="CmMap" >
+        UPDATE gps.report_summary a
+        SET
+            g_sales       = b.g_sales,
+            g_profit      = b.g_profit,
+            g_sales_total = b.g_sales_total,
+            g_profit_total= b.g_profit_total,
+            s01=b.s01,
+            s02=b.s02,
+            s03=b.s03,
+            s04=b.s04,
+            s05=b.s05,
+            s06=b.s06,
+            s07=b.s07,
+            s08=b.s08,
+            s09=b.s09,
+            s10=b.s10,
+            s11=b.s11,
+            s12=b.s12,
+            p01=b.p01,
+            p02=b.p02,
+            p03=b.p03,
+            p04=b.p04,
+            p05=b.p05,
+            p06=b.p06,
+            p07=b.p07,
+            p08=b.p08,
+            p09=b.p09,
+            p10=b.p10,
+            p11=b.p11,
+            p12=b.p12
+        FROM (
+            SELECT
+                #{goalBaseYear} AS base_year
+                , b.title
+                , b.thread
+                , b.cp_thread
+                , b.is_subtotal
+                , b.is_sum
+				, b.is_mainview
+                , b.section_id
+                , a.*
+                FROM
+                (
+                     SELECT
+                        a.seq
+                        , COALESCE(SUM(
+                            CASE
+                            WHEN a.is_sale='Y'  THEN CASE WHEN b.is_grp_sale='Y' or b.is_grp_prof='Y' THEN b.g_sales ::DOUBLE PRECISION ELSE 0 END
+                            WHEN b.is_grp_sale='Y' THEN b.g_sales ::DOUBLE PRECISION
+                            WHEN a.is_sum='N' THEN b.g_sales_total ::DOUBLE PRECISION
+                            END),0) AS g_sales
+                        , COALESCE(SUM(CASE WHEN b.is_grp_prof='Y' THEN b.g_profit ::DOUBLE PRECISION ELSE 0 END),0) AS g_profit
+                        , COALESCE(SUM(b.g_sales_total ::DOUBLE PRECISION),0) AS g_sales_total, COALESCE(SUM(b.g_profit_total ::DOUBLE PRECISION),0) AS g_profit_total
+
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN b.s_01::DOUBLE PRECISION ELSE 0 END),0) AS s01
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN b.s_02::DOUBLE PRECISION ELSE 0 END),0) AS s02
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN b.s_03::DOUBLE PRECISION ELSE 0 END),0) AS s03
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN b.s_04::DOUBLE PRECISION ELSE 0 END),0) AS s04
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN b.s_05::DOUBLE PRECISION ELSE 0 END),0) AS s05
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN b.s_06::DOUBLE PRECISION ELSE 0 END),0) AS s06
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN b.s_07::DOUBLE PRECISION ELSE 0 END),0) AS s07
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN b.s_08::DOUBLE PRECISION ELSE 0 END),0) AS s08
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN b.s_09::DOUBLE PRECISION ELSE 0 END),0) AS s09
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN b.s_10::DOUBLE PRECISION ELSE 0 END),0) AS s10
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN b.s_11::DOUBLE PRECISION ELSE 0 END),0) AS s11
+                        , COALESCE(SUM(CASE WHEN a.is_grp_sale='Y' OR a.is_sum='N' THEN b.s_12::DOUBLE PRECISION ELSE 0 END),0) AS s12
+
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN b.p_01 ::DOUBLE PRECISION ELSE 0 END),0) AS p01
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN b.p_02 ::DOUBLE PRECISION ELSE 0 END),0) AS p02
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN b.p_03 ::DOUBLE PRECISION ELSE 0 END),0) AS p03
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN b.p_04 ::DOUBLE PRECISION ELSE 0 END),0) AS p04
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN b.p_05 ::DOUBLE PRECISION ELSE 0 END),0) AS p05
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN b.p_06 ::DOUBLE PRECISION ELSE 0 END),0) AS p06
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN b.p_07 ::DOUBLE PRECISION ELSE 0 END),0) AS p07
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN b.p_08 ::DOUBLE PRECISION ELSE 0 END),0) AS p08
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN b.p_09 ::DOUBLE PRECISION ELSE 0 END),0) AS p09
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN b.p_10 ::DOUBLE PRECISION ELSE 0 END),0) AS p10
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN b.p_11 ::DOUBLE PRECISION ELSE 0 END),0) AS p11
+                        , COALESCE(SUM(CASE WHEN a.is_grp_prof='Y' THEN b.p_12 ::DOUBLE PRECISION ELSE 0 END),0) AS p12
+                    FROM
+                    (
+                        SELECT DISTINCT ON (a.seq, a.is_sum, b.ch_gps, a.nat_cd, b.is_grp_sale, b.is_grp_prof)
+							a.seq, a.is_sum, CASE WHEN b.ch_gps!='' THEN b.ch_gps ELSE b.chl_cd END AS chl_cd, a.nat_cd, b.is_grp_sale, b.is_grp_prof, a.is_sale
+                        FROM
+                        (
+                            SELECT seq, string_to_array(chl_cd,',') chl_cd_arr, ch_onoff, gs.is_sum, string_to_array(ch_grp,',') ch_grp_arr, chl_cd, ch_un, ch_grp, nat_cd, ch_lc,
+					                string_to_array(ch_onoff,',') ch_onoff_arr, is_sale
+                            FROM gps.report_base1 gs
+                            WHERE gs.base_year = #{goalBaseYear} AND gs.status = 'Y' AND report_type = 'common'
+                            AND cp_thread = 1
+                        ) a
+                        LEFT JOIN gps.ch_info b ON
+                        CASE
+                            --WHEN array_length(a.chl_cd_arr,1)>0 THEN b.chl_cd=ANY(a.chl_cd_arr)
+                                when a.chl_cd!='' then a.chl_cd=b.chl_cd
+                                WHEN a.ch_grp!='' THEN a.ch_grp=b.ch_grp
+                                WHEN a.ch_lc!='' THEN a.ch_lc=b.ch_lc
+                                ELSE 1=1
+                            END
+                        AND
+                            CASE
+                                -- WHEN ch_onoff IS NOT NULL AND ch_onoff != '' THEN a.ch_onoff = b.is_onoff
+						        WHEN array_length(a.ch_onoff_arr,1)>0 THEN b.is_onoff=ANY(a.ch_onoff_arr)
+                                ELSE 1=1
+                            END
+                    ) a
+                    LEFT JOIN gps.tb_goal_data_month_krw b ON
+                        b.base_year=#{curBaseYear} AND
+                        CASE
+                            WHEN a.nat_cd!='' and a.nat_cd!='-' THEN a.nat_cd = b.nat_cd
+                            WHEN a.nat_cd='-' THEN b.nat_cd!='KR'
+                            ELSE 1=1
+                        END
+                        AND
+                        CASE
+                            when a.chl_cd!='' then a.chl_cd=b.chl_cd
+                            ELSE 1!=1
+                        END
+                        AND b.view!='OS'
+                    GROUP BY a.seq, a.is_sum
+                ) a
+                LEFT JOIN gps.report_base1 b ON a.seq=b.seq
+                ORDER BY b.cp_thread, b.thread
+        ) b
+        WHERE a.seq=b.seq
+    </update>
+    <delete id="deleteReportDigitalQuantum">
+        TRUNCATE TABLE gps.report_digital_summay
+    </delete>
+
+    <insert id="insertReportDigitalQuantum"  parameterType="CmMap" >
+        INSERT INTO gps.report_digital_summay
+        (base_seq, base_year, selectMonth, report_type
+            ,goal_ec
+--             ,goal_ece
+--             ,goal_ecd
+            ,goal_gec
+            ,goal_global
+            ,goal_cn
+            ,goal_hk
+            ,goal_tw
+            ,goal_sg
+            ,goal_my
+            ,goal_th
+            ,goal_vn
+            ,goal_id
+            ,goal_ind
+            ,goal_au
+            ,goal_ph
+            ,goal_ae
+            ,goal_jp
+            ,goal_fr
+            ,goal_us
+            ,goal_ca
+            ,goal_ru
+            ,goal_korea_spec
+            ,goal_global_spec
+        )
+        SELECT
+        base.seq, gdm.base_year, t.selectMonth, report_type
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ch_grp = '01' 						THEN t.sales END)/100,0) ec
+--         ,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ch_grp = '01' AND e_type = 'E' 		THEN t.sales END)/100,0) ece
+--         ,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ch_grp = '01' AND e_type = 'D' 		THEN t.sales END)/100,0) ecd
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ch_grp = '03' 						THEN t.sales END)/100,0) gec
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd ~ '^[A-Z]'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) global_
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'CN%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) cn
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'HK%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) hk
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'TW%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) tw
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'SG%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) sg
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'MY%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) my
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'TH%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) th
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'VN%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) vn
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'ID%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) id
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'IN%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ind
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'AU%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) au
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'PH%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ph
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'AE%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ae
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'JP%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) jp
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'FR%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) fr
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'US%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) us
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'CA%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ca
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'RU%'  AND ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ru
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd												THEN t.sales END)/100,0) korea_spec
+        ,COALESCE(sum(CASE WHEN gdm.cp_cd ~ '^[A-Z]'												THEN t.sales END)/100,0) global_spec
+        FROM gps.report_digital_quantum_base base
+        LEFT JOIN gps.brd_info bi ON
+        CASE
+            WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+            WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+            ELSE bi.brd_cd = base.brd_cd
+        END
+         LEFT JOIN (SELECT DISTINCT ON (gdm.month_seq, gdm.cp_cd, gdm.brd_cd, ci.ch_gps) gdm.*, ci.ch_grp, ci.e_type FROM gps.tb_goal_data_month_krw gdm INNER JOIN gps.ch_info ci ON CASE WHEN ci.ch_gps != '' AND ci.ch_gps IS NOT NULL THEN gdm.chl_cd = ci.ch_gps ELSE gdm.chl_cd = ci.chl_cd END
+        AND ci.ch_grp NOT IN('15','16') AND ci.is_grp_sale = 'Y' AND ci.status = 'Y') AS gdm
+        ON base.base_year = #{goalBaseYear} AND base.status = 'Y' AND base.report_type = 'digital'
+        AND gdm.base_year = #{goalBaseYear} AND gdm.is_grp_sale = 'Y' AND gdm.brd_cd IN (bi.brd_cd)
+                  cross join lateral (
+                     values
+                       (gdm.s_01::DOUBLE PRECISION, '01'),
+                       (gdm.s_02::DOUBLE PRECISION, '02'),
+                       (gdm.s_03::DOUBLE PRECISION, '03'),
+                       (gdm.s_04::DOUBLE PRECISION, '04'),
+                       (gdm.s_05::DOUBLE PRECISION, '05'),
+                       (gdm.s_06::DOUBLE PRECISION, '06'),
+                       (gdm.s_07::DOUBLE PRECISION, '07'),
+                       (gdm.s_08::DOUBLE PRECISION, '08'),
+                       (gdm.s_09::DOUBLE PRECISION, '09'),
+                       (gdm.s_10::DOUBLE PRECISION, '10'),
+                       (gdm.s_11::DOUBLE PRECISION, '11'),
+                       (gdm.s_12::DOUBLE PRECISION, '12')
+              ) as t(sales, selectMonth)
+        GROUP BY base.seq, gdm.base_year, t.selectMonth, report_type
+        HAVING gdm.base_year IS NOT NULL
+    </insert>
+
+    <update id="updateReportDigitalQuantum" parameterType="CmMap" >
+        UPDATE gps.report_digital_summay base
+        SET
+        base_year	 		=   a.base_year
+        ,	ec				=   a.ec
+        ,	ece				=   a.ece
+        ,	ecd				=   a.ecd
+        ,	gec				=   a.gec
+        ,	global      	=   a.global_
+        ,	cn				=   a.cn
+        ,	hk				=   a.hk
+        ,	tw				=   a.tw
+        ,	sg				=   a.sg
+        ,	my				=   a.my
+        ,	th				=   a.th
+        ,	vn				=   a.vn
+        ,	id				=   a.id
+        ,	ind				=   a.ind
+        ,	au				=   a.au
+        ,	ph				=   a.ph
+        ,	ae				=   a.ae
+        ,	jp				=   a.jp
+        ,	fr				=   a.fr
+        ,	us				=   a.us
+        ,	ca				=   a.ca
+        ,	ru				=   a.ru
+        ,	korea_spec  	=   a.korea_spec
+        ,	global_spec 	=   a.global_spec
+        FROM (
+        SELECT
+        base.seq, tmk.yyyy AS base_year, t.selectMonth, report_type
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01' 						THEN t.sales END)/100,0) ec
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01' AND e_type = 'E' 		THEN t.sales END)/100,0) ece
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01' AND e_type = 'D' 		THEN t.sales END)/100,0) ecd
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '03' 						THEN t.sales END)/100,0) gec
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd ~ '^[A-Z]'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) global_
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'CN%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) cn
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'HK%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) hk
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'TW%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) tw
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'SG%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) sg
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'MY%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) my
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'TH%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) th
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'VN%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) vn
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'ID%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) id
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'IN%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ind
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'AU%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) au
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'PH%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ph
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'AE%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ae
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'JP%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) jp
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'FR%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) fr
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'US%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) us
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'CA%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ca
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'RU%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ru
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd												THEN t.sales END)/100,0) korea_spec
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd ~ '^[A-Z]'												THEN t.sales END)/100,0) global_spec
+        FROM gps.report_digital_quantum_base base
+        LEFT JOIN gps.brd_info bi ON
+        CASE
+            WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+            WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+            ELSE bi.brd_cd = base.brd_cd
+        END
+        LEFT JOIN (gps.tb_trm_month_krw tmk INNER JOIN gps.ch_info ci ON tmk.chl_cd = ci.chl_cd AND ci.ch_grp NOT IN('15','16') AND ci.is_grp_sale = 'Y' AND ci.status = 'Y') ON
+        base.base_year = #{goalBaseYear} AND base.status = 'Y' AND base.report_type = 'digital'
+        AND tmk.yyyy = #{goalBaseYear} AND tmk.brd_cd IN (bi.brd_cd)
+                  cross join lateral (
+                     values
+                       (tmk.s_01::DOUBLE PRECISION, '01'),
+                       (tmk.s_02::DOUBLE PRECISION, '02'),
+                       (tmk.s_03::DOUBLE PRECISION, '03'),
+                       (tmk.s_04::DOUBLE PRECISION, '04'),
+                       (tmk.s_05::DOUBLE PRECISION, '05'),
+                       (tmk.s_06::DOUBLE PRECISION, '06'),
+                       (tmk.s_07::DOUBLE PRECISION, '07'),
+                       (tmk.s_08::DOUBLE PRECISION, '08'),
+                       (tmk.s_09::DOUBLE PRECISION, '09'),
+                       (tmk.s_10::DOUBLE PRECISION, '10'),
+                       (tmk.s_11::DOUBLE PRECISION, '11'),
+                       (tmk.s_12::DOUBLE PRECISION, '12')
+              ) as t(sales, selectMonth)
+        GROUP BY base.seq, tmk.yyyy, t.selectMonth, report_type
+        HAVING tmk.yyyy IS NOT NULL
+        ) a
+        WHERE base.base_seq = a.seq AND base.base_year = a.base_year AND base.selectMonth = a.selectMonth AND base.report_type = a.report_type
+    </update>
+
+    <insert id="insertReportDigitalQuantum2" parameterType="CmMap" >
+        INSERT INTO gps.report_digital_summay
+        (base_seq, base_year, selectMonth, report_type
+            ,ec
+            ,ece
+            ,ecd
+            ,gec
+            ,global
+            ,cn
+            ,hk
+            ,tw
+            ,sg
+            ,my
+            ,th
+            ,vn
+            ,id
+            ,ind
+            ,au
+            ,ph
+            ,ae
+            ,jp
+            ,fr
+            ,us
+            ,ca
+            ,ru
+            ,korea_spec
+            ,global_spec
+        )
+        SELECT
+        base.seq, tmk.yyyy AS base_year, t.selectMonth, report_type
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01' 						THEN t.sales END)/100,0) ec
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01' AND e_type = 'E' 		THEN t.sales END)/100,0) ece
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01' AND e_type = 'D' 		THEN t.sales END)/100,0) ecd
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '03' 						THEN t.sales END)/100,0) gec
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd ~ '^[A-Z]'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) global_
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'CN%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) cn
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'HK%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) hk
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'TW%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) tw
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'SG%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) sg
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'MY%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) my
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'TH%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) th
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'VN%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) vn
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'ID%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) id
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'IN%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ind
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'AU%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) au
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'PH%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ph
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'AE%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ae
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'JP%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) jp
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'FR%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) fr
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'US%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) us
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'CA%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ca
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'RU%'  AND ci.ch_grp IN ('01','03') 					THEN t.sales END)/100,0) ru
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd												THEN t.sales END)/100,0) korea_spec
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd ~ '^[A-Z]'												THEN t.sales END)/100,0) global_spec
+        FROM gps.report_digital_quantum_base base
+        LEFT JOIN gps.brd_info bi ON
+        CASE
+            WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+            WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+            ELSE bi.brd_cd = base.brd_cd
+        END
+        LEFT JOIN (gps.tb_trm_month_krw tmk INNER JOIN gps.ch_info ci ON tmk.chl_cd = ci.chl_cd AND ci.ch_grp NOT IN('15','16') AND ci.is_grp_sale = 'Y' AND ci.status = 'Y') ON
+        base.base_year = #{goalBaseYear} AND base.status = 'Y' AND base.report_type = 'digital'
+        AND tmk.yyyy = #{estBaseYear} AND tmk.brd_cd IN (bi.brd_cd)
+                  cross join lateral (
+                     values
+                       (tmk.s_01::DOUBLE PRECISION, '01'),
+                       (tmk.s_02::DOUBLE PRECISION, '02'),
+                       (tmk.s_03::DOUBLE PRECISION, '03'),
+                       (tmk.s_04::DOUBLE PRECISION, '04'),
+                       (tmk.s_05::DOUBLE PRECISION, '05'),
+                       (tmk.s_06::DOUBLE PRECISION, '06'),
+                       (tmk.s_07::DOUBLE PRECISION, '07'),
+                       (tmk.s_08::DOUBLE PRECISION, '08'),
+                       (tmk.s_09::DOUBLE PRECISION, '09'),
+                       (tmk.s_10::DOUBLE PRECISION, '10'),
+                       (tmk.s_11::DOUBLE PRECISION, '11'),
+                       (tmk.s_12::DOUBLE PRECISION, '12')
+              ) as t(sales, selectMonth)
+        GROUP BY base.seq, tmk.yyyy, t.selectMonth, report_type
+        HAVING tmk.yyyy IS NOT NULL
+    </insert>
+    
+    <delete id="deleteReportOneChina">
+        TRUNCATE TABLE gps.report_onechina_summary
+    </delete>
+    
+    <insert id="insertReportOneChina"  parameterType="CmMap" >
+        INSERT INTO gps.report_onechina_summary
+		(base_seq, base_year, selectMonth, report_type
+			, goal_ec
+			, goal_offline
+			, goal_gec
+			, goal_ntr
+			, goal_gtr
+		)
+		SELECT
+		base.seq, gdm.base_year, t.selectMonth, report_type
+		,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'CN%' AND ch_grp = '01'					THEN t.sales END)/100,0) ec
+		,COALESCE(sum(CASE WHEN gdm.cp_cd LIKE 'CN%' AND ch_grp NOT IN ('01','03')		THEN t.sales END)/100,0) offline
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ch_grp = '03'					THEN t.sales END)/100,0) gec
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ch_grp = '15'					THEN t.sales END)/100,0) ntr
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ch_grp = '16'					THEN t.sales END)/100,0) gtr
+		FROM gps.report_digital_quantum_base base
+		LEFT JOIN gps.brd_info bi ON
+		CASE
+			WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+			WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+			ELSE bi.brd_cd = base.brd_cd
+		END
+        LEFT JOIN (
+        	SELECT DISTINCT ON (
+        		gdm.month_seq, gdm.cp_cd, gdm.brd_cd, ci.ch_gps
+        		) gdm.*
+        		, ci.ch_grp
+        		, ci.e_type 
+        	FROM gps.tb_goal_data_month_krw gdm 
+        	INNER JOIN gps.ch_info ci 
+        	ON CASE WHEN ci.ch_gps != '' AND ci.ch_gps IS NOT NULL THEN gdm.chl_cd = ci.ch_gps 
+        	ELSE gdm.chl_cd = ci.chl_cd END
+        	AND ci.is_grp_sale = 'Y' AND ci.status = 'Y') AS gdm
+        ON base.base_year = #{goalBaseYear} AND base.status = 'Y' AND base.report_type = 'digital'
+		AND gdm.base_year = #{goalBaseYear} AND gdm.is_grp_sale = 'Y' AND gdm.brd_cd IN (bi.brd_cd)
+				  cross join lateral (
+					 values
+					   (gdm.s_01::DOUBLE PRECISION, '01'),
+					   (gdm.s_02::DOUBLE PRECISION, '02'),
+					   (gdm.s_03::DOUBLE PRECISION, '03'),
+					   (gdm.s_04::DOUBLE PRECISION, '04'),
+					   (gdm.s_05::DOUBLE PRECISION, '05'),
+					   (gdm.s_06::DOUBLE PRECISION, '06'),
+					   (gdm.s_07::DOUBLE PRECISION, '07'),
+					   (gdm.s_08::DOUBLE PRECISION, '08'),
+					   (gdm.s_09::DOUBLE PRECISION, '09'),
+					   (gdm.s_10::DOUBLE PRECISION, '10'),
+					   (gdm.s_11::DOUBLE PRECISION, '11'),
+					   (gdm.s_12::DOUBLE PRECISION, '12')
+			  ) as t(sales, selectMonth)
+		GROUP BY base.seq, gdm.base_year, t.selectMonth, report_type
+		HAVING gdm.base_year IS NOT NULL
+    </insert>
+
+    <update id="updateReportOneChina" parameterType="CmMap" >
+        UPDATE gps.report_onechina_summary base
+        SET
+        base_year	=   a.base_year
+        , ec		=   a.ec
+        , offline	=   a.offline
+        , gec		=   a.gec
+        , ntr    	=   a.ntr
+        , gtr		=   a.gtr
+        FROM (
+        SELECT
+        base.seq, tmk.yyyy AS base_year, t.selectMonth, report_type
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'CN%' AND ci.ch_grp = '01' 				THEN t.sales END)/100,0) ec
+		,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'CN%' AND ci.ch_grp NOT IN ('01','03')		THEN t.sales END)/100,0) offline
+        ,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '03' 				THEN t.sales END)/100,0) gec
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '15'					THEN t.sales END)/100,0) ntr
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '16'					THEN t.sales END)/100,0) gtr
+        FROM gps.report_digital_quantum_base base
+        LEFT JOIN gps.brd_info bi ON
+        CASE
+			WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+			WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+			ELSE bi.brd_cd = base.brd_cd
+        END
+		LEFT JOIN (gps.tb_trm_month_krw tmk INNER JOIN gps.ch_info ci ON tmk.chl_cd = ci.chl_cd  AND ci.status = 'Y' AND ci.is_grp_sale = 'Y') ON
+		base.base_year = #{goalBaseYear} AND base.status = 'Y' AND base.report_type = 'digital'
+		AND tmk.yyyy = #{goalBaseYear} AND tmk.brd_cd IN (bi.brd_cd)
+                  cross join lateral (
+                     values
+                       (tmk.s_01::DOUBLE PRECISION, '01'),
+                       (tmk.s_02::DOUBLE PRECISION, '02'),
+                       (tmk.s_03::DOUBLE PRECISION, '03'),
+                       (tmk.s_04::DOUBLE PRECISION, '04'),
+                       (tmk.s_05::DOUBLE PRECISION, '05'),
+                       (tmk.s_06::DOUBLE PRECISION, '06'),
+                       (tmk.s_07::DOUBLE PRECISION, '07'),
+                       (tmk.s_08::DOUBLE PRECISION, '08'),
+                       (tmk.s_09::DOUBLE PRECISION, '09'),
+                       (tmk.s_10::DOUBLE PRECISION, '10'),
+                       (tmk.s_11::DOUBLE PRECISION, '11'),
+                       (tmk.s_12::DOUBLE PRECISION, '12')
+              ) as t(sales, selectMonth)
+        GROUP BY base.seq, tmk.yyyy, t.selectMonth, report_type
+        HAVING tmk.yyyy IS NOT NULL
+        ) a
+        WHERE base.base_seq = a.seq AND base.base_year = a.base_year AND base.selectMonth = a.selectMonth AND base.report_type = a.report_type
+    </update>
+
+    <insert id="insertReportOneChina2" parameterType="CmMap" >
+        INSERT INTO gps.report_onechina_summary
+		(base_seq, base_year, selectMonth, report_type
+			,ec
+			,offline
+			,gec
+			,ntr
+			,gtr
+		)
+		SELECT
+		base.seq, tmk.yyyy AS base_year, t.selectMonth, report_type
+		,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'CN%' AND ci.ch_grp = '01'					THEN t.sales END)/100,0) ec
+		,COALESCE(sum(CASE WHEN tmk.cp_cd LIKE 'CN%' AND ci.ch_grp NOT IN ('01','03')		THEN t.sales END)/100,0) offline
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '03'					THEN t.sales END)/100,0) gec
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '15'					THEN t.sales END)/100,0) ntr
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '16'					THEN t.sales END)/100,0) gtr
+		FROM gps.report_digital_quantum_base base
+		LEFT JOIN gps.brd_info bi ON
+		CASE
+			WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+			WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+			ELSE bi.brd_cd = base.brd_cd
+		END
+		LEFT JOIN (gps.tb_trm_month_krw tmk INNER JOIN gps.ch_info ci ON tmk.chl_cd = ci.chl_cd	 AND ci.status = 'Y' AND ci.is_grp_sale = 'Y') ON
+		base.base_year = #{goalBaseYear} AND base.status = 'Y' AND base.report_type = 'digital'
+		AND tmk.yyyy = #{estBaseYear} AND tmk.brd_cd IN (bi.brd_cd)
+				  cross join lateral (
+					 values
+					   (tmk.s_01::DOUBLE PRECISION, '01'),
+					   (tmk.s_02::DOUBLE PRECISION, '02'),
+					   (tmk.s_03::DOUBLE PRECISION, '03'),
+					   (tmk.s_04::DOUBLE PRECISION, '04'),
+					   (tmk.s_05::DOUBLE PRECISION, '05'),
+					   (tmk.s_06::DOUBLE PRECISION, '06'),
+					   (tmk.s_07::DOUBLE PRECISION, '07'),
+					   (tmk.s_08::DOUBLE PRECISION, '08'),
+					   (tmk.s_09::DOUBLE PRECISION, '09'),
+					   (tmk.s_10::DOUBLE PRECISION, '10'),
+					   (tmk.s_11::DOUBLE PRECISION, '11'),
+					   (tmk.s_12::DOUBLE PRECISION, '12')
+			  ) as t(sales, selectMonth)
+		GROUP BY base.seq, tmk.yyyy, t.selectMonth, report_type
+		HAVING tmk.yyyy IS NOT NULL
+    </insert>
+    
+    <delete id="deleteReportGroupBrand">
+        TRUNCATE TABLE gps.report_group_brand_summary
+    </delete>
+	
+	<select id="cntTbGoalDataMonthExist" parameterType="CmMap" resultType="java.lang.Integer" flushCache="false">
+		SELECT count(*)
+		FROM gps.tb_goal_data_month_krw gdm
+		WHERE gdm.base_year = #{baseYear}
+	</select>
+	
+    <insert id="insertGroupBrandResultSalesCur" parameterType="CmMap" >
+		/* cur - sales insert */
+		INSERT INTO gps.report_group_brand_summary
+				(base_seq, base_year, selectMonth
+					, ec_korea_sales
+					, ec_global_sales
+					, tc_sales
+					, mbs_sales
+					, roadshop_sales
+					, mart_sales
+					, dtd_sales
+					, department_sales
+					, retail_sales
+					, ntr_sales
+					, gtr_sales
+					, global_sales
+				)
+				SELECT
+				 base.seq, tmk.yyyy AS base_year, t.selectMonth
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01'			THEN t.sales END)/100,0) ec_korea
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '03'			THEN t.sales END)/100,0) ec_global
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '11'			THEN t.sales END)/100,0) tc
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '02'			THEN t.sales END)/100,0) mbs
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '04'			THEN t.sales END)/100,0) roadshop
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '07'			THEN t.sales END)/100,0) mart
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '05'			THEN t.sales END)/100,0) dtd
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '06'			THEN t.sales END)/100,0) department
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '09'			THEN t.sales END)/100,0) retail
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('15') 		THEN t.sales END)/100,0) ntr
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('16') 		THEN t.sales END)/100,0) gtr
+				,COALESCE(sum(CASE WHEN tmk.cp_cd ~ '^[A-Z]'								THEN t.sales END)/100,0) global_
+				FROM gps.report_group_brand_base base
+				LEFT JOIN gps.brd_info bi ON
+				CASE
+					WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+					WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+					ELSE bi.brd_cd = base.brd_cd
+				END
+				LEFT JOIN (gps.tb_trm_month_krw tmk INNER JOIN gps.ch_info ci ON tmk.chl_cd = ci.chl_cd	 AND ci.status = 'Y' AND ci.is_grp_sale = 'Y') ON
+				base.base_year = #{goalBaseYear} AND base.status = 'Y'
+				AND tmk.yyyy = #{goalBaseYear} AND tmk.brd_cd IN (bi.brd_cd)
+						  cross join lateral (
+							 values
+							   (tmk.s_01::DOUBLE PRECISION, '01'),
+							   (tmk.s_02::DOUBLE PRECISION, '02'),
+							   (tmk.s_03::DOUBLE PRECISION, '03'),
+							   (tmk.s_04::DOUBLE PRECISION, '04'),
+							   (tmk.s_05::DOUBLE PRECISION, '05'),
+							   (tmk.s_06::DOUBLE PRECISION, '06'),
+							   (tmk.s_07::DOUBLE PRECISION, '07'),
+							   (tmk.s_08::DOUBLE PRECISION, '08'),
+							   (tmk.s_09::DOUBLE PRECISION, '09'),
+							   (tmk.s_10::DOUBLE PRECISION, '10'),
+							   (tmk.s_11::DOUBLE PRECISION, '11'),
+							   (tmk.s_12::DOUBLE PRECISION, '12')
+					  ) as t(sales, selectMonth)
+		        GROUP BY base.seq, tmk.yyyy, t.selectMonth
+		        HAVING tmk.yyyy IS NOT NULL
+    </insert>
+	
+    <insert id="insertGroupBrandGoalSalesCur" parameterType="CmMap" >
+    /* goal cur - sales insert */
+	    INSERT INTO gps.report_group_brand_summary
+			(base_seq, base_year, selectMonth
+				, goal_ec_korea_sales
+				, goal_ec_global_sales
+				, goal_tc_sales
+				, goal_mbs_sales
+				, goal_roadshop_sales
+				, goal_mart_sales
+				, goal_dtd_sales
+				, goal_department_sales
+				, goal_retail_sales
+				, goal_ntr_sales
+				, goal_gtr_sales
+				, goal_global_sales
+			)
+			SELECT
+			 base.seq, gdm.base_year AS base_year, t.selectMonth
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '01'			THEN t.sales END)/100,0) ec_korea
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '03'			THEN t.sales END)/100,0) ec_global
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '11'			THEN t.sales END)/100,0) tc
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '02'			THEN t.sales END)/100,0) mbs
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '04'			THEN t.sales END)/100,0) roadshop
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '07'			THEN t.sales END)/100,0) mart
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '05'			THEN t.sales END)/100,0) dtd
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '06'			THEN t.sales END)/100,0) department
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '09'			THEN t.sales END)/100,0) retail
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp IN('15') 		THEN t.sales END)/100,0) ntr
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp IN('16') 		THEN t.sales END)/100,0) gtr
+			,COALESCE(sum(CASE WHEN gdm.cp_cd ~ '^[A-Z]'								THEN t.sales END)/100,0) global_
+			FROM gps.report_group_brand_base base
+			LEFT JOIN gps.brd_info bi ON
+			CASE
+				WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+				WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+				ELSE bi.brd_cd = base.brd_cd
+			END
+	        LEFT JOIN (gps.tb_goal_data_month_krw gdm INNER JOIN gps.ch_info ci ON gdm.chl_cd = ci.ch_gps AND ci.is_grp_sale = 'Y' AND ci.status = 'Y') ON
+	        base.base_year = #{goalBaseYear} AND base.status = 'Y'
+	        AND gdm.base_year = #{goalBaseYear} AND gdm.is_grp_sale = 'Y' AND gdm.brd_cd IN (bi.brd_cd)
+					  cross join lateral (
+						 values
+						   (gdm.s_01::DOUBLE PRECISION, '01'),
+						   (gdm.s_02::DOUBLE PRECISION, '02'),
+						   (gdm.s_03::DOUBLE PRECISION, '03'),
+						   (gdm.s_04::DOUBLE PRECISION, '04'),
+						   (gdm.s_05::DOUBLE PRECISION, '05'),
+						   (gdm.s_06::DOUBLE PRECISION, '06'),
+						   (gdm.s_07::DOUBLE PRECISION, '07'),
+						   (gdm.s_08::DOUBLE PRECISION, '08'),
+						   (gdm.s_09::DOUBLE PRECISION, '09'),
+						   (gdm.s_10::DOUBLE PRECISION, '10'),
+						   (gdm.s_11::DOUBLE PRECISION, '11'),
+						   (gdm.s_12::DOUBLE PRECISION, '12')
+				  ) as t(sales, selectMonth)
+	        GROUP BY base.seq, gdm.base_year, t.selectMonth
+	        HAVING gdm.base_year IS NOT NULL
+    </insert>
+
+    <update id="updateGroupBrandResultSalesCur" parameterType="CmMap" >
+    	/* result cur - sales update */
+    	UPDATE gps.report_group_brand_summary base
+	    SET
+	      base_year					= a.base_year
+	    , ec_korea_sales			= a.ec_korea
+	    , ec_global_sales 			= a.ec_global
+	    , tc_sales					= a.tc
+	    , mbs_sales 				= a.mbs
+	    , roadshop_sales    		= a.roadshop
+	    , mart_sales    			= a.mart
+	    , dtd_sales 				= a.dtd
+	    , department_sales 		= a.department
+	    , retail_sales 			= a.retail
+	    , ntr_sales 				= a.ntr
+	    , gtr_sales 				= a.gtr
+	    , global_sales 			= a.global_
+	    FROM (
+	    SELECT
+		 base.seq, tmk.yyyy AS base_year, t.selectMonth
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01'			THEN t.sales END)/100,0) ec_korea
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '03'			THEN t.sales END)/100,0) ec_global
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '11'			THEN t.sales END)/100,0) tc
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '02'			THEN t.sales END)/100,0) mbs
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '04'			THEN t.sales END)/100,0) roadshop
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '07'			THEN t.sales END)/100,0) mart
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '05'			THEN t.sales END)/100,0) dtd
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '06'			THEN t.sales END)/100,0) department
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '09'			THEN t.sales END)/100,0) retail
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('15') 		THEN t.sales END)/100,0) ntr
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('16') 		THEN t.sales END)/100,0) gtr
+		,COALESCE(sum(CASE WHEN tmk.cp_cd ~ '^[A-Z]'								THEN t.sales END)/100,0) global_
+	    FROM gps.report_group_brand_base base
+	    LEFT JOIN gps.brd_info bi ON
+	    CASE
+			WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+			WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+			ELSE bi.brd_cd = base.brd_cd
+	    END
+		LEFT JOIN (gps.tb_trm_month_krw tmk INNER JOIN gps.ch_info ci ON tmk.chl_cd = ci.chl_cd	 AND ci.status = 'Y' AND ci.is_grp_sale = 'Y') ON
+		base.base_year = #{goalBaseYear} AND base.status = 'Y'
+		AND tmk.yyyy = #{goalBaseYear} AND tmk.brd_cd IN (bi.brd_cd)
+	              cross join lateral (
+	                 values
+	                   (tmk.s_01::DOUBLE PRECISION, '01'),
+	                   (tmk.s_02::DOUBLE PRECISION, '02'),
+	                   (tmk.s_03::DOUBLE PRECISION, '03'),
+	                   (tmk.s_04::DOUBLE PRECISION, '04'),
+	                   (tmk.s_05::DOUBLE PRECISION, '05'),
+	                   (tmk.s_06::DOUBLE PRECISION, '06'),
+	                   (tmk.s_07::DOUBLE PRECISION, '07'),
+	                   (tmk.s_08::DOUBLE PRECISION, '08'),
+	                   (tmk.s_09::DOUBLE PRECISION, '09'),
+	                   (tmk.s_10::DOUBLE PRECISION, '10'),
+	                   (tmk.s_11::DOUBLE PRECISION, '11'),
+	                   (tmk.s_12::DOUBLE PRECISION, '12')
+	          ) as t(sales, selectMonth)
+	    GROUP BY base.seq, tmk.yyyy, t.selectMonth
+	    HAVING tmk.yyyy IS NOT NULL
+	    ) a
+	    WHERE base.base_seq = a.seq AND base.base_year = a.base_year AND base.selectMonth = a.selectMonth
+    </update>
+
+    <update id="updateGroupBrandResultProfitCur" parameterType="CmMap" >
+    	/* result cur - profit update */
+	    UPDATE gps.report_group_brand_summary base
+	        SET
+	          base_year					= a.base_year
+	        , ec_korea_profit			= a.ec_korea
+	        , ec_global_profit 			= a.ec_global
+	        , tc_profit					= a.tc
+	        , mbs_profit 				= a.mbs
+	        , roadshop_profit    		= a.roadshop
+	        , mart_profit    			= a.mart
+	        , dtd_profit 				= a.dtd
+	        , department_profit 		= a.department
+	        , retail_profit 			= a.retail
+	        , ntr_profit 				= a.ntr
+	        , gtr_profit 				= a.gtr
+	        , global_profit 			= a.global_
+	        FROM (
+	        SELECT
+			 base.seq, tmk.yyyy AS base_year, t.selectMonth
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01'			THEN t.profit END)/100,0) ec_korea
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '03'			THEN t.profit END)/100,0) ec_global
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '11'			THEN t.profit END)/100,0) tc
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '02'			THEN t.profit END)/100,0) mbs
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '04'			THEN t.profit END)/100,0) roadshop
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '07'			THEN t.profit END)/100,0) mart
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '05'			THEN t.profit END)/100,0) dtd
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '06'			THEN t.profit END)/100,0) department
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '09'			THEN t.profit END)/100,0) retail
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('15') 		THEN t.profit END)/100,0) ntr
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('16') 		THEN t.profit END)/100,0) gtr
+			,COALESCE(sum(CASE WHEN tmk.cp_cd ~ '^[A-Z]'								THEN t.profit END)/100,0) global_
+	        FROM gps.report_group_brand_base base
+	        LEFT JOIN gps.brd_info bi ON
+	        CASE
+				WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+				WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+				ELSE bi.brd_cd = base.brd_cd
+	        END
+			LEFT JOIN (gps.tb_trm_month_krw tmk INNER JOIN gps.ch_info ci ON tmk.chl_cd = ci.chl_cd	 AND ci.status = 'Y' AND ci.is_grp_prof = 'Y') ON
+			base.base_year = #{goalBaseYear} AND base.status = 'Y'
+			AND tmk.yyyy = #{goalBaseYear} AND tmk.brd_cd IN (bi.brd_cd)
+	                  cross join lateral (
+	                     values
+	                       (tmk.p_01::DOUBLE PRECISION, '01'),
+	                       (tmk.p_02::DOUBLE PRECISION, '02'),
+	                       (tmk.p_03::DOUBLE PRECISION, '03'),
+	                       (tmk.p_04::DOUBLE PRECISION, '04'),
+	                       (tmk.p_05::DOUBLE PRECISION, '05'),
+	                       (tmk.p_06::DOUBLE PRECISION, '06'),
+	                       (tmk.p_07::DOUBLE PRECISION, '07'),
+	                       (tmk.p_08::DOUBLE PRECISION, '08'),
+	                       (tmk.p_09::DOUBLE PRECISION, '09'),
+	                       (tmk.p_10::DOUBLE PRECISION, '10'),
+	                       (tmk.p_11::DOUBLE PRECISION, '11'),
+	                       (tmk.p_12::DOUBLE PRECISION, '12')
+	              ) as t(profit, selectMonth)
+	        GROUP BY base.seq, tmk.yyyy, t.selectMonth
+	        HAVING tmk.yyyy IS NOT NULL
+	        ) a
+	        WHERE base.base_seq = a.seq AND base.base_year = a.base_year AND base.selectMonth = a.selectMonth
+    </update>
+
+    <update id="updateGroupBrandGoalProfitCur" parameterType="CmMap" >
+    	/* goal cur - profit update */
+    	UPDATE gps.report_group_brand_summary base
+        SET
+          base_year						= a.base_year
+        , goal_ec_korea_profit			= a.ec_korea
+        , goal_ec_global_profit 		= a.ec_global
+        , goal_tc_profit				= a.tc
+        , goal_mbs_profit 				= a.mbs
+        , goal_roadshop_profit    		= a.roadshop
+        , goal_mart_profit    			= a.mart
+        , goal_dtd_profit 				= a.dtd
+        , goal_department_profit 		= a.department
+        , goal_retail_profit 			= a.retail
+        , goal_ntr_profit 				= a.ntr
+        , goal_gtr_profit 				= a.gtr
+        , goal_global_profit 			= a.global_
+        FROM (
+        SELECT
+		 base.seq, gdm.base_year AS base_year, t.selectMonth
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '01'			THEN t.profit END)/100,0) ec_korea
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '03'			THEN t.profit END)/100,0) ec_global
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '11'			THEN t.profit END)/100,0) tc
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '02'			THEN t.profit END)/100,0) mbs
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '04'			THEN t.profit END)/100,0) roadshop
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '07'			THEN t.profit END)/100,0) mart
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '05'			THEN t.profit END)/100,0) dtd
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '06'			THEN t.profit END)/100,0) department
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '09'			THEN t.profit END)/100,0) retail
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp IN('15') 		THEN t.profit END)/100,0) ntr
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp IN('16') 		THEN t.profit END)/100,0) gtr
+		,COALESCE(sum(CASE WHEN gdm.cp_cd ~ '^[A-Z]'								THEN t.profit END)/100,0) global_
+        FROM gps.report_group_brand_base base
+        LEFT JOIN gps.brd_info bi ON
+        CASE
+			WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+			WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+			ELSE bi.brd_cd = base.brd_cd
+        END
+        LEFT JOIN (gps.tb_goal_data_month_krw gdm INNER JOIN gps.ch_info ci ON gdm.chl_cd = ci.ch_gps AND ci.is_grp_prof = 'Y' AND ci.status = 'Y') ON
+        base.base_year = #{goalBaseYear} AND base.status = 'Y'
+        AND gdm.base_year = #{goalBaseYear} AND gdm.is_grp_sale = 'Y' AND gdm.brd_cd IN (bi.brd_cd)
+                  cross join lateral (
+                     values
+                       (gdm.p_01::DOUBLE PRECISION, '01'),
+                       (gdm.p_02::DOUBLE PRECISION, '02'),
+                       (gdm.p_03::DOUBLE PRECISION, '03'),
+                       (gdm.p_04::DOUBLE PRECISION, '04'),
+                       (gdm.p_05::DOUBLE PRECISION, '05'),
+                       (gdm.p_06::DOUBLE PRECISION, '06'),
+                       (gdm.p_07::DOUBLE PRECISION, '07'),
+                       (gdm.p_08::DOUBLE PRECISION, '08'),
+                       (gdm.p_09::DOUBLE PRECISION, '09'),
+                       (gdm.p_10::DOUBLE PRECISION, '10'),
+                       (gdm.p_11::DOUBLE PRECISION, '11'),
+                       (gdm.p_12::DOUBLE PRECISION, '12')
+              ) as t(profit, selectMonth)
+        GROUP BY base.seq, gdm.base_year, t.selectMonth
+        HAVING gdm.base_year IS NOT NULL
+        ) a
+        WHERE base.base_seq = a.seq AND base.base_year = a.base_year AND base.selectMonth = a.selectMonth
+    </update>
+	
+    <insert id="insertGroupBrandResultSalesEst" parameterType="CmMap" >
+		/* result est - sales insert */
+		INSERT INTO gps.report_group_brand_summary
+				(base_seq, base_year, selectMonth
+					, ec_korea_sales
+					, ec_global_sales
+					, tc_sales
+					, mbs_sales
+					, roadshop_sales
+					, mart_sales
+					, dtd_sales
+					, department_sales
+					, retail_sales
+					, ntr_sales
+					, gtr_sales
+					, global_sales
+				)
+				SELECT
+				 base.seq, tmk.yyyy AS base_year, t.selectMonth
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01'			THEN t.sales END)/100,0) ec_korea
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '03'			THEN t.sales END)/100,0) ec_global
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '11'			THEN t.sales END)/100,0) tc
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '02'			THEN t.sales END)/100,0) mbs
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '04'			THEN t.sales END)/100,0) roadshop
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '07'			THEN t.sales END)/100,0) mart
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '05'			THEN t.sales END)/100,0) dtd
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '06'			THEN t.sales END)/100,0) department
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '09'			THEN t.sales END)/100,0) retail
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('15') 		THEN t.sales END)/100,0) ntr
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('16') 		THEN t.sales END)/100,0) gtr
+				,COALESCE(sum(CASE WHEN tmk.cp_cd ~ '^[A-Z]'								THEN t.sales END)/100,0) global_
+				FROM gps.report_group_brand_base base
+				LEFT JOIN gps.brd_info bi ON
+				CASE
+					WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+					WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+					ELSE bi.brd_cd = base.brd_cd
+				END
+				LEFT JOIN (gps.tb_trm_month_krw tmk INNER JOIN gps.ch_info ci ON tmk.chl_cd = ci.chl_cd AND ci.status = 'Y' AND ci.is_grp_sale = 'Y') ON
+				base.base_year = #{goalBaseYear} AND base.status = 'Y'
+				AND tmk.yyyy = #{estBaseYear} AND tmk.brd_cd IN (bi.brd_cd)
+						  cross join lateral (
+							 values
+							   (tmk.s_01::DOUBLE PRECISION, '01'),
+							   (tmk.s_02::DOUBLE PRECISION, '02'),
+							   (tmk.s_03::DOUBLE PRECISION, '03'),
+							   (tmk.s_04::DOUBLE PRECISION, '04'),
+							   (tmk.s_05::DOUBLE PRECISION, '05'),
+							   (tmk.s_06::DOUBLE PRECISION, '06'),
+							   (tmk.s_07::DOUBLE PRECISION, '07'),
+							   (tmk.s_08::DOUBLE PRECISION, '08'),
+							   (tmk.s_09::DOUBLE PRECISION, '09'),
+							   (tmk.s_10::DOUBLE PRECISION, '10'),
+							   (tmk.s_11::DOUBLE PRECISION, '11'),
+							   (tmk.s_12::DOUBLE PRECISION, '12')
+					  ) as t(sales, selectMonth)
+		        GROUP BY base.seq, tmk.yyyy, t.selectMonth
+		        HAVING tmk.yyyy IS NOT NULL
+    </insert>
+	
+    <insert id="insertGroupBrandGoalSalesEst" parameterType="CmMap" >
+    /* goal est - sales insert */
+	    INSERT INTO gps.report_group_brand_summary
+			(base_seq, base_year, selectMonth
+				, goal_ec_korea_sales
+				, goal_ec_global_sales
+				, goal_tc_sales
+				, goal_mbs_sales
+				, goal_roadshop_sales
+				, goal_mart_sales
+				, goal_dtd_sales
+				, goal_department_sales
+				, goal_retail_sales
+				, goal_ntr_sales
+				, goal_gtr_sales
+				, goal_global_sales
+			)
+			SELECT
+			 base.seq, gdm.base_year AS base_year, t.selectMonth
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '01'			THEN t.sales END)/100,0) ec_korea
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '03'			THEN t.sales END)/100,0) ec_global
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '11'			THEN t.sales END)/100,0) tc
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '02'			THEN t.sales END)/100,0) mbs
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '04'			THEN t.sales END)/100,0) roadshop
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '07'			THEN t.sales END)/100,0) mart
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '05'			THEN t.sales END)/100,0) dtd
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '06'			THEN t.sales END)/100,0) department
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '09'			THEN t.sales END)/100,0) retail
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp IN('15') 		THEN t.sales END)/100,0) ntr
+			,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp IN('16') 		THEN t.sales END)/100,0) gtr
+			,COALESCE(sum(CASE WHEN gdm.cp_cd ~ '^[A-Z]'								THEN t.sales END)/100,0) global_
+			FROM gps.report_group_brand_base base
+			LEFT JOIN gps.brd_info bi ON
+			CASE
+				WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+				WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+				ELSE bi.brd_cd = base.brd_cd
+			END
+	        LEFT JOIN (gps.tb_goal_data_month_krw gdm INNER JOIN gps.ch_info ci ON gdm.chl_cd = ci.ch_gps AND ci.is_grp_sale = 'Y' AND ci.status = 'Y') ON
+	        base.base_year = #{goalBaseYear} AND base.status = 'Y'
+	        AND gdm.base_year = #{estBaseYear} AND gdm.is_grp_sale = 'Y' AND gdm.brd_cd IN (bi.brd_cd)
+					  cross join lateral (
+						 values
+						   (gdm.s_01::DOUBLE PRECISION, '01'),
+						   (gdm.s_02::DOUBLE PRECISION, '02'),
+						   (gdm.s_03::DOUBLE PRECISION, '03'),
+						   (gdm.s_04::DOUBLE PRECISION, '04'),
+						   (gdm.s_05::DOUBLE PRECISION, '05'),
+						   (gdm.s_06::DOUBLE PRECISION, '06'),
+						   (gdm.s_07::DOUBLE PRECISION, '07'),
+						   (gdm.s_08::DOUBLE PRECISION, '08'),
+						   (gdm.s_09::DOUBLE PRECISION, '09'),
+						   (gdm.s_10::DOUBLE PRECISION, '10'),
+						   (gdm.s_11::DOUBLE PRECISION, '11'),
+						   (gdm.s_12::DOUBLE PRECISION, '12')
+				  ) as t(sales, selectMonth)
+	        GROUP BY base.seq, gdm.base_year, t.selectMonth
+	        HAVING gdm.base_year IS NOT NULL
+    </insert>
+
+    <update id="updateGroupBrandResultSalesEst" parameterType="CmMap" >
+    	/* result est - sales update */
+    	UPDATE gps.report_group_brand_summary base
+	    SET
+	      base_year					= a.base_year
+	    , ec_korea_sales			= a.ec_korea
+	    , ec_global_sales 			= a.ec_global
+	    , tc_sales					= a.tc
+	    , mbs_sales 				= a.mbs
+	    , roadshop_sales    		= a.roadshop
+	    , mart_sales    			= a.mart
+	    , dtd_sales 				= a.dtd
+	    , department_sales 		= a.department
+	    , retail_sales 			= a.retail
+	    , ntr_sales 				= a.ntr
+	    , gtr_sales 				= a.gtr
+	    , global_sales 			= a.global_
+	    FROM (
+	    SELECT
+		 base.seq, tmk.yyyy AS base_year, t.selectMonth
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01'			THEN t.sales END)/100,0) ec_korea
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '03'			THEN t.sales END)/100,0) ec_global
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '11'			THEN t.sales END)/100,0) tc
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '02'			THEN t.sales END)/100,0) mbs
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '04'			THEN t.sales END)/100,0) roadshop
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '07'			THEN t.sales END)/100,0) mart
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '05'			THEN t.sales END)/100,0) dtd
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '06'			THEN t.sales END)/100,0) department
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '09'			THEN t.sales END)/100,0) retail
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('15') 		THEN t.sales END)/100,0) ntr
+		,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('16') 		THEN t.sales END)/100,0) gtr
+		,COALESCE(sum(CASE WHEN tmk.cp_cd ~ '^[A-Z]'								THEN t.sales END)/100,0) global_
+	    FROM gps.report_group_brand_base base
+	    LEFT JOIN gps.brd_info bi ON
+	    CASE
+			WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+			WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+			ELSE bi.brd_cd = base.brd_cd
+	    END
+		LEFT JOIN (gps.tb_trm_month_krw tmk INNER JOIN gps.ch_info ci ON tmk.chl_cd = ci.chl_cd	 AND ci.status = 'Y' AND ci.is_grp_sale = 'Y') ON
+		base.base_year = #{goalBaseYear} AND base.status = 'Y'
+		AND tmk.yyyy = #{estBaseYear} AND tmk.brd_cd IN (bi.brd_cd)
+	              cross join lateral (
+	                 values
+	                   (tmk.s_01::DOUBLE PRECISION, '01'),
+	                   (tmk.s_02::DOUBLE PRECISION, '02'),
+	                   (tmk.s_03::DOUBLE PRECISION, '03'),
+	                   (tmk.s_04::DOUBLE PRECISION, '04'),
+	                   (tmk.s_05::DOUBLE PRECISION, '05'),
+	                   (tmk.s_06::DOUBLE PRECISION, '06'),
+	                   (tmk.s_07::DOUBLE PRECISION, '07'),
+	                   (tmk.s_08::DOUBLE PRECISION, '08'),
+	                   (tmk.s_09::DOUBLE PRECISION, '09'),
+	                   (tmk.s_10::DOUBLE PRECISION, '10'),
+	                   (tmk.s_11::DOUBLE PRECISION, '11'),
+	                   (tmk.s_12::DOUBLE PRECISION, '12')
+	          ) as t(sales, selectMonth)
+	    GROUP BY base.seq, tmk.yyyy, t.selectMonth
+	    HAVING tmk.yyyy IS NOT NULL
+	    ) a
+	    WHERE base.base_seq = a.seq AND base.base_year = a.base_year AND base.selectMonth = a.selectMonth
+    </update>
+
+    <update id="updateGroupBrandResultProfitEst" parameterType="CmMap" >
+    	/* result est - profit update */
+	    UPDATE gps.report_group_brand_summary base
+	        SET
+	          base_year					= a.base_year
+	        , ec_korea_profit			= a.ec_korea
+	        , ec_global_profit 			= a.ec_global
+	        , tc_profit					= a.tc
+	        , mbs_profit 				= a.mbs
+	        , roadshop_profit    		= a.roadshop
+	        , mart_profit    			= a.mart
+	        , dtd_profit 				= a.dtd
+	        , department_profit 		= a.department
+	        , retail_profit 			= a.retail
+	        , ntr_profit 				= a.ntr
+	        , gtr_profit 				= a.gtr
+	        , global_profit 			= a.global_
+	        FROM (
+	        SELECT
+			 base.seq, tmk.yyyy AS base_year, t.selectMonth
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01'			THEN t.profit END)/100,0) ec_korea
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '03'			THEN t.profit END)/100,0) ec_global
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '11'			THEN t.profit END)/100,0) tc
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '02'			THEN t.profit END)/100,0) mbs
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '04'			THEN t.profit END)/100,0) roadshop
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '07'			THEN t.profit END)/100,0) mart
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '05'			THEN t.profit END)/100,0) dtd
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '06'			THEN t.profit END)/100,0) department
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '09'			THEN t.profit END)/100,0) retail
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('15') 		THEN t.profit END)/100,0) ntr
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('16') 		THEN t.profit END)/100,0) gtr
+			,COALESCE(sum(CASE WHEN tmk.cp_cd ~ '^[A-Z]'								THEN t.profit END)/100,0) global_
+	        FROM gps.report_group_brand_base base
+	        LEFT JOIN gps.brd_info bi ON
+	        CASE
+				WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+				WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+				ELSE bi.brd_cd = base.brd_cd
+	        END
+			LEFT JOIN (gps.tb_trm_month_krw tmk INNER JOIN gps.ch_info ci ON tmk.chl_cd = ci.chl_cd	 AND ci.status = 'Y' AND ci.is_grp_prof = 'Y') ON
+			base.base_year = #{goalBaseYear} AND base.status = 'Y'
+			AND tmk.yyyy = #{estBaseYear} AND tmk.brd_cd IN (bi.brd_cd)
+	                  cross join lateral (
+	                     values
+	                       (tmk.p_01::DOUBLE PRECISION, '01'),
+	                       (tmk.p_02::DOUBLE PRECISION, '02'),
+	                       (tmk.p_03::DOUBLE PRECISION, '03'),
+	                       (tmk.p_04::DOUBLE PRECISION, '04'),
+	                       (tmk.p_05::DOUBLE PRECISION, '05'),
+	                       (tmk.p_06::DOUBLE PRECISION, '06'),
+	                       (tmk.p_07::DOUBLE PRECISION, '07'),
+	                       (tmk.p_08::DOUBLE PRECISION, '08'),
+	                       (tmk.p_09::DOUBLE PRECISION, '09'),
+	                       (tmk.p_10::DOUBLE PRECISION, '10'),
+	                       (tmk.p_11::DOUBLE PRECISION, '11'),
+	                       (tmk.p_12::DOUBLE PRECISION, '12')
+	              ) as t(profit, selectMonth)
+	        GROUP BY base.seq, tmk.yyyy, t.selectMonth
+	        HAVING tmk.yyyy IS NOT NULL
+	        ) a
+	        WHERE base.base_seq = a.seq AND base.base_year = a.base_year AND base.selectMonth = a.selectMonth
+    </update>
+
+    <update id="updateGroupBrandGoalProfitEst" parameterType="CmMap" >
+    	/* goal est - profit update */
+    	UPDATE gps.report_group_brand_summary base
+        SET
+          base_year						= a.base_year
+        , goal_ec_korea_profit			= a.ec_korea
+        , goal_ec_global_profit 		= a.ec_global
+        , goal_tc_profit				= a.tc
+        , goal_mbs_profit 				= a.mbs
+        , goal_roadshop_profit    		= a.roadshop
+        , goal_mart_profit    			= a.mart
+        , goal_dtd_profit 				= a.dtd
+        , goal_department_profit 		= a.department
+        , goal_retail_profit 			= a.retail
+        , goal_ntr_profit 				= a.ntr
+        , goal_gtr_profit 				= a.gtr
+        , goal_global_profit 			= a.global_
+        FROM (
+        SELECT
+		 base.seq, gdm.base_year AS base_year, t.selectMonth
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '01'			THEN t.profit END)/100,0) ec_korea
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '03'			THEN t.profit END)/100,0) ec_global
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '11'			THEN t.profit END)/100,0) tc
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '02'			THEN t.profit END)/100,0) mbs
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '04'			THEN t.profit END)/100,0) roadshop
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '07'			THEN t.profit END)/100,0) mart
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '05'			THEN t.profit END)/100,0) dtd
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '06'			THEN t.profit END)/100,0) department
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp = '09'			THEN t.profit END)/100,0) retail
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp IN('15') 		THEN t.profit END)/100,0) ntr
+		,COALESCE(sum(CASE WHEN gdm.cp_cd = base.cp_cd AND ci.ch_grp IN('16') 		THEN t.profit END)/100,0) gtr
+		,COALESCE(sum(CASE WHEN gdm.cp_cd ~ '^[A-Z]'								THEN t.profit END)/100,0) global_
+        FROM gps.report_group_brand_base base
+        LEFT JOIN gps.brd_info bi ON
+        CASE
+			WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+			WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+			ELSE bi.brd_cd = base.brd_cd
+        END
+        LEFT JOIN (gps.tb_goal_data_month_krw gdm INNER JOIN gps.ch_info ci ON gdm.chl_cd = ci.ch_gps AND ci.is_grp_prof = 'Y' AND ci.status = 'Y') ON
+        base.base_year = #{goalBaseYear} AND base.status = 'Y'
+        AND gdm.base_year = #{estBaseYear} AND gdm.is_grp_sale = 'Y' AND gdm.brd_cd IN (bi.brd_cd)
+                  cross join lateral (
+                     values
+                       (gdm.p_01::DOUBLE PRECISION, '01'),
+                       (gdm.p_02::DOUBLE PRECISION, '02'),
+                       (gdm.p_03::DOUBLE PRECISION, '03'),
+                       (gdm.p_04::DOUBLE PRECISION, '04'),
+                       (gdm.p_05::DOUBLE PRECISION, '05'),
+                       (gdm.p_06::DOUBLE PRECISION, '06'),
+                       (gdm.p_07::DOUBLE PRECISION, '07'),
+                       (gdm.p_08::DOUBLE PRECISION, '08'),
+                       (gdm.p_09::DOUBLE PRECISION, '09'),
+                       (gdm.p_10::DOUBLE PRECISION, '10'),
+                       (gdm.p_11::DOUBLE PRECISION, '11'),
+                       (gdm.p_12::DOUBLE PRECISION, '12')
+              ) as t(profit, selectMonth)
+        GROUP BY base.seq, gdm.base_year, t.selectMonth
+        HAVING gdm.base_year IS NOT NULL
+        ) a
+        WHERE base.base_seq = a.seq AND base.base_year = a.base_year AND base.selectMonth = a.selectMonth
+    </update>
+	
+    <insert id="insertGroupBrandResultSalesRst" parameterType="CmMap" >
+		/* result rst - sales insert */
+		INSERT INTO gps.report_group_brand_summary
+				(base_seq, base_year, selectMonth
+					, ec_korea_sales
+					, ec_global_sales
+					, tc_sales
+					, mbs_sales
+					, roadshop_sales
+					, mart_sales
+					, dtd_sales
+					, department_sales
+					, retail_sales
+					, ntr_sales
+					, gtr_sales
+					, global_sales
+				)
+				SELECT
+				 base.seq, tmk.yyyy AS base_year, t.selectMonth
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01'			THEN t.sales END)/100,0) ec_korea
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '03'			THEN t.sales END)/100,0) ec_global
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '11'			THEN t.sales END)/100,0) tc
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '02'			THEN t.sales END)/100,0) mbs
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '04'			THEN t.sales END)/100,0) roadshop
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '07'			THEN t.sales END)/100,0) mart
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '05'			THEN t.sales END)/100,0) dtd
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '06'			THEN t.sales END)/100,0) department
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '09'			THEN t.sales END)/100,0) retail
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('15') 		THEN t.sales END)/100,0) ntr
+				,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('16') 		THEN t.sales END)/100,0) gtr
+				,COALESCE(sum(CASE WHEN tmk.cp_cd ~ '^[A-Z]'								THEN t.sales END)/100,0) global_
+				FROM gps.report_group_brand_base base
+				LEFT JOIN gps.brd_info bi ON
+				CASE
+					WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+					WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+					ELSE bi.brd_cd = base.brd_cd
+				END
+				LEFT JOIN (gps.tb_trm_month_krw tmk INNER JOIN gps.ch_info ci ON tmk.chl_cd = ci.chl_cd	 AND ci.status = 'Y' AND ci.is_grp_sale = 'Y') ON
+				base.base_year = #{goalBaseYear} AND base.status = 'Y'
+				AND tmk.yyyy = #{rstBaseYear} AND tmk.brd_cd IN (bi.brd_cd)
+						  cross join lateral (
+							 values
+							   (tmk.s_01::DOUBLE PRECISION, '01'),
+							   (tmk.s_02::DOUBLE PRECISION, '02'),
+							   (tmk.s_03::DOUBLE PRECISION, '03'),
+							   (tmk.s_04::DOUBLE PRECISION, '04'),
+							   (tmk.s_05::DOUBLE PRECISION, '05'),
+							   (tmk.s_06::DOUBLE PRECISION, '06'),
+							   (tmk.s_07::DOUBLE PRECISION, '07'),
+							   (tmk.s_08::DOUBLE PRECISION, '08'),
+							   (tmk.s_09::DOUBLE PRECISION, '09'),
+							   (tmk.s_10::DOUBLE PRECISION, '10'),
+							   (tmk.s_11::DOUBLE PRECISION, '11'),
+							   (tmk.s_12::DOUBLE PRECISION, '12')
+					  ) as t(sales, selectMonth)
+		        GROUP BY base.seq, tmk.yyyy, t.selectMonth
+		        HAVING tmk.yyyy IS NOT NULL
+    </insert>
+
+    <update id="updateGroupBrandResultProfitRst" parameterType="CmMap" >
+    	/* result rst - profit update */
+	    UPDATE gps.report_group_brand_summary base
+	        SET
+	          base_year					= a.base_year
+	        , ec_korea_profit			= a.ec_korea
+	        , ec_global_profit 			= a.ec_global
+	        , tc_profit					= a.tc
+	        , mbs_profit 				= a.mbs
+	        , roadshop_profit    		= a.roadshop
+	        , mart_profit    			= a.mart
+	        , dtd_profit 				= a.dtd
+	        , department_profit 		= a.department
+	        , retail_profit 			= a.retail
+	        , ntr_profit 				= a.ntr
+	        , gtr_profit 				= a.gtr
+	        , global_profit 			= a.global_
+	        FROM (
+	        SELECT
+			 base.seq, tmk.yyyy AS base_year, t.selectMonth
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '01'			THEN t.profit END)/100,0) ec_korea
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '03'			THEN t.profit END)/100,0) ec_global
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '11'			THEN t.profit END)/100,0) tc
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '02'			THEN t.profit END)/100,0) mbs
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '04'			THEN t.profit END)/100,0) roadshop
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '07'			THEN t.profit END)/100,0) mart
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '05'			THEN t.profit END)/100,0) dtd
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '06'			THEN t.profit END)/100,0) department
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp = '09'			THEN t.profit END)/100,0) retail
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('15') 		THEN t.profit END)/100,0) ntr
+			,COALESCE(sum(CASE WHEN tmk.cp_cd = base.cp_cd AND ci.ch_grp IN('16') 		THEN t.profit END)/100,0) gtr
+			,COALESCE(sum(CASE WHEN tmk.cp_cd ~ '^[A-Z]'								THEN t.profit END)/100,0) global_
+	        FROM gps.report_group_brand_base base
+	        LEFT JOIN gps.brd_info bi ON
+	        CASE
+				WHEN base.brd_cd LIKE '!%' THEN bi.brd_grp = base.brd_grp AND bi.brd_cd != ALL(string_to_array(REPLACE(base.brd_cd,'!',''),',')) AND is_use = 'Y'
+				WHEN base.brd_cd = '' OR base.brd_cd IS NULL THEN bi.brd_grp = base.brd_grp AND is_use = 'Y'
+				ELSE bi.brd_cd = base.brd_cd
+	        END
+			LEFT JOIN (gps.tb_trm_month_krw tmk INNER JOIN gps.ch_info ci ON tmk.chl_cd = ci.chl_cd	 AND ci.status = 'Y' AND ci.is_grp_prof = 'Y') ON
+			base.base_year = #{goalBaseYear} AND base.status = 'Y'
+			AND tmk.yyyy = #{rstBaseYear} AND tmk.brd_cd IN (bi.brd_cd)
+	                  cross join lateral (
+	                     values
+	                       (tmk.p_01::DOUBLE PRECISION, '01'),
+	                       (tmk.p_02::DOUBLE PRECISION, '02'),
+	                       (tmk.p_03::DOUBLE PRECISION, '03'),
+	                       (tmk.p_04::DOUBLE PRECISION, '04'),
+	                       (tmk.p_05::DOUBLE PRECISION, '05'),
+	                       (tmk.p_06::DOUBLE PRECISION, '06'),
+	                       (tmk.p_07::DOUBLE PRECISION, '07'),
+	                       (tmk.p_08::DOUBLE PRECISION, '08'),
+	                       (tmk.p_09::DOUBLE PRECISION, '09'),
+	                       (tmk.p_10::DOUBLE PRECISION, '10'),
+	                       (tmk.p_11::DOUBLE PRECISION, '11'),
+	                       (tmk.p_12::DOUBLE PRECISION, '12')
+	              ) as t(profit, selectMonth)
+	        GROUP BY base.seq, tmk.yyyy, t.selectMonth
+	        HAVING tmk.yyyy IS NOT NULL
+	        ) a
+	        WHERE base.base_seq = a.seq AND base.base_year = a.base_year AND base.selectMonth = a.selectMonth
+    </update>
+	
+	
+    <update id="updateGoalDataMonth" parameterType="String">
+	    update gps.tb_goal_data_month_krw a set
+		month_seq = b.month_seq,
+		year_seq = b.year_seq,
+		base_year = b.base_year,
+		section_id = b.section_id,
+		cp_cd = b.cp_cd,
+		cp_nm = b.cp_nm,
+		unit_cd = b.unit_cd,
+		unit_nm = b.unit_nm,
+		nat_cd = b.nat_cd,
+		nat_nm = b.nat_nm,
+		brd_cd = b.brd_cd,
+		brd_nm = b.brd_nm,
+		chl_cd = b.chl_cd,
+		chl_nm = b.chl_nm,
+		unit = b.unit,
+		g_sales = b.g_sales,
+		g_profit = b.g_profit,
+		g_sales_total = b.g_sales_total,
+		g_profit_total = b.g_profit_total,
+		sm_status = b.sm_status,
+		pm_status = b.pm_status,
+		is_grp_sale = b.is_grp_sale,
+		is_grp_prof = b.is_grp_prof,
+		s_01 = b.s_01,s_02 = b.s_02,s_03 = b.s_03,s_04 = b.s_04,s_05 = b.s_05,s_06 = b.s_06,s_07 = b.s_07,s_08 = b.s_08,s_09 = b.s_09,s_10 = b.s_10,s_11 = b.s_11,s_12 = b.s_12,
+		p_01 = b.p_01,p_02 = b.p_02,p_03 = b.p_03,p_04 = b.p_04,p_05 = b.p_05,p_06 = b.p_06,p_07 = b.p_07,p_08 = b.p_08,p_09 = b.p_09,p_10 = b.p_10,p_11 = b.p_11,p_12 = b.p_12
+		FROM(
+			SELECT
+			a.month_seq, a.year_seq, a.base_year,
+			a.section_id, b.dtl_cd AS views,
+			a.cp_cd, a.cp_nm, a.unit_cd, a.unit_nm,
+			a.nat_cd, a.nat_nm,
+			a.brd_cd, a.brd_nm,
+			a.chl_cd, a.chl_nm,
+			'KRW' AS unit,
+			a.g_sales, a.g_profit,
+			a.g_sales_total, a.g_profit_total,
+			a.sm_status, a.pm_status,
+			a.is_grp_sale, a.is_grp_prof,
+			a.s_01,a.s_02,a.s_03,a.s_04,a.s_05,a.s_06,a.s_07,a.s_08,a.s_09,a.s_10,a.s_11,s_12,
+			a.p_01,a.p_02,a.p_03,a.p_04,a.p_05,a.p_06,a.p_07,a.p_08,a.p_09,a.p_10,a.p_11,p_12
+			FROM (
+				SELECT
+				a.month_seq, a.year_seq, a.base_year,
+				a.cp_cd, a.cp_nm, a.unit_cd, a.unit_nm,
+				a.nat_cd, a.nat_nm,
+				a.brd_cd, a.brd_nm,
+				a.chl_cd, a.chl_nm,
+				'KRW' AS unit,
+				a.section_id,
+				gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	a.g_sales,'' , a.unit) AS g_sales,
+				gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	a.g_profit,'' , a.unit) AS g_profit,
+				gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	a.g_sales_total,'' , a.unit) AS g_sales_total,
+				gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	a.g_profit_total,'' , a.unit) AS g_profit_total,
+				a.sm_status, a.pm_status,
+				a.is_grp_sale, a.is_grp_prof,
+				a.s_01,a.s_02,a.s_03,a.s_04,a.s_05,a.s_06,a.s_07,a.s_08,a.s_09,a.s_10,a.s_11,a.s_12,
+				a.p_01,a.p_02,a.p_03,a.p_04,a.p_05,a.p_06,a.p_07,a.p_08,a.p_09,a.p_10,a.p_11,a.p_12
+				FROM (
+					SELECT m.seq AS month_seq, a.seq AS year_seq, a.yyyy AS base_year,
+						a.cp_cd, b.cd_nm AS cp_nm, a.unit_cd, c.cd_nm AS unit_nm,
+						a.nat_cd, d.cd_nm AS nat_nm,
+						a.brd_cd, e.cd_nm AS brd_nm,
+						a.chl_cd, f.cd_nm AS chl_nm,
+						case
+							WHEN g.ch_unit='19' THEN a.unit
+							ELSE aa.unit
+						END unit,
+						a.section_id,
+						case when g.is_grp_sale='Y' then goal.sync_g_sales ELSE '0' end AS g_sales,
+						case when g.is_grp_prof IN ('N','Y') then goal.sync_g_profit ELSE '0' end AS g_profit,
+						goal.sync_g_sales AS g_sales_total,
+						goal.sync_g_profit AS g_profit_total,
+						aa.sm_status,
+						CASE
+							WHEN a.cp_cd='1100' AND a.nat_cd='KR' THEN aa.pm_status
+							WHEN a.cp_cd='1100' AND a.nat_cd!='KR' THEN aa.pm_os_status
+							ELSE aa.pm_status
+						END AS pm_status,
+						g.is_grp_sale, g.is_grp_prof,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.s_01, g.ch_unit , aa.unit) AS s_01,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.s_02, g.ch_unit , aa.unit) AS s_02,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.s_03, g.ch_unit , aa.unit) AS s_03,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.s_04, g.ch_unit , aa.unit) AS s_04,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.s_05, g.ch_unit , aa.unit) AS s_05,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.s_06, g.ch_unit , aa.unit) AS s_06,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.s_07, g.ch_unit , aa.unit) AS s_07,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.s_08, g.ch_unit , aa.unit) AS s_08,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.s_09, g.ch_unit , aa.unit) AS s_09,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.s_10, g.ch_unit , aa.unit) AS s_10,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.s_11, g.ch_unit , aa.unit) AS s_11,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.s_12, g.ch_unit , aa.unit) AS s_12,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.p_01, g.ch_unit , aa.unit) AS p_01,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.p_02, g.ch_unit , aa.unit) AS p_02,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.p_03, g.ch_unit , aa.unit) AS p_03,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.p_04, g.ch_unit , aa.unit) AS p_04,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.p_05, g.ch_unit , aa.unit) AS p_05,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.p_06, g.ch_unit , aa.unit) AS p_06,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.p_07, g.ch_unit , aa.unit) AS p_07,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.p_08, g.ch_unit , aa.unit) AS p_08,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.p_09, g.ch_unit , aa.unit) AS p_09,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.p_10, g.ch_unit , aa.unit) AS p_10,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.p_11, g.ch_unit , aa.unit) AS p_11,
+						gps.fn_nat_fx_krw(	a.section_id,	a.nat_cd,	a.unit,	goal.p_12, g.ch_unit , aa.unit) AS p_12
+					FROM gps.goal_data_year a
+					LEFT OUTER JOIN gps.goal_data aa ON a.goal_data_seq=aa.seq AND aa.ROLLBACK='N'
+					LEFT OUTER JOIN gps.code_info b ON a.cp_cd=b.cd AND b.cd_type='cp'
+					LEFT OUTER JOIN gps.code_info c ON a.unit_cd=c.cd AND c.cd_type='unit'
+					LEFT OUTER JOIN gps.code_info d ON a.nat_cd=d.cd AND d.cd_type='nat'
+					LEFT OUTER JOIN gps.code_info e ON a.brd_cd=e.cd AND e.cd_type='brand'
+					LEFT OUTER JOIN gps.code_info f ON a.chl_cd=f.cd AND f.cd_type='ch'
+					LEFT OUTER JOIN gps.goal_data_month m ON a.seq=m.goal_data_year_seq AND m."rollback"='N'
+					LEFT OUTER JOIN (
+					/* 해외법인과 연동된 월목표 */
+						SELECT
+							gdy.seq AS goal_data_year_seq
+							, gdy.goal_data_seq
+							, gdy.section_id
+							, gdy.cp_cd
+							, gdy.unit_cd
+							, gdy.nat_cd
+							, gdy.brd_cd
+							, gdy.chl_cd
+							, CASE WHEN gos.s_status IS NULL THEN gdy.g_sales
+								WHEN gos.s_status = 'Y' THEN gos.g_sales
+								ELSE NULL
+							  END AS sync_g_sales
+							 , CASE WHEN gos.p_status IS NULL THEN gdy.g_profit
+								WHEN gos.p_status = 'Y' THEN gos.g_profit
+								ELSE NULL
+							  END AS sync_g_profit
+							, gdy.yyyy
+							, COALESCE(gos.unit, gdy.unit) AS unit
+							, gdy.status
+							, gdy.is_grp_sale
+							, gdy.is_grp_prof
+							, gos.s_status AS os_s_status
+							, gos.p_status AS os_p_status
+							, CASE WHEN gos.s_status IS NULL THEN gdm.s_01
+								WHEN gos.s_status = 'Y' THEN gos.s_01
+								ELSE NULL
+							  END AS s_01
+							, CASE WHEN gos.s_status IS NULL THEN gdm.s_02
+								WHEN gos.s_status = 'Y' THEN gos.s_02
+								ELSE NULL
+							  END AS s_02
+							, CASE WHEN gos.s_status IS NULL THEN gdm.s_03
+								WHEN gos.s_status = 'Y' THEN gos.s_03
+								ELSE NULL
+							  END AS s_03
+							, CASE WHEN gos.s_status IS NULL THEN gdm.s_04
+								WHEN gos.s_status = 'Y' THEN gos.s_04
+								ELSE NULL
+							  END AS s_04
+							, CASE WHEN gos.s_status IS NULL THEN gdm.s_05
+								WHEN gos.s_status = 'Y' THEN gos.s_05
+								ELSE NULL
+							  END AS s_05
+							, CASE WHEN gos.s_status IS NULL THEN gdm.s_06
+								WHEN gos.s_status = 'Y' THEN gos.s_06
+								ELSE NULL
+							  END AS s_06
+							, CASE WHEN gos.s_status IS NULL THEN gdm.s_07
+								WHEN gos.s_status = 'Y' THEN gos.s_07
+								ELSE NULL
+							  END AS s_07
+							, CASE WHEN gos.s_status IS NULL THEN gdm.s_08
+								WHEN gos.s_status = 'Y' THEN gos.s_08
+								ELSE NULL
+							  END AS s_08
+							, CASE WHEN gos.s_status IS NULL THEN gdm.s_09
+								WHEN gos.s_status = 'Y' THEN gos.s_09
+								ELSE NULL
+							  END AS s_09
+							, CASE WHEN gos.s_status IS NULL THEN gdm.s_10
+								WHEN gos.s_status = 'Y' THEN gos.s_10
+								ELSE NULL
+							  END AS s_10
+							, CASE WHEN gos.s_status IS NULL THEN gdm.s_11
+								WHEN gos.s_status = 'Y' THEN gos.s_11
+								ELSE NULL
+							  END AS s_11
+							, CASE WHEN gos.s_status IS NULL THEN gdm.s_12
+								WHEN gos.s_status = 'Y' THEN gos.s_12
+								ELSE NULL
+							  END AS s_12
+							, CASE WHEN gos.p_status IS NULL THEN gdm.p_01
+								WHEN gos.p_status = 'Y' THEN gos.p_01
+								ELSE NULL
+							  END AS p_01
+							, CASE WHEN gos.p_status IS NULL THEN gdm.p_02
+								WHEN gos.p_status = 'Y' THEN gos.p_02
+								ELSE NULL
+							  END AS p_02
+							, CASE WHEN gos.p_status IS NULL THEN gdm.p_03
+								WHEN gos.p_status = 'Y' THEN gos.p_03
+								ELSE NULL
+							  END AS p_03
+							, CASE WHEN gos.p_status IS NULL THEN gdm.p_04
+								WHEN gos.p_status = 'Y' THEN gos.p_04
+								ELSE NULL
+							  END AS p_04
+							, CASE WHEN gos.p_status IS NULL THEN gdm.p_05
+								WHEN gos.p_status = 'Y' THEN gos.p_05
+								ELSE NULL
+							  END AS p_05
+							, CASE WHEN gos.p_status IS NULL THEN gdm.p_06
+								WHEN gos.p_status = 'Y' THEN gos.p_06
+								ELSE NULL
+							  END AS p_06
+							, CASE WHEN gos.p_status IS NULL THEN gdm.p_07
+								WHEN gos.p_status = 'Y' THEN gos.p_07
+								ELSE NULL
+							  END AS p_07
+							, CASE WHEN gos.p_status IS NULL THEN gdm.p_08
+								WHEN gos.p_status = 'Y' THEN gos.p_08
+								ELSE NULL
+							  END AS p_08
+							, CASE WHEN gos.p_status IS NULL THEN gdm.p_09
+								WHEN gos.p_status = 'Y' THEN gos.p_09
+								ELSE NULL
+							  END AS p_09
+							, CASE WHEN gos.p_status IS NULL THEN gdm.p_10
+								WHEN gos.p_status = 'Y' THEN gos.p_10
+								ELSE NULL
+							  END AS p_10
+							, CASE WHEN gos.p_status IS NULL THEN gdm.p_11
+								WHEN gos.p_status = 'Y' THEN gos.p_11
+								ELSE NULL
+							  END AS p_11
+							, CASE WHEN gos.p_status IS NULL THEN gdm.p_12
+								WHEN gos.p_status = 'Y' THEN gos.p_12
+								ELSE NULL
+							  END AS p_12
+							, gdm.s_status
+							, gdm.p_status
+						FROM gps.goal_data_year gdy
+						LEFT OUTER JOIN gps.goal_data_month gdm ON
+						gdy.seq = gdm.goal_data_year_seq
+						LEFT OUTER JOIN (
+							/* 해외법인 월목표 */
+							SELECT
+								goal.*
+							FROM
+							(
+								SELECT
+									gd.guide_seq
+									, gdy.section_id 
+									, gdy.cp_cd
+									, gdy.unit_cd
+									, gdy.nat_cd
+									, gdy.brd_cd
+									, gdy.chl_cd
+									, gdy.yyyy
+								FROM gps.guide_data_year gdy
+								INNER JOIN (
+									SELECT
+										gd.seq
+										, gd.status
+										, gd.guide_seq
+									FROM gps.guide_info gi
+									INNER JOIN gps.guide_data gd ON
+										gi.seq = gd.guide_seq
+									WHERE
+										gi.seq	= (SELECT MAX(seq) FROM gps.guide_info WHERE status = 'C')
+								) gd ON
+									gdy.guide_data_seq = gd.seq
+								INNER JOIN gps.section_info si ON
+									gdy.section_id = si.section_id
+									AND si.is_use = 'Y'
+									AND si.is_reg = 'Y'
+								WHERE
+									si.dtl_cd = 'OS'
+							) guide
+							LEFT OUTER JOIN (
+								SELECT
+									gd.guide_seq
+									, gdy.*
+									, gdm.s_01
+									, gdm.s_02
+									, gdm.s_03
+									, gdm.s_04
+									, gdm.s_05
+									, gdm.s_06
+									, gdm.s_07
+									, gdm.s_08
+									, gdm.s_09
+									, gdm.s_10
+									, gdm.s_11
+									, gdm.s_12
+									, gdm.p_01
+									, gdm.p_02
+									, gdm.p_03
+									, gdm.p_04
+									, gdm.p_05
+									, gdm.p_06
+									, gdm.p_07
+									, gdm.p_08
+									, gdm.p_09
+									, gdm.p_10
+									, gdm.p_11
+									, gdm.p_12
+									, COALESCE(gdm.s_status, 'U') AS s_status
+									, COALESCE(gdm.p_status, 'U') AS p_status
+								FROM gps.goal_data_year gdy
+								INNER JOIN gps.goal_data gd ON
+									gdy.goal_data_seq = gd.seq
+								LEFT OUTER JOIN gps.goal_data_month gdm ON
+									gdy.seq = gdm.goal_data_year_seq
+								WHERE
+									gd.rollback = 'N'
+							) goal ON
+								guide.guide_seq = goal.guide_seq
+								AND guide.section_id = goal.section_id
+								AND guide.cp_cd = goal.cp_cd
+								AND guide.nat_cd = goal.nat_cd
+								AND guide.unit_cd = goal.unit_cd
+								AND guide.brd_cd = goal.brd_cd
+								AND guide.chl_cd = goal.chl_cd
+						) gos ON
+						gdy.cp_cd = gos.cp_cd 
+						AND gdy.nat_cd = gos.nat_cd
+						AND gdy.brd_cd = gos.brd_cd
+						AND gdy.chl_cd = gos.chl_cd
+						AND gdy.yyyy = gos.yyyy
+					) goal ON
+						m.cp_cd = goal.cp_cd 
+						AND m.nat_cd = goal.nat_cd
+						AND m.unit_cd = goal.unit_cd
+						AND m.brd_cd = goal.brd_cd
+						AND m.chl_cd = goal.chl_cd
+						AND m.goal_data_year_seq = goal.goal_data_year_seq
+						LEFT OUTER JOIN (select ch_gps, max(ch_unit) ch_unit, MAX(is_grp_sale) is_grp_sale, MAX(is_grp_prof) is_grp_prof FROM gps.ch_info GROUP BY ch_gps) g ON a.chl_cd=g.ch_gps
+						WHERE a.goal_data_seq IN (
+							SELECT seq AS goal_seq
+							FROM gps.goal_data
+							WHERE guide_seq = (
+								SELECT MAX(seq) AS guide_seq
+								FROM gps.guide_info
+								WHERE STATUS='C' AND guide_base::text=#{goalBaseYear}
+							)
+							AND ROLLBACK='N'
+						)
+						AND a.yyyy=#{goalBaseYear}
+						AND a.ROLLBACK='N'
+					) a
+				) a
+			LEFT JOIN gps.section_info b ON a.section_id=b.section_id
+			WHERE  b.is_use='Y' AND b.cate_cd!='005'
+			)b
+		WHERE a.year_seq = b.year_seq
+    </update>
+    
+	
+</mapper>
