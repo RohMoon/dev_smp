@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        section{
+            border: 1px solid red;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+        }
+
+
+        .movingBox{
+            /*display: flex;*/;
+            width: 100px;
+            background-color: mediumpurple;
+            height: 100px;
+        }
+
+        .arrow_box{
+            display: none;
+            position:absolute;
+            width: fit-content;
+            padding: 8px;
+            /*-webkit-border-radius: 8px;*/
+            /*-moz-border-radius: 8px;*/
+            border-radius: 8px;
+            background: #333;
+            color: #fff;
+            font-size: 14px;
+        }
+
+/*        .arrow_box:after{
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            margin-left : -10px;
+            border: 10px solid rgba(51, 51, 51, 0);
+            border-bottom-color: #333;
+            pointer-events : none;
+            content: " ";
+        }*/
+
+        .arrow_box p:hover{
+            background-color: white;
+            animation-delay: 3s;
+            transition-timing-function: ease-out;
+            transition-duration: 1s;
+            color: goldenrod;
+        }
+
+    </style>
+</head>
+<body>
+<div class="arrow_box">
+<p>아이콘 만들기</p>
+<p>폴더 만들기</p>
+</div>
+<section class="desktop">
+
+<div id="test01" class="movingBox"></div>
+<div id="test02" class="movingBox"></div>
+
+<!--<div class="movingBox2"></div>-->
+<!--<img src="https://js.cx/clipart/ball.svg" style="cursor: pointer; position: absolute; z-index: 1000; left: 308px; top: 113px;" width="40" height="40" id="ball">-->
+
+</section>
+</body>
+</html>
+<script>
+
+    let mvnBox = document.getElementsByClassName("movingBox");
+    for (let i = 1; i < mvnBox.length+1; i++) {
+        let mvnBoxId = document.getElementById("test0"+i);
+        mvnBoxId.onmousedown = function (event) {
+
+            event.stopPropagation();
+
+            let shiftX = event.clientX - mvnBoxId.getBoundingClientRect().left;
+            let shiftY = event.clientY - mvnBoxId.getBoundingClientRect().top;
+
+            mvnBoxId.style.position = "absolute";
+            mvnBoxId.style.zIndex = 1000;
+            document.body.appendChild(mvnBoxId);
+
+            moveAt(event.pageX, event.pageY);
+
+            function moveAt(pageX, pageY) {
+
+                mvnBoxId.style.left = pageX - shiftX + "px";
+                mvnBoxId.style.top = pageY - shiftY + "px";
+                // console.log("px", pageX, pageY);
+                // mvnBox.item(i).style.top = pageY - mvnBox.item(i).offsetHeight / 2 + "px";
+                // mvnBox.item(i).style.left = pageX - mvnBox.item(i).offsetWidth / 2 + "px";
+            } //아 >,, ?
+
+            function onMouseMove(event) {
+
+                moveAt(event.pageX, event.pageY);
+
+            }
+
+            document.addEventListener("mousemove", onMouseMove);
+
+            mvnBoxId.onmouseup = function () {
+
+                document.removeEventListener("mousemove", onMouseMove);
+
+                mvnBoxId.onmouseup = null;
+
+            };
+
+
+            mvnBoxId.ondragstart = function(e) {
+                console.log("ondragstart", e)
+                return false;
+
+
+            }; // 혹시 이부분이랑 관련이있으까여 ?
+        }
+
+    }
+
+
+
+    //------------------
+    let desktop = document.getElementsByTagName("section").item(0);
+    let x = 0;
+    let y = 0;
+    function desktopRightClick(e) {
+
+        console.log("BAB"   );
+        if (typeof e === "object") {
+            switch (e.button) {
+
+                case 0 :
+                    alert("left button ");
+                    document.getElementsByClassName("arrow_box").item(0).setAttribute("style","display: none");
+
+                    break;
+
+
+/*
+                case 1 :
+                    alert("middle button ");
+                    break;
+*/
+
+                case 2 :
+
+                    alert("right button ");
+
+                    x = e.clientX;
+                    y = e.clientY;
+                    console.log("x : "+x);
+                    console.log("y : "+y);
+                  /*
+                    document.getElementsByClassName("arrow_box").item(0).style.left = x;
+                    document.getElementsByClassName("arrow_box").item(0).style.top = y;
+                    */
+
+                    document.getElementsByClassName("arrow_box").item(0).setAttribute("style","display: block");
+                    document.getElementsByClassName("arrow_box").item(0).style.left= x + "px";
+                    document.getElementsByClassName("arrow_box").item(0).style.top= y + "px";
+                    break;
+/*                default :
+                    alert("unknown Button");*/
+            }
+        }
+    }
+
+    desktop.addEventListener("mousedown",desktopRightClick);
+// ------------------------
+
+
+
+
+</script>

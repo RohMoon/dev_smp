@@ -220,4 +220,5 @@ public class CmPathInfo {
     public static String getSECRET_AES_KEY() {
         return SECRET_AES_KEY;
     }
+
 }

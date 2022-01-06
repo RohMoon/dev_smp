@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            border: 1px solid red;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+        }
+
+
+        .movingBox{
+            /*display: flex;*/
+            background-color: mediumpurple;
+            width: 100px;
+            height: 100px;
+        }
+        .movingBox:nth-child(2){
+            background-color: pink;
+        }
+
+        .movingBox2{
+            background-color: green;
+            width: 100px;
+            height: 100px;
+            border-radius: 50px;
+
+        }
+    </style>
+</head>
+<body>
+<div id="test01" class="movingBox"></div>
+<div id="test02" class="movingBox"></div>
+<!--<div class="movingBox2"></div>-->
+<!--<img src="https://js.cx/clipart/ball.svg" style="cursor: pointer; position: absolute; z-index: 1000; left: 308px; top: 113px;" width="40" height="40" id="ball">-->
+
+</body>
+</html>
+<script>
+
+    let mvnBox = document.getElementsByClassName('movingBox');
+    for (let i = 0; i < mvnBox.length; i++) {
+        mvnBox.item(i).onmousedown = function (event) {
+            let shiftX = event.clientX - mvnBox.item(i).getBoundingClientRect().left;
+            let shiftY = event.clientY - mvnBox.item(i).getBoundingClientRect().top;
+
+            mvnBox.item(i).style.position = 'absolute';
+            mvnBox.item(i).style.zIndex = 1000;
+            document.body.appendChild(mvnBox.item(i));
+
+            moveAt(event.pageX, event.pageY);
+
+            function moveAt(pageX, pageY) {
+
+                mvnBox.item(i).style.left = pageX - shiftX + 'px';
+                mvnBox.item(i).style.top = pageY - shiftY + 'px';
+                // console.log('px', pageX, pageY);
+                // mvnBox.item(i).style.top = pageY - mvnBox.item(i).offsetHeight / 2 + 'px';
+                // mvnBox.item(i).style.left = pageX - mvnBox.item(i).offsetWidth / 2 + 'px';
+            } //아 >,, ?
+
+            function onMouseMove(event) {
+
+                moveAt(event.pageX, event.pageY);
+
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+
+            mvnBox.item(i).onmouseup = function () {
+
+                document.removeEventListener('mousemove', onMouseMove);
+
+                mvnBox.item(i).onmouseup = null;
+
+            };
+
+        }
+       mvnBox.item(i).ondragstart = function(e) {
+           console.log('ondrastart', e)
+           return false;
+        }; // 혹시 이부분이랑 관련이있으까여 ?
+    }
+
+
+
+    //------------------
+
+/*
+        let mvnBox2 = document.getElementsByClassName('movingBox2');
+    for (let i = 0; i < mvnBox2.length; i++) {
+
+    mvnBox2.item(i).addEventListener('mousedown',function (event) {
+            console.log('mouseDown');
+        mvnBox2.item(i).setAttribute('style','z-Index : 1000');
+        mvnBox2.item(i).setAttribute('style','position : absolute');
+            document.body.append(mvnBox2.item(i));
+
+            function moveAt(pageX, pageY) {
+             // mvnBox.item(i).setAttribute('style',`left : ${pageX} - ${mvnBox.item(i).offsetWidth} /2 +'px'`);
+             // mvnBox.item(i).setAttribute('style',`top : ${pageX} - ${mvnBox.item(i).offsetWidth} /2 +'px'`);
+                event.target.style.left = pageX - event.target.offsetWidth / 2 + 'px';
+                event.target.style.top = pageY - event.target.offsetHeight / 2 + 'px';
+            }
+            moveAt(event.pageX, event.pageY);
+            
+            function onMouseMove(event) {
+                moveAt(event.pageX,event.pageY);
+            }
+
+            document.addEventListener('mousemove',onMouseMove);
+
+        });
+        mvnBox2.item(i).ondragstart = function(event) {
+            event.preventDefault();
+            return false;
+        };
+    }
+*/
+
+/*
+
+    // ---------------------
+    let ball = document.getElementById('ball');
+    ball.onmousedown = function(event) {
+
+        ball.style.position = 'absolute';
+        ball.style.zIndex = 1000;
+        document.body.appendChild(ball);
+
+        moveAt(event.pageX, event.pageY);
+
+        function moveAt(pageX, pageY) {
+            ball.style.left = pageX - ball.offsetWidth / 2 + 'px';
+            ball.style.top = pageY - ball.offsetHeight / 2 + 'px';
+        }
+
+        function onMouseMove(event) {
+            moveAt(event.pageX, event.pageY);
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+
+        ball.onmouseup = function() {
+            document.removeEventListener('mousemove', onMouseMove);
+            ball.onmouseup = null;
+        };
+
+    };
+
+    
+    ball.ondragstart = function(event) {
+        event.preventDefault();
+        return false;
+    };
+*/
+
+</script>

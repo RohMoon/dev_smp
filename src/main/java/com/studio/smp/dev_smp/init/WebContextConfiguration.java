@@ -119,15 +119,25 @@ public class WebContextConfiguration implements WebMvcConfigurer {
         resolver.setSuffix(".jsp");
         return resolver;
     }
-    
-    /*
+
+
+
+
+/*
     * jar, resources 설정
     * */
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/assets/**").addResourceLocations("classpath:/META-INF/resources/webjars/").setCachePeriod(31556926);
-//        WebMvcConfigurer.super.addResourceHandlers(registry);
+
+//        registry.addResourceHandler("/resources/**").addResourceLocations("classpath:/resources/");
+
+
+        WebMvcConfigurer.super.addResourceHandlers(registry);
     }
+
+
 
     /*
     * 파일업로드 설정

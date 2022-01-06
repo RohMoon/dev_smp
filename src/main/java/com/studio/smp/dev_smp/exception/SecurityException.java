@@ -1,4 +1,4 @@
-package com.amore.gps.exception;
+package com.studio.smp.dev_smp.exception;
 
 public class SecurityException extends Exception {
 
