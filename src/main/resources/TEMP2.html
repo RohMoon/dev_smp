@@ -12,24 +12,25 @@
         }
 
 
-        section{
+        section {
             border: 1px solid red;
             width: 100vw;
             height: 100vh;
             display: flex;
+            z-index: 0;
         }
 
 
-        .movingBox{
+        .movingBox {
             /*display: flex;*/;
             width: 100px;
             background-color: mediumpurple;
             height: 100px;
         }
 
-        .arrow_box{
+        .arrow_box {
             display: none;
-            position:absolute;
+            position: absolute;
             width: fit-content;
             padding: 8px;
             /*-webkit-border-radius: 8px;*/
@@ -40,98 +41,174 @@
             font-size: 14px;
         }
 
-/*        .arrow_box:after{
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            margin-left : -10px;
-            border: 10px solid rgba(51, 51, 51, 0);
-            border-bottom-color: #333;
-            pointer-events : none;
-            content: " ";
-        }*/
+        /*        .arrow_box:after{
+                    position: absolute;
+                    bottom: 100%;
+                    left: 50%;
+                    width: 0;
+                    height: 0;
+                    margin-left : -10px;
+                    border: 10px solid rgba(51, 51, 51, 0);
+                    border-bottom-color: #333;
+                    pointer-events : none;
+                    content: " ";
+                }*/
 
-        .arrow_box p:hover{
+        .arrow_box p:hover {
             background-color: white;
             animation-delay: 3s;
             transition-timing-function: ease-out;
             transition-duration: 1s;
             color: goldenrod;
+            cursor: pointer;
         }
 
     </style>
 </head>
 <body>
 <div class="arrow_box">
-<p>아이콘 만들기</p>
-<p>폴더 만들기</p>
+    <p id="iconMakerButton">아이콘 만들기</p>
+    <p id="folderMakerButton">폴더 만들기</p>
 </div>
 <section class="desktop">
 
-<div id="test01" class="movingBox"></div>
-<div id="test02" class="movingBox"></div>
+    <div id="test01" class="movingBox"></div>
+    <div id="test02" class="movingBox"></div>
 
-<!--<div class="movingBox2"></div>-->
-<!--<img src="https://js.cx/clipart/ball.svg" style="cursor: pointer; position: absolute; z-index: 1000; left: 308px; top: 113px;" width="40" height="40" id="ball">-->
-
+    <!--<div class="movingBox2"></div>-->
+    <!--<img src="https://js.cx/clipart/ball.svg" style="cursor: pointer; position: absolute; z-index: 1000; left: 308px; top: 113px;" width="40" height="40" id="ball">-->
+    <button id="test">ffff</button>
 </section>
 </body>
 </html>
 <script>
+    document.getElementById("test").addEventListener('mousedown', test);
+
+
+    let testVar = 0;
+
+    function test() {
+        event.preventDefault();
+        testVar++;
+        setTimeout(function () {
+                testVar = 0;
+                console.log(testVar);
+            }, 500
+        );
+    }
 
     let mvnBox = document.getElementsByClassName("movingBox");
-    for (let i = 1; i < mvnBox.length+1; i++) {
-        let mvnBoxId = document.getElementById("test0"+i);
-        mvnBoxId.onmousedown = function (event) {
 
-            event.stopPropagation();
+    for (let i = 0; i < mvnBox.length; i++) {
 
-            let shiftX = event.clientX - mvnBoxId.getBoundingClientRect().left;
-            let shiftY = event.clientY - mvnBoxId.getBoundingClientRect().top;
+        // mvnBox[i].addEventListener("mousedown",dragDropFunction);
 
-            mvnBoxId.style.position = "absolute";
-            mvnBoxId.style.zIndex = 1000;
-            document.body.appendChild(mvnBoxId);
+        mvnBox[i].addEventListener("mousedown", dragDropOrDblClickFunction);
+    }
+
+    function dragDropFunction(event) {
+        event.stopImmediatePropagation();
+        let whatThisID = event.target.getAttribute("id");
+        console.log(whatThisID);
+        let mvnTarget = document.getElementById(whatThisID);
+        // event.stopPropagation();
+
+
+        let shiftX = event.clientX - mvnTarget.getBoundingClientRect().left;
+        let shiftY = event.clientY - mvnTarget.getBoundingClientRect().top;
+
+        mvnTarget.style.position = "absolute";
+        mvnTarget.style.zIndex = 1000;
+        document.body.appendChild(mvnTarget);
+
+        moveAt(event.pageX, event.pageY);
+
+        function moveAt(pageX, pageY) {
+
+            mvnTarget.style.left = pageX - shiftX + "px";
+            mvnTarget.style.top = pageY - shiftY + "px";
+        }
+
+        function onMouseMove(event) {
 
             moveAt(event.pageX, event.pageY);
 
-            function moveAt(pageX, pageY) {
+        }
 
-                mvnBoxId.style.left = pageX - shiftX + "px";
-                mvnBoxId.style.top = pageY - shiftY + "px";
-                // console.log("px", pageX, pageY);
-                // mvnBox.item(i).style.top = pageY - mvnBox.item(i).offsetHeight / 2 + "px";
-                // mvnBox.item(i).style.left = pageX - mvnBox.item(i).offsetWidth / 2 + "px";
-            } //아 >,, ?
+        document.addEventListener("mousemove", onMouseMove);
 
-            function onMouseMove(event) {
+        mvnTarget.onmouseup = function () {
+
+            document.removeEventListener("mousemove", onMouseMove);
+
+            mvnTarget.onmouseup = null;
+            mvnTarget.style.zIndex = 0;
+
+        };
+
+
+        mvnTarget.ondragstart = function (e) {
+            console.log("ondragstart", e)
+            return false;
+
+
+        };
+
+    } // End of dragDropFunction Function//
+
+    /*
+        for (let i = 1; i < mvnBox.length+1; i++) {
+            let mvnBoxId = document.getElementById("test0"+i);
+            mvnBoxId.onmousedown = function (event) {
+
+                // event.stopPropagation();
+                event.stopImmediatePropagation();
+
+                let shiftX = event.clientX - mvnBoxId.getBoundingClientRect().left;
+                let shiftY = event.clientY - mvnBoxId.getBoundingClientRect().top;
+
+                mvnBoxId.style.position = "absolute";
+                mvnBoxId.style.zIndex = 1000;
+                document.body.appendChild(mvnBoxId);
 
                 moveAt(event.pageX, event.pageY);
 
+                function moveAt(pageX, pageY) {
+
+                    mvnBoxId.style.left = pageX - shiftX + "px";
+                    mvnBoxId.style.top = pageY - shiftY + "px";
+                    // console.log("px", pageX, pageY);
+                    // mvnBox.item(i).style.top = pageY - mvnBox.item(i).offsetHeight / 2 + "px";
+                    // mvnBox.item(i).style.left = pageX - mvnBox.item(i).offsetWidth / 2 + "px";
+                } //아 >,, ?
+
+                function onMouseMove(event) {
+
+                    moveAt(event.pageX, event.pageY);
+
+                }
+
+                document.addEventListener("mousemove", onMouseMove);
+
+                mvnBoxId.onmouseup = function () {
+
+                    document.removeEventListener("mousemove", onMouseMove);
+
+                    mvnBoxId.onmouseup = null;
+
+                };
+
+
+                mvnBoxId.ondragstart = function(e) {
+                    console.log("ondragstart", e)
+                    return false;
+
+
+                };
             }
 
-            document.addEventListener("mousemove", onMouseMove);
-
-            mvnBoxId.onmouseup = function () {
-
-                document.removeEventListener("mousemove", onMouseMove);
-
-                mvnBoxId.onmouseup = null;
-
-            };
-
-
-            mvnBoxId.ondragstart = function(e) {
-                console.log("ondragstart", e)
-                return false;
-
-
-            }; // 혹시 이부분이랑 관련이있으까여 ?
-        }
-
-    }
+        } // end of for to dragEvent addEventListener
+    */
 
 
 
@@ -139,52 +216,118 @@
     let desktop = document.getElementsByTagName("section").item(0);
     let x = 0;
     let y = 0;
+
     function desktopRightClick(e) {
 
-        console.log("BAB"   );
+        // console.log("BAB"   );
         if (typeof e === "object") {
             switch (e.button) {
 
                 case 0 :
-                    alert("left button ");
-                    document.getElementsByClassName("arrow_box").item(0).setAttribute("style","display: none");
+                    // alert("left button ");
+                    document.getElementsByClassName("arrow_box").item(0).setAttribute("style", "display: none");
 
                     break;
 
-
-/*
-                case 1 :
-                    alert("middle button ");
-                    break;
-*/
+                /*
+                                case 1 :
+                                    alert("middle button ");
+                                    break;
+                */
 
                 case 2 :
 
-                    alert("right button ");
+                    // alert("right button ");
 
                     x = e.clientX;
                     y = e.clientY;
-                    console.log("x : "+x);
-                    console.log("y : "+y);
-                  /*
-                    document.getElementsByClassName("arrow_box").item(0).style.left = x;
-                    document.getElementsByClassName("arrow_box").item(0).style.top = y;
-                    */
+                    console.log("x : " + x);
+                    console.log("y : " + y);
+                    /*
+                      document.getElementsByClassName("arrow_box").item(0).style.left = x;
+                      document.getElementsByClassName("arrow_box").item(0).style.top = y;
+                      */
 
-                    document.getElementsByClassName("arrow_box").item(0).setAttribute("style","display: block");
-                    document.getElementsByClassName("arrow_box").item(0).style.left= x + "px";
-                    document.getElementsByClassName("arrow_box").item(0).style.top= y + "px";
+                    document.getElementsByClassName("arrow_box").item(0).setAttribute("style", "display: block");
+                    document.getElementsByClassName("arrow_box").item(0).style.left = x + "px";
+                    document.getElementsByClassName("arrow_box").item(0).style.top = y + "px";
                     break;
-/*                default :
-                    alert("unknown Button");*/
+                /*                default :
+                                    alert("unknown Button");*/
             }
         }
     }
 
-    desktop.addEventListener("mousedown",desktopRightClick);
-// ------------------------
+    desktop.addEventListener("mousedown", desktopRightClick);
+    // ------------------------
+
+    document.getElementById("iconMakerButton").addEventListener("click", iconMakerFunction);
+
+    function iconMakerFunction(e) {
+        alert("아이콘생성클릭");
+
+        let newIconName = prompt("생성할 아이콘 이름을 입력하세요.");
+        let newIconDivElements = document.createElement("div");
+        newIconDivElements.classList.add("movingBox");
+        newIconDivElements.setAttribute("id", newIconName);
+        // newIconDivElements.addEventListener("mousedown", dragDropFunction);
+        newIconDivElements.addEventListener("mousedown", dragDropOrDblClickFunction);
+        // newIconDivElements.addEventListener("dblclick", folderOpener);
+
+        document.getElementsByClassName("desktop").item(0).append(newIconDivElements);
+        closeArrowBox();
+
+    }
+
+    function closeArrowBox() {
+        document.getElementsByClassName("arrow_box").item(0).setAttribute("style", "display:none");
+    }
 
 
+    function folderOpener(e) {
+        e.stopImmediatePropagation();
+        let targetId = e.target.getAttribute("id") + "OpenedBox";
+        let folderWindow = document.createElement("div");
+        folderWindow.style.zIndex = 1500;
+        folderWindow.style.position = "absolute";
+        folderWindow.style.left = 50 + "%";
+        folderWindow.style.top = 50 + "%";
+        folderWindow.style.width = 150 + "px";
+        folderWindow.style.height = 150 + "px";
+        folderWindow.style.borderWidth = 10+"px";
+        folderWindow.style.borderColor = "red";
+        folderWindow.style.backgroundColor = "red";
+        folderWindow.setAttribute("id",targetId);
+        folderWindow.classList.add("movingBox");
+        folderWindow.addEventListener("mousedown", dragDropFunction);
+
+        document.getElementsByClassName("desktop").item(0).append(folderWindow);
 
 
+    }
+
+    let clicks = 0;
+
+    function dragDropOrDblClickFunction(event) {
+        event.stopPropagation();
+        clicks++;
+        console.log("eventTarget" + event.target);
+        console.log("event" + event)
+        console.log(clicks);
+        setTimeout(function (event) {
+            clicks = 0;
+            console.log(clicks);
+        }, 500);
+
+
+        if (clicks == 2) {
+            alert("click2");
+            folderOpener(event);
+
+            return;
+        } else {
+            dragDropFunction(event)
+        } // end of if click == 1
+        // End of dragDropOrDblClickFunction Function//
+    }
 </script>
