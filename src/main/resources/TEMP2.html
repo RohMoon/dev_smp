@@ -21,11 +21,14 @@
         }
 
 
-        .movingBox {
-            /*display: flex;*/;
+        .iconBox{
             width: 100px;
             background-color: mediumpurple;
             height: 100px;
+        }
+        .movingBox {
+            /*display: flex;*/;
+
         }
 
         .arrow_box {
@@ -41,18 +44,19 @@
             font-size: 14px;
         }
 
-        /*        .arrow_box:after{
-                    position: absolute;
-                    bottom: 100%;
-                    left: 50%;
-                    width: 0;
-                    height: 0;
-                    margin-left : -10px;
-                    border: 10px solid rgba(51, 51, 51, 0);
-                    border-bottom-color: #333;
-                    pointer-events : none;
-                    content: " ";
-                }*/
+        /*
+        .arrow_box:after{
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        margin-left : -10px;
+        border: 10px solid rgba(51, 51, 51, 0);
+        border-bottom-color: #333;
+        pointer-events : none;
+        content: " ";
+        }*/
 
         .arrow_box p:hover {
             background-color: white;
@@ -62,7 +66,18 @@
             color: goldenrod;
             cursor: pointer;
         }
+        .openedFolder{
+            position: absolute;
+            left: 50%;
+            top:50%;
+            width: 150px;
+            height: 150px;
+            border-width: 1px;
+            border-style: solid;
+            border-color: goldenrod;
+            box-shadow: #333333;
 
+        }
     </style>
 </head>
 <body>
@@ -72,8 +87,8 @@
 </div>
 <section class="desktop">
 
-    <div id="test01" class="movingBox"></div>
-    <div id="test02" class="movingBox"></div>
+    <div id="test01" class="movingBox iconBox"></div>
+    <div id="test02" class="movingBox iconBox"></div>
 
     <!--<div class="movingBox2"></div>-->
     <!--<img src="https://js.cx/clipart/ball.svg" style="cursor: pointer; position: absolute; z-index: 1000; left: 308px; top: 113px;" width="40" height="40" id="ball">-->
@@ -107,7 +122,7 @@
     }
 
     function dragDropFunction(event) {
-        event.stopImmediatePropagation();
+        event.stopPropagation();
         let whatThisID = event.target.getAttribute("id");
         console.log(whatThisID);
         let mvnTarget = document.getElementById(whatThisID);
@@ -269,6 +284,7 @@
         let newIconName = prompt("생성할 아이콘 이름을 입력하세요.");
         let newIconDivElements = document.createElement("div");
         newIconDivElements.classList.add("movingBox");
+        newIconDivElements.classList.add("iconBox");
         newIconDivElements.setAttribute("id", newIconName);
         // newIconDivElements.addEventListener("mousedown", dragDropFunction);
         newIconDivElements.addEventListener("mousedown", dragDropOrDblClickFunction);
@@ -286,26 +302,43 @@
 
     function folderOpener(e) {
         e.stopImmediatePropagation();
+
         let targetId = e.target.getAttribute("id") + "OpenedBox";
+        console.log(targetId);
+        console.log(document.contains(document.getElementById(targetId)));
+        if (!document.contains(document.getElementById(targetId))){
+
         let folderWindow = document.createElement("div");
+
         folderWindow.style.zIndex = 1500;
-        folderWindow.style.position = "absolute";
-        folderWindow.style.left = 50 + "%";
-        folderWindow.style.top = 50 + "%";
-        folderWindow.style.width = 150 + "px";
-        folderWindow.style.height = 150 + "px";
-        folderWindow.style.borderWidth = 10+"px";
-        folderWindow.style.borderColor = "red";
-        folderWindow.style.backgroundColor = "red";
+        // folderWindow.style.position = "absolute";
+        // folderWindow.style.left = 50 + "%";
+        // folderWindow.style.top = 50 + "%";
+        // folderWindow.style.width = 150 + "px";
+        // folderWindow.style.height = 150 + "px";
+        // folderWindow.style.borderWidth = 10+"px";
+        // folderWindow.style.borderColor = "red";
+        // folderWindow.style.backgroundColor = "red";
+
         folderWindow.setAttribute("id",targetId);
         folderWindow.classList.add("movingBox");
+        folderWindow.classList.add("openedFolder");
+            folderWindow.innerHTML = "<button id='closeButton' style='position: relative' onclick=folderCloser(e)>x</button>";
+
         folderWindow.addEventListener("mousedown", dragDropFunction);
 
         document.getElementsByClassName("desktop").item(0).append(folderWindow);
 
-
+        }
+        else if(document.contains(document.getElementById(targetId))) {
+            alert("이미 오픈되어 있습니다.");
+        }
     }
-
+    
+    function folderCloser(e) {
+        console.log(e.target.closest("div").getAttribute("id"));
+    }
+    
     let clicks = 0;
 
     function dragDropOrDblClickFunction(event) {
